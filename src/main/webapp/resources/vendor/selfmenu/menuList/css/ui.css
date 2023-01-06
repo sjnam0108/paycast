@@ -1,0 +1,66 @@
+@charset "UTF-8";
+
+/*버튼*/
+
+.button {display: inline-block; text-decoration: none; -webkit-appearance: none; border:none; box-sizing: border-box; cursor: pointer !important; vertical-align: middle; text-align: center; overflow: hidden;}
+
+.button.small {padding: 0 15px; height: 30px; line-height: 30px; min-width: 110px;  }
+.button.medium {padding: 0 25px; height: 40px; line-height: 40px }
+.button.large {padding: 0 40px; height: 50px; line-height: 50px}
+.button i {font-size: 1.2em;}
+
+.button.circle {border-radius: 3px; font-size: 20px;}
+
+.button.small.black, .button.small.white {line-height: 26px; }
+.button.medium.black, .button.medium.white {line-height: 34px; }
+.button.large.black, .button.large.white {line-height: 48px; }
+
+.button.w160 {width: 160px; padding: 0 !important;}
+.button.w200 {width: 200px; padding: 0 !important;}
+.button.w250 {width: 250px; padding: 0 !important;}
+.button.w300 {width: 300px; padding: 0 !important;} 
+.button.full {width: 100%; padding: 0 !important;}
+
+.button.red {background: #ea5019; color: #fff;}
+.button.yell {background: #ffc000; color: #000;}
+.button.gray {background: #fff; color: #000; border: 1px solid #999;}
+
+.btn_area {margin-left: -5px; margin-right: -5px; padding: 10px 0; overflow: hidden}
+.btn_area li {float: left; padding: 0 5px; box-sizing: border-box}
+
+.btn_area .full {width: 100%;}
+.btn_area .half {width: 50%;}
+
+.divider {height: 1px; width: 100%; background:#ccc; margin: 15px 0 0; clear: both}
+
+/*패치*/
+.patch {position: absolute; width: 32px; height: 33px; right: -10px; top: -5px;} 
+.patch:after {display: block;font-size: 9px; color: #fff;  text-align: center; line-height: 32px;}
+/* .patch.BEST {background: url(../img/patch_bg.png); background-size: 32px 33px} */
+.patch.BEST {background: url(../img/badge_hot.png); background-size: 32px 33px}
+/* .patch.NEW {background: #004aa2;} */
+.patch.NEW {background: url(../img/badge_new.png); background-size: 32px 33px}
+/* .patch.BEST:after { content: "HOT";  } */
+/* .patch.NEW:after { content: "NEW";  } */
+.patch.BEST:after { content: "";  }
+.patch.NEW:after { content: "";  }
+
+/*input*/
+.inputWrap { height: 50px; box-sizing: border-box; overflow: hidden; border-radius: 25px; border: 1px solid #ddd; width: 100%; }
+.inputWrap input { width: 100%; color: #4b4b4b; display: block; padding: 0 25px; line-height: 50px; box-sizing: border-box; font-size: 1.4em;}
+
+/* text-align */
+.taC {text-align: center !important;}
+.taL {text-align: left !important;}
+.taR {text-align: right !important;}
+
+/* color */
+
+
+
+
+
+
+
+
+

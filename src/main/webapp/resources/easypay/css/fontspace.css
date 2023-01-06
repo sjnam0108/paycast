@@ -1,0 +1,213 @@
+/*****************************************************************
+KICC IT지원본부 전산운영팀
+Author : 최정우 (jwoochoi@kicc.co.kr)
+Version : 1.0
+*****************************************************************/
+
+/***** font color *****/
+
+.colorfff {color:#fff;}
+.color000 {color:#000;}
+.color111 {color:#111;}
+.color333 {color:#333;}
+.color444 {color:#444;}
+.color555 {color:#555;}
+.color666 {color:#666;}
+.color777 {color:#777;}
+.color888 {color:#888;}
+.color999 {color:#999;}
+.colorYellow {color:#ffe800;}
+.colorOrange {color:#ffbb38;}
+.colorOrange02 {color:#ee6d00;}
+.colorRed {color:#ff3300;}
+.colorRed02 {color:rgba(255, 51, 0, .3);}
+.colorBlue {color:#0078c1;}
+.colorBlue02 {color:rgba(0, 120, 193, .3);}
+.colorGrey01 {color:rgba(68, 68, 68, .3);}
+
+.ls0 {letter-spacing:0px;}
+.ls1 {letter-spacing:-1px;}
+.ls2 {letter-spacing:-2px;}
+.fw_normal {font-weight:normal;}
+.fw_bold {font-weight:bold;}
+
+/***** font size *****/
+.f12 {font-size:0.8em;}
+.f13 {font-size:0.9em;}
+.f14 {font-size:1em;}
+.f16 {font-size:1.1em;}
+.f18 {font-size:1.2em;}
+.f20 {font-size:1.3em;}
+
+/***** line-height *****/
+.lh20 {line-height:1.4em;}
+
+/***** margin *****/
+.margin4_minus {margin:-4px 0 0 0;}
+.margin5 {margin:5px;}
+.margin10 {margin:10px;}
+.margin20 {margin:20px;}
+
+.margin_t1 {margin-top:1px;}
+.marginm_t1 {margin-top:-1px;}
+.marginm_t3 {margin-top:-3px;}
+.marginm_t10 {margin-top:-10px;}
+.margin_t2 {margin-top:2px;}
+.margin_t3 {margin-top:3px;}
+.margin_t4 {margin-top:4px;}
+.margin_t5 {margin-top:5px;}
+.margin_t6 {margin-top:6px;}
+.margin_t7 {margin-top:7px;}
+.margin_t8 {margin-top:8px;}
+.margin_t9 {margin-top:9px;}
+.margin_t10 {margin-top:10px;}
+.margin_t12 {margin-top:12px;}
+.margin_t11 {margin-top:11px;}
+.margin_t13 {margin-top:13px;}
+.margin_t15 {margin-top:15px;}
+
+.margin_r2 {margin-right:2px;}
+.margin_r3 {margin-right:3px;}
+.margin_r4 {margin-right:4px;}
+.margin_r5 {margin-right:5px;}
+.margin_r7 {margin-right:7px;}
+.margin_r8 {margin-right:8px;}
+.margin_r9 {margin-right:9px;}
+.margin_r10 {margin-right:10px;}
+.margin_r12 {margin-right:12px;}
+.margin_r13 {margin-right:13px;}
+.margin_r15 {margin-right:15px;}
+
+.margin_mb1 {margin-bottom:-1px;}
+.margin_mb2 {margin-bottom:-2px;}
+.margin_mb3 {margin-bottom:-3px;}
+.margin_mb4 {margin-bottom:-4px;}
+.margin_mb5 {margin-bottom:-5px;}
+.margin_mb6 {margin-bottom:-6px;}
+.margin_mb7 {margin-bottom:-7px;}
+.margin_mb8 {margin-bottom:-8px;}
+.margin_mb9 {margin-bottom:-9px;}
+.margin_mb10 {margin-bottom:-10px;}
+.margin_mb15 {margin-bottom:-15px;}
+.margin_mb20 {margin-bottom:-20px;}
+.margin_b1 {margin-bottom:1px;}
+.margin_b2 {margin-bottom:2px;}
+.margin_b3 {margin-bottom:3px;}
+.margin_b4 {margin-bottom:4px;}
+.margin_b5 {margin-bottom:5px;}
+.margin_b6 {margin-bottom:6px;}
+.margin_b7 {margin-bottom:7px;}
+.margin_b8 {margin-bottom:8px;}
+.margin_b9 {margin-bottom:9px;}
+.margin_b10 {margin-bottom:10px;}
+.margin_b11 {margin-bottom:11px;}
+.margin_b12 {margin-bottom:12px;}
+.margin_b13 {margin-bottom:13px;}
+.margin_b14 {margin-bottom:14px;}
+.margin_b15 {margin-bottom:15px;}
+
+.margin_lm22 {margin-left:-22px;}
+.margin_lm23 {margin-left:-23px;}
+.margin_l1 {margin-left:1px;}
+.margin_l2 {margin-left:2px;}
+.margin_l3 {margin-left:3px;}
+.margin_l4 {margin-left:4px;}
+.margin_l5 {margin-left:5px;}
+.margin_l6 {margin-left:6px;}
+.margin_l7 {margin-left:7px;}
+.margin_l8 {margin-left:8px;}
+.margin_l9 {margin-left:9px;}
+.margin_l10 {margin-left:10px;}
+.margin_l11 {margin-left:11px;}
+.margin_l12 {margin-left:12px;}
+.margin_l13 {margin-left:13px;}
+.margin_l14 {margin-left:14px;}
+.margin_l15 {margin-left:15px;}
+
+.margin_t2r2l5 {margin-top:2px; margin-right:2px; margin-left:5px;}
+.margin_t4l19 {margin-top:4px; margin-left:19px;}
+.margin_t10l10 {margin-top:10px; margin-left:10px;}
+.margin_t10l11b10 {margin-top:10px; margin-left:11px; margin-bottom:10px;}
+.margin_t8b8 {margin-top:8px; margin-bottom:8px;}
+.margin_t1l5 {margin:1px 0 0 5px;}
+.margin_t4l7 {margin:4px 0 0 7px;}
+.margin_t6l14 {margin:6px 0 0 14px;}
+
+.margin_r5l5 {margin:0 5px;}
+.margin_r5l17 {margin:0 5px 0 17px;}
+.margin_r5l12 {margin:0 5px 0 12px;}
+.margin_r20l20 {margin:0 20px;}
+.margin_r30l30 {margin:0 30px;}
+
+.margin_l10r10 {margin-left:10px; margin-right:10px;}
+
+/***** padding *****/
+.padding0 {padding:0 !important;}
+.padding3 {padding:3px;}
+.padding4 {padding:4px;}
+.padding5 {padding:5px;}
+.padding6 {padding:6px;}
+.padding7 {padding:7px;}
+.padding10 {padding:10px;}
+.padding12 {padding:12px;}
+.padding15 {padding:15px;}
+.padding19 {padding:19px;}
+
+.padding_t1 {padding-top:1px;}
+.padding_t2 {padding-top:2px;}
+.padding_t3 {padding-top:3px;}
+.padding_t4 {padding-top:4px;}
+.padding_t5 {padding-top:5px;}
+.padding_t6 {padding-top:6px;}
+.padding_t7 {padding-top:7px;}
+.padding_t8 {padding-top:8px;}
+.padding_t9 {padding-top:9px;}
+.padding_t10 {padding-top:10px;}
+.padding_t11 {padding-top:11px;}
+.padding_t12 {padding-top:12px;}
+.padding_t13 {padding-top:13px;}
+.padding_t14 {padding-top:14px;}
+.padding_t15 {padding-top:15px;}
+
+.padding_r1	{padding-right:1px;}
+.padding_r2	{padding-right:2px;}
+.padding_r3	{padding-right:3px;}
+.padding_r4	{padding-right:4px;}
+.padding_r5	{padding-right:5px;}
+.padding_r6	{padding-right:6px;}
+.padding_r7	{padding-right:7px;}
+.padding_r8	{padding-right:8px;}
+.padding_r9	{padding-right:9px;}
+.padding_r10 {padding-right:10px;}
+.padding_r12 {padding-right:12px;}
+.padding_r13 {padding-right:13px;}
+.padding_r15 {padding-right:15px;}
+
+.padding_b2 {padding-bottom:2px;}
+.padding_b3 {padding-bottom:3px;}
+.padding_b4 {padding-bottom:4px;}
+.padding_b5 {padding-bottom:5px;}
+.padding_b7 {padding-bottom:7px;}
+.padding_b8 {padding-bottom:8px;}
+.padding_b10 {padding-bottom:10px;}
+.padding_b11 {padding-bottom:11px;}
+.padding_b12 {padding-bottom:12px;}
+.padding_b13 {padding-bottom:13px;}
+.padding_b15 {padding-bottom:15px;}
+
+.padding_l2 { padding-left:2px;}
+.padding_l3 { padding-left:3px;}
+.padding_l4 { padding-left:4px;}
+.padding_l5 { padding-left:5px;}
+.padding_l6 { padding-left:6px;}
+.padding_l7 { padding-left:7px;}
+.padding_l8 { padding-left:8px;}
+.padding_l9 { padding-left:9px;}
+.padding_l10 { padding-left:10px;}
+.padding_l11 { padding-left:11px;}
+.padding_l12 { padding-left:12px;}
+.padding_l13 { padding-left:13px;}
+.padding_l14 { padding-left:14px;}
+.padding_l15 { padding-left:15px;}
+
+.padding_roundList {padding:0 10px 11px !important; border-bottom:none !important;}

@@ -1,0 +1,17 @@
+/*****************************************************************
+KICC IT지원본부 전산운영팀
+Author : 최정우 (jwoochoi@kicc.co.kr)
+Version : 1.0
+*****************************************************************/
+
+#wrap {width:100%; height:100%; position:relative;}
+	header {height:46px; background:url('/img/bg.gif') 0 0 repeat-x;}
+	footer {position:relative; width:100%; height:40px; font-size:0.7em; color:#7e7e7e; font-weight:bold; letter-spacing:-1px; text-align:center; z-index:1000;}
+	
+	.section00 {width:auto;}
+	.bg_skyblue {background:url('/img/common/bg/bg_skyblue.gif') no-repeat 0 0; padding-top:6px; background-size:100% 30%;}
+	#container_skyblue {
+		background-image:-webkit-gradient(linear, 0 0%, 50% 0%, from(#f1ede2), to(#d5e1ed)); 
+		background-image:-moz-linear-gradient(left, #f1ede2 10%,#d5e1ed); 
+		background-color:#588edf;
+	}

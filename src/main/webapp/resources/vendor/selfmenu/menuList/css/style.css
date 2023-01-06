@@ -1,0 +1,130 @@
+@charset "UTF-8";
+
+@import url(common.css);
+@import url(fonts.css);
+
+body {font-family: 'NanumSquare', san-seif; background: #e4e4e4; color: #192434;}
+body.fix {height: 100%; overflow: hidden}
+
+.header {background: #ffc000; padding: 10px 0 10px;}
+.header .logo {height: 40px;}
+.header .logo img {max-height: 100%}
+.header .greeting {color: #000; margin-top: 10px; font-weight: 300; font-size: 14px;}
+
+.container {margin-bottom: 30px;}
+.sel_menu {position: fixed; bottom: 0; left: 5px; right: 5px; background: #fff; border-top-left-radius: 8px; border-top-right-radius: 8px; box-shadow: 0 -2px 4px rgba(0,0,0,.2); padding: 20px 20px 0; z-index: 10; max-height: 250px; border: 1px solid #aaa; border-bottom: 0;} 
+.sel_menu li {line-height: 1.6; position: relative;}
+.sel_menu li>div {float: left;}
+.sel_menu li .name {width: 52%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; font-size:16px; white-space: nowrap; text-overflow: ellipsis;}
+/* .sel_menu li .name {width: 40%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; font-size:16px; white-space: nowrap; text-overflow: ellipsis;} */
+.sel_menu li .count {font-size:16px }
+/* .sel_menu li .count:before {content:"×"} */
+/*
+.sel_menu li .count_wrap {font-size: 12px; margin-top: 0; padding: 0; width: 70px;}
+.sel_menu li .count_wrap .down_count, 
+.sel_menu li .count_wrap .up_count {width: 19px; height: 19px; line-height: 19px;  }
+.sel_menu li .count_wrap .down_count {left: 0;}
+.sel_menu li .count_wrap .up_count {right: 0;}
+*/
+.sel_menu li .price {float: right; font-size: 16px; padding-right: 50px;}
+
+
+.sel_list {max-height: 100px; overflow: auto; }
+.sel_menu li.sel { height: 30px; }
+.sel_menu li.sel.row > div {line-height: 19px;}
+
+
+.sel_menu .del {display: block; width: 19px; height: 19px;  position: absolute; right: 10px; top:0; text-indent: -9999px; background: #ea5019; border-radius: 4px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3)}
+.sel_menu .del:before, .sel_menu .del:after {display: block; content: ''; width: 15px; height: 1px; background: #fff; position: absolute; top: 10px; left: 2px;}
+.sel_menu .del:before {transform: rotate(45deg)}
+.sel_menu .del:after {transform: rotate(-45deg)}
+
+.sel_menu li.total {border-top: 1px solid #ccc; padding-top: 15px;  font-weight: 600;}
+.sel_menu li.total .price, .sel_menu li.total .name, .sel_menu li.total .count {font-size: 15px;}
+.sel_menu li.total .price {padding-right: 10px;}
+
+.sel_menu.no_sel {height: 20px;}
+.sel_menu.no_sel span {display: block; text-align: center;  font-size: 17px; color: #192434; opacity: .75; margin-top: -5px}
+
+
+.inner {padding: 20px 10px;}
+.menu_type {padding: 0 5px; margin-bottom: 10px;}
+.menu_type.on {}
+.menu_type button {display: block; width:100%;  background: #fff; border: 0 none; height: 40px; line-height: 40px; padding: 0 15px; box-sizing: border-box; text-align: left; position: relative;  font-size: 22px; border-radius: 3px 3px 3px 3px; transition: ease all .3s; padding-top: 2px;}
+.menu_type button span {display: inline-block; width: 26px; height: 26px; background: #ffc000; border-radius: 4px; box-shadow: 0 3px 4px rgba(0,0,0,.2); position: absolute; right: 10px; top: 6px;}  
+.menu_type button span:before, .menu_type button span:after {display: block; content: ''; width: 0; height: 0; border: 6px solid transparent; position: absolute;border-bottom: 0 none; left: 50%; margin-left: -6px; top: 50%;}
+.menu_type button span:before {border-top: 6px solid #000; margin-top: -2px;}
+.menu_type button span:after {border-top: 6px solid #ffc000; margin-top: -3px;}
+
+.menu_type.on button {margin-bottom: 0px; border-radius: 3px 3px 0 0; background: #fff5d8; padding-top: 2px;}
+.menu_type.on button span:before, .menu_type.on button span:after {transform: rotate(180deg)}
+.menu_type.on button span:after {margin-top: -1px;} 
+
+.menu_type .row.menu_list {/* margin: 0 -5px;  */background: #fff; border-radius: 0 0 3px 3px; padding: 10px ;}
+
+.menu_list {display: none;} 
+.menu_list li {float: left; width: 50%; padding:0 5px; box-sizing: border-box; }
+
+.menu {display: block; background: #fff; border-radius: 3px; padding: 5px 0 10px; position: relative; }
+.menu .img_wrap {display: block; margin: auto; box-sizing: border-box; border-radius: 3px; overflow: hidden}
+
+
+.no_order:before {display: block; content: ''; position: absolute; left: 0; top: 5px; right: 0; bottom: 0; background: rgba(0,0,0,.7); border-radius: 3px; z-index: 1;}
+.no_inventory {position: absolute; top:50%; text-align: center; width: 100%; left: 0; z-index: 1; color: #fff; transform: translateY(-50%); font-size: 14px; font-weight: 300; letter-spacing: -.4px; font-weight: 600;}
+.no_inventory .icon {display: block; width: 32px; height: 35px; background: url(../img/icon_noOrder.png); background-size: 32px 35px; margin: auto; margin-bottom: 10px;}
+
+.info_wrap>span{display: block;}
+.info_wrap .name {font-size: 18px; font-weight: 650; margin-top: 10px;}
+.info_wrap .price {font-size: 17px; font-weight: 550;}
+
+.popup_area {display: none; width:90%; max-width: 300px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; z-index: 20; padding: 15px 20px 10px; box-sizing: border-box; max-height: 95%; overflow: auto;}
+/* .popup_area {display: none; width:90%; max-width: 300px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; z-index: 20; padding: 15px 20px 10px; box-sizing: border-box} */
+.popup_area .close {display: block; position: absolute; right: 0; top: 0; margin-top: -30px; color: #fff;  font-size: 22px; line-height: 20px; vertical-align: top;}
+.txtX {font-size: 24px; }
+.popup_area .close .txtX {position: relative; top:4px ; margin-right: 3px;}
+.popup_area .title {text-align: center; font-size: 27px; margin-bottom: 10px;}
+.popup_area .info_wrap {text-align: center;}
+.popup_area .info_wrap .additional {font-size: 14px; margin-top: 10px;}
+.popup_area .info_wrap .price {font-size: 24px;}
+.count_wrap {position: relative; text-align: center; padding: 0 80px; height: 26px; line-height: 26px; font-size: 18px; margin-top: 20px;}
+.count_wrap .down_count, .count_wrap .up_count {display: block; position: absolute; width: 26px; height: 26px; background: #ffc000; border-radius: 4px; box-shadow: 0 3px 4px rgba(0,0,0,.3); color: #000; top:0; line-height: 26px;}
+.count_wrap .down_count {left: 50px;}
+.count_wrap .up_count {right: 50px;}
+
+.dim {position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0, .6); z-index: 10;}
+
+.order_menu {background: #fff; border-radius: 9px; padding: 20px 5px 20px 10px; margin-bottom: 10px;  position: relative}
+.order_menu .img_wrap {width: 100px; height: 100px; display: inline-block; height: auto; }
+
+.order_menu .infoWrapTotal {display: inline-block;  width:calc(100% - 130px); vertical-align: middle; margin-left: 20px;}
+.order_menu .infoWrapTotal h2.name { font-size: 16px; padding-right: 30px; display: block; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;}
+.order_menu .infoWrapTotal .row {margin-top: 10px;}
+.order_menu .info_wrap, .order_menu .count_wrap{width: ; box-sizing: border-box}
+.order_menu .price {display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap} 
+
+.order_menu .info_wrap { width: calc(100% - 100px); display: inline-block; vertical-align: middle}
+.order_menu .count_wrap { padding: 0; width: 90px; display: inline-block; vertical-align: middle;  margin-top: 0;}
+.order_menu .count_wrap  .down_count {left: 0;}
+.order_menu .count_wrap  .up_count {right: 0;}
+
+.order_menu  .del {position: absolute; right: 5px; top: 0px; width: 20px}
+.order_menu .total {margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; font-weight: 600; position: relative; text-align: right}
+.order_menu .total .label {display: inline-block; margin-right: 10px;}
+
+.order_menu .total .del  {display: block; width: 23px; height: 23px; position: absolute; right: 0; top: 10px; text-indent: -9999px;}
+.order_menu .total .del:before, .order_menu .total .del:after {display: block; content: ''; width: 20px; height: 2px; background: #444; position: absolute; top: 10px; left: 2px;}
+.order_menu .total .del:before {transform: rotate(45deg)}
+.order_menu .total .del:after {transform: rotate(-45deg)}
+
+.menu_add {padding: 10px 0}
+
+.order_total {padding: 20px 0 ; border-top: 1px solid #ccc; margin-top: 10px; font-size: 20px; font-weight: 600;}
+.order_total .label {float: left;}
+.order_total .price {float: right;}
+.order_btn {padding: 0 10px 20px;}
+.order_btn .button {}
+
+
+@media only screen and (min-width: 640px) { 
+	.menu_list li {width: 33%;}
+	 }

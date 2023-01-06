@@ -1,0 +1,32 @@
+/*****************************************************************
+KICC IT지원본부 전산운영팀
+Author : 최정우 (jwoochoi@kicc.co.kr)
+Version : 1.0
+*****************************************************************/
+
+/* 하단 NEXT 버튼 디자인*/
+.btnBox_blue {
+	height:37px; width:77px; line-height:1.8em; color:#fff !important; font-weight:bold; 
+	letter-spacing:-1px; 
+	-moz-text-shadow:0 0 3px rgba(0, 0, 0, .5); -webkit-text-shadow:0 0 3px rgba(0, 0, 0, .5); text-shadow:0 0 3px rgba(0, 0, 0, .5); 
+	border:1px solid #4677bd; border-radius:5px; padding:0 13px; 
+	display:inline-block; position:relative; 
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, from(#8fb6ef), color-stop(0.49,#558bde), color-stop(0.5,#3a79d2),to(#598cd8)); 
+	background-image:-moz-linear-gradient(top, #8fb6ef,#558bde 49%,#3a79d2 50%,#578bd8); 
+	background-color:#588edf; position:relative;}
+
+/* table 내부 버튼 디자인*/	
+.btnBox_Orange {
+	height:24px; width:62px; line-height:1.85em; color:#fff !important; font-weight:bold; 
+	letter-spacing:-1px; 
+	-moz-text-shadow:0 0 3px rgba(0, 0, 0, .5); -webkit-text-shadow:0 0 3px rgba(0, 0, 0, .5); text-shadow:0 0 3px rgba(0, 0, 0, .5); 
+	border:1px solid #f0af2c; border-radius:5px; padding:0 13px; 
+	display:inline-block; position:relative; 
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, from(#f7cb4c), to(#df9709)); 
+	background-image:-moz-linear-gradient(top, #f7cb4c,#df9709); 
+	background-color:#f1b11a;}
+
+/* 다음버튼 폰트 설정 */
+.btnMidNext{margin-top:15px; margin-bottom:15px; text-align:center; font-size:1.5em;} 
+/* 사용하기버튼 폰트 설정 */
+.btnRDo {margin-top:10px; text-align:center; font-size:1em;}

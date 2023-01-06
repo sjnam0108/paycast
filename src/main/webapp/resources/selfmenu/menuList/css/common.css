@@ -1,0 +1,68 @@
+@charset "UTF-8";
+
+/* margin */
+.topM10 {margin-top: 10px !important;}
+.topM20 {margin-top: 20px !important;}
+.topM25 {margin-top: 25px !important;}
+.topM30 {margin-top: 30px !important;}
+.topM50 {margin-top: 50px !important;}
+.rightM10 {margin-right: 10px !important;}
+.rightM20 {margin-right: 20px !important;}
+.rightM25 {margin-right: 25px !important;}
+.rightM30 {margin-right: 30px !important;}
+.bottomM10 {margin-bottom: 10px !important;}
+.bottomM20 {margin-bottom: 20px !important;}
+.bottomM25 {margin-bottom: 25px !important;}
+.bottomM30 {margin-bottom: 30px !important;}
+.bottomM50 {margin-bottom: 50px !important;}
+.leftM10 {margin-left: 10px !important;}
+.leftM20 {margin-left: 20px !important;}
+.leftM25 {margin-left: 25px !important;}
+.leftM30 {margin-left: 30px !important;}
+
+.noM {margin: 0;}
+.noTopM {margin-top: 0;}
+.noRightM {margin-right: 0;}
+.noBottomM {margin-bottom: 0;}
+.noLeftM {margin-left: 0;}
+
+/* padding */
+.topP10 {padding-top: 10px !important;}
+.topP20 {padding-top: 20px !important;}
+.topP25 {padding-top: 25px !important;}
+.topP30 {padding-top: 30px !important;}
+.rightP10 {padding-right: 10px !important;}
+.rightP20 {padding-right: 20px !important;}
+.rightP25 {padding-right: 25px !important;}
+.rightP30 {padding-right: 30px !important;}
+.bottomP10 {padding-bottom: 10px !important;}
+.bottomP20 {padding-bottom: 20px !important;}
+.bottomP25 {padding-bottom: 25px !important;}
+.bottomP30 {padding-bottom: 30px !important;}
+.leftP10 {padding-left: 10px !important;}
+.leftP20 {padding-left: 20px !important;}
+.leftP25 {padding-left: 25px !important;}
+.leftP30 {padding-left: 30px !important;}
+
+.noP {padding: 0 !important;}
+.noTopP {padding-top: 0 !important;}
+.noRightP {padding-right: 0 !important;}
+.noBottomP {padding-bottom: 0 !important}
+.noLeftP {padding-left: 0 !important}
+
+i {vertical-align: -1px !important;}
+
+.hidden {display: none;}
+
+.img_wrap {text-align: center; border-radius: 3px; overflow: hidden; position: relative; padding: 31.5% 0; }
+.img_wrap img {/* width: 100%; */ position: absolute; transform: translate(-50%, -50%); left: 50%; top: 50%;}
+
+.img_wrap img.landscape {height: 100%; width: auto;}
+.img_wrap img.portrait {width: 100%; height: auto;}
+
+.img_wrap.noBorder img { border: none !important; }
+
+.row:after {display: block; content: ''; clear: both;}
+
+:focus {outline: 0}
+

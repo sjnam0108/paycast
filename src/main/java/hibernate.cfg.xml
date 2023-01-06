@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+    	<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+    	<property name="connection.url">jdbc:mysql://121.254.176.35:3306/paycast?createDatabaseIfNotExist=true</property>
+     	<property name="connection.username">signcast</property>
+     	<property name="connection.password">signcastfnd</property>
+<!--  		<property name="connection.url">jdbc:mysql://121.254.176.84:3306/paycast_run_update_20191125_1?createDatabaseIfNotExist=true</property>
+    	<property name="connection.username">paycastuser</property>
+    	<property name="connection.password">paycastuser!@</property>
+    	<property name="dialect">org.hibernate.dialect.MySQLDialect</property> -->
+
+
+    	<!-- property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+    	<property name="connection.url">jdbc:mysql://DomainOrIp:3306/signcast?createDatabaseIfNotExist=true</property>
+    	<property name="connection.username">signcast</property>
+    	<property name="connection.password">signcastfnd</property>
+    	<property name="dialect">org.hibernate.dialect.MySQLDialect</property-->
+
+    	<!-- property name="connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+    	<property name="connection.url">jdbc:sqlserver://DomainOrIp:1433;databaseName=signcast;</property>
+    	<property name="connection.username">sa</property>
+    	<property name="connection.password">bbmc123!</property>
+    	<property name="dialect">org.hibernate.dialect.SQLServer2008Dialect</property-->
+    	
+    	<!-- property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+    	<property name="connection.url">jdbc:oracle:thin:@DomainOrIp:1521:SCDS</property>
+    	<property name="connection.username">signcast</property>
+    	<property name="connection.password">signcastfnd</property>
+    	<property name="dialect">org.hibernate.dialect.Oracle10gDialect</property-->
+
+    	<property name="c3p0.min_size">1</property>
+    	<property name="c3p0.max_size">5</property>
+    	<property name="c3p0.timeout">300</property>
+    	<property name="c3p0.max_statements">50</property>
+    	<property name="c3p0.idle_test_period">3000</property>
+    	
+    	<property name="show_sql">true</property>
+    	<property name="format_sql">true</property>
+    	<property name="generate_statistics">true</property>
+    	
+    	<mapping class="kr.co.paycast.models.fnd.Menu"/>
+    	<mapping class="kr.co.paycast.models.fnd.LoginLog"/>
+    	<mapping class="kr.co.paycast.models.fnd.Privilege"/>
+    	<mapping class="kr.co.paycast.models.fnd.Role"/>
+    	<mapping class="kr.co.paycast.models.fnd.RolePrivilege"/>
+    	<mapping class="kr.co.paycast.models.fnd.Site"/>
+    	<mapping class="kr.co.paycast.models.fnd.SiteSite"/>
+    	<mapping class="kr.co.paycast.models.fnd.SiteUser"/>
+    	<mapping class="kr.co.paycast.models.fnd.User"/>
+    	<mapping class="kr.co.paycast.models.fnd.UserPrivilege"/>
+    	
+    	<!-- Solution ext                                                start -->
+
+		<mapping class="kr.co.paycast.models.calc.StoreCalcDay"/>
+		<mapping class="kr.co.paycast.models.calc.StoreCalcStats"/>
+		<mapping class="kr.co.paycast.models.calc.StoreCalcMenu"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrder"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderList"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderPay"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderCook"/>
+		<mapping class="kr.co.paycast.models.store.StoreCookAlarm"/>
+		<mapping class="kr.co.paycast.models.store.StoreCookTask"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderCancel"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderVerification"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderNumber"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderBasket"/>
+		<mapping class="kr.co.paycast.models.store.StoreOrderBasketList"/>
+		<mapping class="kr.co.paycast.models.store.StoreDelivery"/>
+    	
+    	<mapping class="kr.co.paycast.models.fnd.Region"/>
+    	
+    	<mapping class="kr.co.paycast.models.pay.AppUser"/>
+    	<mapping class="kr.co.paycast.models.pay.Content"/>
+    	<mapping class="kr.co.paycast.models.pay.ContentFile"/>
+    	<mapping class="kr.co.paycast.models.pay.Device"/>
+    	<mapping class="kr.co.paycast.models.pay.DeviceTask"/>
+    	<mapping class="kr.co.paycast.models.pay.Menu"/>
+    	<mapping class="kr.co.paycast.models.pay.MenuGroup"/>
+		<mapping class="kr.co.paycast.models.pay.MenuDelete"/>
+   		<mapping class="kr.co.paycast.models.pay.MenuGroupDelete"/>
+    	<mapping class="kr.co.paycast.models.pay.OptionalMenu"/>
+    	<mapping class="kr.co.paycast.models.pay.OptionalMenuDelete"/>
+    	<mapping class="kr.co.paycast.models.pay.OptionalMenuList"/>
+    	<mapping class="kr.co.paycast.models.pay.OptionalMenuListDelete"/>
+    	<mapping class="kr.co.paycast.models.pay.SiteOpt"/>
+    	<mapping class="kr.co.paycast.models.pay.SiteRegion"/>
+    	<mapping class="kr.co.paycast.models.pay.Store"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreEtc"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreOpt"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreUser"/>
+    	<mapping class="kr.co.paycast.models.pay.TokenActivity"/>
+    	<mapping class="kr.co.paycast.models.pay.UploadFile"/>
+    	<!-- Solution ext                                                  end -->
+    	<!-- 배달료 관련  class -->
+    	<mapping class="kr.co.paycast.models.pay.StoreDeliveryPay"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreDeliveryPolicy"/>
+    	
+    </session-factory>
+</hibernate-configuration>

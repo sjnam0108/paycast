@@ -1,0 +1,60 @@
+/*****************************************************************
+KICC IT지원본부 전산운영팀
+Author : 최정우 (jwoochoi@kicc.co.kr)
+Version : 1.0
+*****************************************************************/
+
+/***** 리스트 테이블 bbs_list *****/
+.tableSub_left {font-size:1.2em; color:#fff; font-weight:bold; position:absolute; left:10px; letter-spacing:-1px;}
+.tableSub_left02 {font-size:1.2em; color:#ffbb38; font-weight:bold; position:absolute; left:10px; letter-spacing:-1px;}
+.tableSubject {width:100%; height:38px; background-color:#7b7d7b; text-align:center; line-height:2.7em; position:relative;}
+
+.tableSubject02 {width:auto; height:29px; font-size:1.15em; text-align:left; color:#000; border-top:1px solid #fff; border-bottom:1px solid #a5a5a5; padding:9px 10px 0 10px; background-color:#e5e5e5; -webkit-box-shadow:0 0 22px rgba(0, 0, 0, .7); box-shadow:0 0 22px rgba(0, 0, 0, .7); font-weight:bold;}/*20110506_추가*/
+
+.tableSub_right {font-size:1.2em; color:#ffbb38; font-weight:bold; position:absolute; right:10px;}
+.selecArea {position:absolute; top:90px; right:10px;}
+table.bbs_list {width:100%; text-align:left; font-weight:bold; letter-spacing:-1px; background-color:#fff;}
+table.bbs_list th {font-size:1.15em; text-align:left; height:38px; color:#000; border-top:1px solid #fff; border-bottom:1px solid #a5a5a5; padding:0 10px; background-color:#e5e5e5; -webkit-box-shadow:0 0 22px rgba(0, 0, 0, .7); box-shadow:0 0 22px rgba(0, 0, 0, .7);}
+table.bbs_list th.r {text-align:right; padding:0 10px 0 0;}
+table.bbs_list td {font-size:1.1em; border-bottom:1px solid #e4e4e4; padding:12px 10px 11px;}
+table.bbs_list td.r {text-align:right; padding:12px 10px 11px;}
+table.bbs_list td.c {text-align:center; padding:12px 10px 11px;}
+
+
+/***** 테이블 정보 table_info *****/
+table.table_info {width:100%; font-size:1.1em; text-align:left; font-weight:bold; letter-spacing:-1px;}
+table.table_info td {padding:1px 0 1px 6px;}
+table.table_info td.r {text-align:right; padding:1px 6px 1px 0;}
+table.table_info td.c {text-align:center; padding:1px 0;}
+
+.bdbn {border-bottom:none !important;}
+
+/***** 테이블 정보 table_info *****/
+.roundTable {margin-left:9px; margin-right:9px; border-top:1px solid #4677bd; border-right:1px solid #adbacc; border-bottom:1px solid #adbacc; border-left:1px solid #adbacc; border-radius:5px; background-color:#fff;}
+table.table_roundList {width:100%; font-size:1.1em; text-align:left; font-weight:bold; letter-spacing:-1px;} 
+table.table_roundList th {height:35px; text-align:left; color:#fff; background-image:-webkit-gradient(linear, 0 0, 0 100%, from(#6493d6), to(#3e6bad)); background-image:-moz-linear-gradient(top, #6493d6, #3e6bad); border-bottom:1px solid #4677bd; padding:3px 0 3px 0;}
+table.table_roundList th.r {text-align:right; padding:0 11px 0 0;}
+table.table_roundList th.bgR {border-radius:0 7px 0 0;}
+table.table_roundList th.bgL {border-radius:7px 0 0 0;}
+table.table_roundList td {border-bottom:1px solid #e1e1e1; padding:13px 10px 11px;}
+table.table_roundList td.saleProduct {border-bottom:1px solid #b4b4b4; -webkit-box-shadow:0 5px 6px rgba(0, 0, 0, .15);}
+table.table_roundList td.r {text-align:right; padding:1px 8px 1px 0;}
+table.table_roundList td.c {text-align:center; padding:1px 0;}
+table.table_roundList td table {font-size:0.8em; margin:-3px 0 2px 0;}
+table.table_roundList td table tr:last-child td {border-bottom:none; border-bottom:none; background:#fff;}
+table.table_roundList td table td {color:#444 !important; padding:0px;}
+table.table_roundList td table td.r {text-align:right; padding:0;}
+table.table_roundList td h4 {font-size:1.1em; font-weight:bold; color:#444; line-height:1.5em;}
+/*20110506_추가*/
+/*table.table_roundList tr:last-child td {border-bottom:none !important; border-radius: 0 0 10px 10px;}
+table.table_roundList tr:last-child td:first-child {border-radius:0 0 0 10px;}
+table.table_roundList tr:last-child td:last-child {border-radius:0 0 10px 0;}*/
+table.table_roundList td.tdBg {border-bottom:1px solid #e1e1e1; padding:14px 10px 10px; background:#f4f4f4;}
+table.table_roundList td.tdBgr {text-align:right; padding:1px 8px 1px 0; background:#f4f4f4;}
+table.table_roundList td.tdBgc {text-align:center; padding:1px 0; background:#f4f4f4;}
+/*20110610_추가*/
+table.table_roundList th.bgM {border-radius:2px 2px 0 0;background:#4174c3;}
+
+.bgcolor_Orange01 {background:#ffecdc; font-size:1.25em; color:#000;}
+.noneRight {border-right:none !important;}
+.noneLeft {border-left:none !important;}

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:websocket="http://www.springframework.org/schema/websocket"
+    xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.0.xsd">
+
+	
+    <!-- Enables the Spring MVC @Controller programming model -->
+    <annotation-driven>
+    	<message-converters register-defaults="false">
+    		<beans:bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+    			<beans:property name="objectMapper">
+    				<beans:bean class="kr.co.paycast.models.CustomObjectMapper"/>
+    			</beans:property>
+    		</beans:bean>
+    	</message-converters>
+    </annotation-driven>
+    
+    <tx:annotation-driven proxy-target-class="true"/>
+	
+    <!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+    <resources mapping="/resources/**" location="/resources/" />
+
+    <!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+    <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <beans:property name="order" value="2" />
+        <beans:property name="prefix" value="/WEB-INF/views/" />
+        <beans:property name="suffix" value=".jsp" />
+    </beans:bean>
+
+	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+<!-- 			// test server -->
+<!-- 		<beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycastv1_4_01" /> -->
+<!-- 	    <beans:property name="username" value="paycastuser" /> -->
+<!-- 	    <beans:property name="password" value="paycastuser!@" /> -->
+<!-- 			// test server -->
+
+<!-- 			// dev 테스트 server -->
+  		<beans:property name="url" value="jdbc:mysql://localhost:3306/paycast" />
+	    <beans:property name="username" value="root" />
+	    <beans:property name="password" value="bbmc2757" />
+<!-- 			// dev 테스트 server -->
+
+<!-- 			// demo 테스트 server -->
+<!--   		<beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycast_demotest_20210301" />
+	    <beans:property name="username" value="paycastuser" />
+	    <beans:property name="password" value="paycastuser!@" /> -->
+<!-- 			// demo 테스트 server -->
+
+<!-- 			// test server - 운영서버 데이터 확인 -->
+<!--  		<beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycast_run_update_20210113" />
+ 	    <beans:property name="username" value="paycastuser" /> 
+	    <beans:property name="password" value="paycastuser!@" /> -->
+<!-- 			// test server - 운영서버 데이터 확인 -->
+
+<!-- 			// real server -->
+<!--   	 		<beans:property name="url" value="jdbc:mysql://localhost:3360/paycast" />
+	 		<beans:property name="username" value="paycast" />
+	 		<beans:property name="password" value="paycastfnd" /> -->
+<!-- 			// real server -->
+
+
+	    <beans:property name="maxActive" value="10" />
+	    <beans:property name="maxIdle" value="1" />
+	</beans:bean>
+	
+	<beans:bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<!-- beans:property name="configLocation" value="hibernate.cfg.xml"/-->
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="annotatedClasses">
+			<beans:list>
+				
+				<beans:value>kr.co.paycast.models.fnd.LoginLog</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.Menu</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.Privilege</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.Role</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.RolePrivilege</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.Site</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.SiteSite</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.SiteUser</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.User</beans:value>
+				<beans:value>kr.co.paycast.models.fnd.UserPrivilege</beans:value>
+				
+				<!-- Solution ext                                                start -->
+				<beans:value>kr.co.paycast.models.calc.StoreCalcDay</beans:value>
+				<beans:value>kr.co.paycast.models.calc.StoreCalcStats</beans:value>
+				<beans:value>kr.co.paycast.models.calc.StoreCalcMenu</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrder</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrderList</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrderPay</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrderCook</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreCookAlarm</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreCookTask</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrderCancel</beans:value>
+				<beans:value>kr.co.paycast.models.store.StoreOrderVerification</beans:value>
+				
+				<beans:value>kr.co.paycast.models.fnd.Region</beans:value>
+				
+				<beans:value>kr.co.paycast.models.pay.AppUser</beans:value>
+				<beans:value>kr.co.paycast.models.pay.Content</beans:value>
+				<beans:value>kr.co.paycast.models.pay.ContentFile</beans:value>
+				<beans:value>kr.co.paycast.models.pay.Device</beans:value>
+				<beans:value>kr.co.paycast.models.pay.DeviceTask</beans:value>
+				<beans:value>kr.co.paycast.models.pay.Menu</beans:value>
+				<beans:value>kr.co.paycast.models.pay.MenuGroup</beans:value>
+				<beans:value>kr.co.paycast.models.pay.OptionalMenu</beans:value>
+				<beans:value>kr.co.paycast.models.pay.SiteOpt</beans:value>
+				<beans:value>kr.co.paycast.models.pay.SiteRegion</beans:value>
+				<beans:value>kr.co.paycast.models.pay.Store</beans:value>
+				<beans:value>kr.co.paycast.models.pay.StoreEtc</beans:value>
+				<beans:value>kr.co.paycast.models.pay.StoreOpt</beans:value>
+				<beans:value>kr.co.paycast.models.pay.StoreUser</beans:value>
+				<beans:value>kr.co.paycast.models.pay.TokenActivity</beans:value>
+				<beans:value>kr.co.paycast.models.pay.UploadFile</beans:value>
+				
+				<beans:value>kr.co.paycast.models.pay.OptionalMenuList</beans:value>
+				<beans:value>kr.co.paycast.models.pay.MenuDelete</beans:value>
+				<beans:value>kr.co.paycast.models.pay.MenuGroupDelete</beans:value>
+				<beans:value>kr.co.paycast.models.pay.OptionalMenuDelete</beans:value>
+				<beans:value>kr.co.paycast.models.pay.OptionalMenuListDelete</beans:value>
+				
+				<beans:value>kr.co.paycast.models.store.StoreOrderBasket</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StoreOrderBasketList</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StoreOrderNumber</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StoreDelivery</beans:value>
+ 				
+ 				<!-- 쿠폰 포인트 관련  Class -->
+ 				
+ 				<beans:value>kr.co.paycast.models.pay.StoreCoupon</beans:value>
+				<beans:value>kr.co.paycast.models.pay.StorePolicy</beans:value>
+				<beans:value>kr.co.paycast.models.pay.CouponPolicy</beans:value>
+ 				
+ 				<beans:value>kr.co.paycast.models.store.StoreOrderCoupon</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StoreCouponLog</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StoreOrderPoint</beans:value>
+ 				<beans:value>kr.co.paycast.models.store.StorePointLog</beans:value>
+
+ 				<!-- 배달료 관련  Class -->
+ 				<beans:value>kr.co.paycast.models.pay.StoreDeliveryPay</beans:value>
+ 				<beans:value>kr.co.paycast.models.pay.StoreDeliveryPolicy</beans:value>
+ 				 				
+				<!-- Solution ext                                                  end -->
+			</beans:list>
+		</beans:property>
+		<beans:property name="hibernateProperties">
+			<beans:props>
+				<beans:prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</beans:prop>
+				<!-- beans:prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</beans:prop>
+				<beans:prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</beans:prop-->
+				<beans:prop key="hibernate.show_sql">false</beans:prop>
+				<beans:prop key="hibernate.format_sql">false</beans:prop>
+  				<beans:prop key="hibernate.hbm2ddl.auto">update</beans:prop>
+			</beans:props>
+		</beans:property>
+	</beans:bean>
+
+    <beans:bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+	    <beans:property name="sessionFactory" ref="sessionFactory" />
+	</beans:bean>  
+
+	<beans:bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<beans:property name="defaultEncoding" value="UTF-8" />
+		<beans:property name="basenames">
+			<beans:list>
+				<beans:value>messages/AppMessages</beans:value>
+				<beans:value>messages/Config</beans:value>
+				<beans:value>messages/Menus</beans:value>
+			</beans:list>
+		</beans:property>
+		<beans:property name="fallbackToSystemLocale" value="false" />
+	</beans:bean>
+	
+	
+	<!-- // demo server -->
+	<!-- <beans:value>D:/uploadtemp</beans:value> -->
+	<!-- // real server -->	
+	<!-- <beans:value>/data1/v2_files/paycastv1_4/uploadtemp</beans:value> -->
+	<beans:bean id="uploadDirResource" class="org.springframework.core.io.FileSystemResource">
+		<beans:constructor-arg>
+			<beans:value>/data1/v2_files/paycastv1_4/uploadtemp</beans:value>
+		</beans:constructor-arg>
+	</beans:bean>
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
+		<beans:property name="maxUploadSize" value="10737418240" />
+		<beans:property name="maxInMemorySize" value="1048576" />
+		<beans:property name="uploadTempDir" ref="uploadDirResource" />
+		<beans:property name="defaultEncoding" value="UTF-8" />
+	</beans:bean>
+
+    <context:component-scan base-package="kr.co.paycast.controllers" />
+    <context:component-scan base-package="kr.co.paycast.controllers.common" />
+    <context:component-scan base-package="kr.co.paycast.controllers.fnd" />
+    <context:component-scan base-package="kr.co.paycast.models" />
+    <context:component-scan base-package="kr.co.paycast.models.fnd" />
+    <context:component-scan base-package="kr.co.paycast.models.fnd.dao" />
+    <context:component-scan base-package="kr.co.paycast.models.fnd.service" />
+    <context:component-scan base-package="kr.co.paycast.utils" />
+
+	<!-- Solution ext                                                start -->
+    <context:component-scan base-package="kr.co.paycast.controllers.pay" />
+    <context:component-scan base-package="kr.co.paycast.models.pay" />
+    <context:component-scan base-package="kr.co.paycast.models.pay.dao" />
+    <context:component-scan base-package="kr.co.paycast.models.pay.service" />
+    
+    <context:component-scan base-package="kr.co.paycast.controllers.dsg" />
+    <context:component-scan base-package="kr.co.paycast.controllers.self" />
+    <context:component-scan base-package="kr.co.paycast.controllers.store" />
+    <context:component-scan base-package="kr.co.paycast.models.dsg" />
+    <context:component-scan base-package="kr.co.paycast.models.dsg.dao" />
+    <context:component-scan base-package="kr.co.paycast.models.dsg.service" />
+    <context:component-scan base-package="kr.co.paycast.models.self" />
+    <context:component-scan base-package="kr.co.paycast.models.self.dao" />
+    <context:component-scan base-package="kr.co.paycast.models.self.service" />
+    <context:component-scan base-package="kr.co.paycast.models.store" />
+    <context:component-scan base-package="kr.co.paycast.models.store.dao" />
+    <context:component-scan base-package="kr.co.paycast.models.store.service" />
+	<!-- Solution ext                                                  end -->
+    
+    <interceptors>
+    	<interceptor>
+    		<mapping path="/common/passwordupdate" />
+    		<mapping path="/fnd/**" />
+    		
+			<!-- Solution ext                                                start -->
+    		<mapping path="/pay/**" />
+    		<mapping path="/calc/**" />
+    		<mapping path="/store/sales/**" />
+    		<!-- Solution ext                                                  end -->
+    		
+	    	<beans:bean class="kr.co.paycast.interceptors.LoginCheckInterceptor"/>
+    	</interceptor>
+    </interceptors>
+</beans:beans>
