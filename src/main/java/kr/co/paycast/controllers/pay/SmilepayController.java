@@ -1497,7 +1497,7 @@ public class SmilepayController {
 				SSLContext sslCtx = SSLContext.getInstance("TLSv1.2");
 				sslCtx.init(null, null, new SecureRandom());
 
-				url = new URL("smartropay.RE");
+				url = new URL(msgMgr.message("smartropay.RE", locale));
 				logger.info(" url " + url.toString());
 				connection = (HttpsURLConnection) url.openConnection();
 				connection.setSSLSocketFactory(sslCtx.getSocketFactory());
