@@ -799,7 +799,6 @@ $(document).ready(function() {
 		</form>
 	</div>
 </div>
-
 </script>
 
 <script id="template-opt-menu-reorder" type="text/x-kendo-template">
@@ -1337,9 +1336,16 @@ function deleteMenu(e) {
 //------------------------------------------------------------------- functions for optional menus 
 
 
-function addOptMenu() {
+function addOptMenu(e) {
+
+//	e.preventDefault();
 
 	$("#formRootLevel2").html(kendo.template($("#template-opt-menu-add").html()));
+
+    var row = $(this).closest("tr");
+	$("#form-5").attr("rowid", row.attr("data-id"));
+	$("#form-5 input[name='name']").val(row.attr("data-name"));
+	$("#form-5 input[name='menus']").val(row.attr("data-menus"));
 
 	$("#form-5 input[name='menus']").tagsinput({
 		trimValue: true,
@@ -1411,16 +1417,40 @@ function closeOptMenuAdd() {
 	}
 }
 
-
 function validateTagInputValue(str){
 	
 	var menus = str.split(" ");
-	
+	var row = $(this).closest("tr");
+	console.log(menus);
+	var names = $("#form-6 input[name='menus']").val();
+	console.log(names);
+
+
 	if(menus.length > 1) {
 		var moneyInput = menus[menus.length - 1];
-		
+		var menuType = menus[0];
+		console.log(menuType);
+		console.log(menus[0]);
+
+		if(names !=null){
+			var stnames = names.replace(/[0-9]/g,""); // 숫자제거
+			var onenames = stnames.split(",");
+			console.log(stnames);
+			console.log(onenames);
+			if(onenames.find(element => element == menuType + " ")){
+				showToastNotification("error", "${tip_checkMenu}");
+				return false
+			}
+		}
+			
+
 		if(!$.isNumeric(moneyInput)){
 			showToastNotification("error", "${tip_checkPrice}");
+			return false;
+		}
+
+		if(menuType == names) {
+			showToastNotification("error", "${tip_checkBlank}");
 			return false;
 		}
 		
@@ -1476,7 +1506,6 @@ function optMenuEdit(e) {
 	$("#formRootLevel2").html(kendo.template($("#template-opt-menu-edit").html()));
 	
     var row = $(this).closest("tr");
-    
 	$("#form-6").attr("rowid", row.attr("data-id"));
 	
 	$("#form-6 input[name='name']").val(row.attr("data-name"));
@@ -1496,6 +1525,7 @@ function optMenuEdit(e) {
 		e.preventDefault();
 		
 	    e.cancel = !validateTagInputValue(e.item);
+
 	});
 	 
 	$("#form-6").validate({

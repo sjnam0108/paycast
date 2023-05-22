@@ -13,18 +13,22 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.calc.service.CalculateService;
 import kr.co.paycast.models.pay.ContentFile;
+import kr.co.paycast.models.pay.Device;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.OptionalMenuListDelete;
 import kr.co.paycast.models.pay.Store;
 import kr.co.paycast.models.pay.service.ContentService;
+import kr.co.paycast.models.pay.service.DeviceService;
 import kr.co.paycast.models.pay.service.MenuService;
 import kr.co.paycast.models.pay.service.StoreService;
 import kr.co.paycast.models.self.service.SelfService;
@@ -58,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * ���� �ֹ� ���� �ý��� ���� ���� API
@@ -96,6 +101,12 @@ public class StoreAPIController {
 
 	@Autowired
 	private MenuService menuService;
+	
+	@Autowired
+	private MessageManager msgMgr;
+	
+	@Autowired
+	private DeviceService devService;
 
 	/**
 	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
@@ -607,24 +618,28 @@ public class StoreAPIController {
 		/**
 		 * 대기자 목록을 조회 한다. (주문 목록의 대기 수를 조회 하여 보여준다.)
 		 */
-	@RequestMapping(value = "/cookStayCntRead", method = RequestMethod.GET)
-	public void cookStayCntRead(HttpServletRequest request, HttpServletResponse response)
+	@RequestMapping(value = {"/cookStayCntRead"}, method = {RequestMethod.GET})
+	public @ResponseBody Map<String, Object> cookStayCntRead(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		Map<String, Object> info = new HashMap();
 		request.setCharacterEncoding("utf-8");
-
-		String storeId = (String) request.getParameter("storeId");
-		String deviceId = (String) request.getParameter("deviceId");
-
-		int stayCnt = storeCookService.getStayCntAPI(Util.parseInt(storeId, 0), deviceId);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-
-		response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
-		response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
-		response.setContentType("text/plain;charset=UTF-8");
-		response.setCharacterEncoding("UTF-8");
-
-		out.print(stayCnt);
-		out.close();
+		String storeId = request.getParameter("storeId");
+		String deviceId = request.getParameter("deviceId");
+		boolean success = true;
+		String localMessage = "Ok";
+		int stayCnt = this.storeCookService.getStayCntAPI(Util.parseInt(storeId, 0), deviceId);
+		if (stayCnt == 9999) {
+			success = false;
+			info.put("data", stayCnt);
+			info.put("success", success);
+			info.put("massage", "요청하신 상점 및 기기를 찾을 수 없습니다.");
+			return info;
+		} else {
+			info.put("data", stayCnt);
+			info.put("success", success);
+			info.put("massage", localMessage);
+			return info;
+		}
 	}
 
 	/**
@@ -904,24 +919,46 @@ public class StoreAPIController {
 	/**
 	 * 주문 번호 중앙 관리를 위한 키오스크용 API 
 	 */
-	@RequestMapping(value = "/ordernum", method = { RequestMethod.GET, RequestMethod.POST })
-    public void ordernum(HttpServletRequest request, HttpServletResponse response, Locale locale, 
-			HttpSession session) throws ServletException, IOException {
+	@RequestMapping(value = {"/ordernum"}, method = {RequestMethod.GET, RequestMethod.POST})
+	public @ResponseBody Map<String, Object> ordernum(HttpServletRequest request, Locale locale, HttpSession session)
+			throws ServletException, IOException {
+		Map<String, Object> info = new HashMap();
 		request.setCharacterEncoding("utf-8");
-    	
-    	String storeId = (String) request.getParameter("storeId");
-    	String deviceId = (String) request.getParameter("deviceId");
-
-		int ordernum = storeNumberService.getOrderNum(Util.parseInt(storeId, 0) , deviceId, session, locale);
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-        
-        response.setHeader("Cache-Control", "no-store");              // HTTP 1.1
-        response.setHeader("Pragma", "no-cache, must-revalidate");    // HTTP 1.0
-        response.setContentType("text/plain;charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        
-        out.print(ordernum);
-        out.close();
+		String storeId = request.getParameter("storeId");
+		String deviceId = request.getParameter("deviceId");
+		boolean success = true;
+		int ordernum = this.storeNumberService.getOrderNum(Util.parseInt(storeId, 0), deviceId, session, locale);
+		String localMessage = "Ok";
+		Store store = this.storeService.getStore(Util.parseInt(storeId, 0));
+		if (store == null) {
+			success = false;
+			info.put("success", success);
+			info.put("data", ordernum);
+			info.put("message", this.msgMgr.message("error.store", locale));
+			return info;
+		} else {
+			Device device = this.devService.getDeviceByUkid(Util.parseString(deviceId));
+			if (device == null) {
+				success = false;
+				info.put("success", success);
+				info.put("data", ordernum);
+				info.put("message", this.msgMgr.message("error.deiviceId", locale));
+				return info;
+			} else if (store.getId() != device.getStore().getId()) {
+				success = false;
+				info.put("success", success);
+				info.put("data", ordernum);
+				info.put("message", this.msgMgr.message("error.storeDeiviceId", locale));
+				return info;
+			} else if (ordernum != 9999) {
+				info.put("success", success);
+				info.put("data", ordernum);
+				info.put("message", localMessage);
+				return info;
+			} else {
+				return info;
+			}
+		}
 	}
 	
 	/**
