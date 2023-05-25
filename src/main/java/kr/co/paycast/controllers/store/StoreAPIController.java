@@ -20,10 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import kr.co.paycast.exceptions.ServerOperationForbiddenException;
 import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.calc.service.CalculateService;
 import kr.co.paycast.models.pay.ContentFile;
 import kr.co.paycast.models.pay.Device;
+import kr.co.paycast.models.pay.DeviceTask;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.OptionalMenuListDelete;
 import kr.co.paycast.models.pay.Store;
@@ -130,6 +132,65 @@ public class StoreAPIController {
 		PrintWriter pw = response.getWriter();
 
 		document.write(pw);
+	}
+	
+	/**
+	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
+	 */
+	@RequestMapping(value = "/storeStateInfo", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> stbStoreState(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+			throws ServletException, IOException {
+		Map<String, Object> info = new HashMap<String, Object>();
+		boolean success = true;
+		String message = "OK";
+
+		String storeId = (String) request.getParameter("storeId");
+		
+		String deviceId = (String) request.getParameter("deviceId");
+		Map<String, Object> info2 = new HashMap<String, Object>();
+		info2.put("openType", null);
+		info2.put("kioskEnable", null);
+		Store store = storeService.getStore(Util.parseInt(storeId));
+		if(store == null) {
+			success = false;
+			
+			info.put("data", info2);
+			info.put("success", success);
+			info.put("message", "요청하신 상점을 찾을 수 없습니다.");
+			
+			return info;
+		}
+		
+		Device device = devService.getDeviceByUkid(Util.parseString(deviceId));
+		if (device == null) {
+			
+			success = false;
+			
+			info.put("data", info2);
+			info.put("success", success);
+			info.put("message", "요청하신 기기를 찾을 수 없습니다.");
+			
+			return info;
+		}
+		
+		if(store.getId() != device.getStore().getId()){
+			
+			success = false;
+			info.put("data", info2);
+			info.put("success", success);
+			info.put("message", "상점 정보과 device 정보를 확인하여 주시기 바랍니다.");
+			
+			return info;
+		}
+		
+		info2.put("openType", store.getOpenType());
+		info2.put("kioskEnable",String.valueOf(store.isKioskOrderEnabled()));
+		
+		info.put("data", info2);
+		info.put("success", success);
+		info.put("message", message);
+	
+		return info;
 	}
 
 	/**
@@ -621,7 +682,7 @@ public class StoreAPIController {
 	@RequestMapping(value = {"/cookStayCntRead"}, method = {RequestMethod.GET})
 	public @ResponseBody Map<String, Object> cookStayCntRead(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Map<String, Object> info = new HashMap();
+		Map<String, Object> info = new HashMap<String, Object>();
 		request.setCharacterEncoding("utf-8");
 		String storeId = request.getParameter("storeId");
 		String deviceId = request.getParameter("deviceId");
@@ -632,12 +693,12 @@ public class StoreAPIController {
 			success = false;
 			info.put("data", stayCnt);
 			info.put("success", success);
-			info.put("massage", "요청하신 상점 및 기기를 찾을 수 없습니다.");
+			info.put("message", "요청하신 상점 및 기기를 찾을 수 없습니다.");
 			return info;
 		} else {
 			info.put("data", stayCnt);
 			info.put("success", success);
-			info.put("massage", localMessage);
+			info.put("message", localMessage);
 			return info;
 		}
 	}
@@ -922,7 +983,7 @@ public class StoreAPIController {
 	@RequestMapping(value = {"/ordernum"}, method = {RequestMethod.GET, RequestMethod.POST})
 	public @ResponseBody Map<String, Object> ordernum(HttpServletRequest request, Locale locale, HttpSession session)
 			throws ServletException, IOException {
-		Map<String, Object> info = new HashMap();
+		Map<String, Object> info = new HashMap<String, Object>();
 		request.setCharacterEncoding("utf-8");
 		String storeId = request.getParameter("storeId");
 		String deviceId = request.getParameter("deviceId");

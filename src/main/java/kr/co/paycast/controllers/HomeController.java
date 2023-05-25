@@ -699,6 +699,15 @@ public class HomeController {
     }
 	
 	/**
+	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳 
+	 */
+	@RequestMapping(value = "/info/storeState", method = RequestMethod.GET)
+	public String stbStoreState(HttpServletRequest request, HttpServletResponse response, 
+			HttpSession session) {
+		return "forward:/store/api/storeStateInfo";
+	}
+	
+	/**
 	 * 매장 및 메뉴 변경에 대한 명령이 수행되었다는 확인 URL
 	 */
 	@RequestMapping(value = "/info/storecomplete", method = RequestMethod.GET)

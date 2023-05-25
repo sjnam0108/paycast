@@ -122,7 +122,7 @@ public class StoreSiteServiceImpl implements StoreSiteService {
 				 }
 			 }
         	Iterator<String> keys = deviceTaskMap.keySet().iterator(); 
-        	while( keys.hasNext() ){ 
+        	while( keys.hasNext() ){
         		String key = keys.next(); 
         		DeviceTask deviceTask = (DeviceTask)deviceTaskMap.get(key);
 				Element commandElement = commandsElement.addElement("command");
