@@ -44,9 +44,12 @@
 <!-- 			// test server -->
 
 <!-- 			// dev 테스트 server -->
-  		<beans:property name="url" value="jdbc:mysql://localhost:3306/paycast" />
-	    <beans:property name="username" value="root" />
-	    <beans:property name="password" value="bbmc2757" />
+<!--   		<beans:property name="url" value="jdbc:mysql://localhost:3306/paycast" /> -->
+<!-- 	    <beans:property name="username" value="root" /> -->
+<!-- 	    <beans:property name="password" value="bbmc2757" /> -->
+	    <beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycast_demotest_20210107" />
+	    <beans:property name="username" value="paycastuser" />
+	    <beans:property name="password" value="paycastuser!@" />
 <!-- 			// dev 테스트 server -->
 
 <!-- 			// demo 테스트 server -->

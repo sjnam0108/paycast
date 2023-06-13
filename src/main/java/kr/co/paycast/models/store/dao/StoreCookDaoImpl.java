@@ -26,22 +26,31 @@ public class StoreCookDaoImpl implements StoreCookDao {
     @Autowired
     private SessionFactory sessionFactory;
 
+    @Override
+    public List<StoreOrderCook> getStoreCookStayList(int storeIdInt, String orderMenuComplete) { 
+    	return getStoreCookStayList(storeIdInt, orderMenuComplete, false); 
+    }
+    
     @SuppressWarnings("unchecked")
 	@Override
-	public List<StoreOrderCook> getStoreCookStayList(int storeIdInt, String orderMenuComplete) {
+	public List<StoreOrderCook> getStoreCookStayList(int storeIdInt, String orderMenuComplete, boolean today) {
 		Session session = sessionFactory.getCurrentSession();
 		
 		List<StoreOrderCook> list = null;
 		if("N".equals(orderMenuComplete)){
 			// 1.조회된 일자 기준으로 하루전 날짜를 가져온다. 
 			Calendar afterTime = Calendar.getInstance();
-			afterTime.add(Calendar.DATE, -1); // 오늘날짜로부터 -1
+			if(today == false) {
+				afterTime.add(Calendar.DATE, -1); // 오늘날짜로부터 -1
+			}else {
+			afterTime.get(Calendar.DATE);
+			}
 			afterTime.set(Calendar.HOUR_OF_DAY , 00);
 			afterTime.set(Calendar.MINUTE, 00);
 			afterTime.set(Calendar.SECOND, 00);
 			afterTime.set(Calendar.MILLISECOND, 0);
 	    	Date fromDate1 = afterTime.getTime();
-			
+			System.out.println("fromDate"+fromDate1);
 			list = session.createCriteria(StoreOrderCook.class)
 					.add(Restrictions.eq("storeId", storeIdInt))
 					.add(Restrictions.ne("orderMenuComplete", orderMenuComplete))
@@ -140,4 +149,18 @@ public class StoreCookDaoImpl implements StoreCookDao {
 		return (list.isEmpty() ? null : list.get(0));
 	}
 
+	@Override
+	public List<StoreOrderCook> getStoreOrderCookListByCreated(String createdBy, String orderMenuComplete) {
+		Session session = sessionFactory.getCurrentSession();
+		logger.info(createdBy);
+		logger.info(orderMenuComplete);
+		@SuppressWarnings("unchecked")
+		List<StoreOrderCook> list = session.createCriteria(StoreOrderCook.class)
+				.add(Restrictions.eq("whoCreatedBy", createdBy))
+				.add(Restrictions.eq("orderMenuComplete", orderMenuComplete))
+				.list();
+		
+		return list;
+	}
+	
 }

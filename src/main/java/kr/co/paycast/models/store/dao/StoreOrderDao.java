@@ -10,6 +10,8 @@ import kr.co.paycast.models.store.StoreOrderPay;
 
 
 public interface StoreOrderDao {
+	
+	public void testlog();
 
 	public void saveOrUpdate(StoreOrder condFile);
 	
@@ -20,6 +22,9 @@ public interface StoreOrderDao {
 	public void saveOrderList(List<StoreOrderList> orderList);
 
 	public StoreOrder getOrder(int oidStoreId, String orderNum);
+	public StoreOrder getOrder(int oidStoreId);
+	
+	public StoreOrder getOrderNumberByStoreOrderNum(String orderNum);
 
 	public StoreOrder getOrderOne(int id);
 
@@ -36,6 +41,8 @@ public interface StoreOrderDao {
 	public void saveOrUpdate(StoreOrderList storeOrderList);
 	
 	public List<StoreOrderList> getOrderList(String order);
+	
+	public List<StoreOrderList> getOrderListByStatus(String order,String status);
 
 	public void deleteOrderList(List<StoreOrderList> resList);
 
@@ -52,6 +59,7 @@ public interface StoreOrderDao {
 	public boolean isRegisteredPayAuthCode(int storeId, String authCode);
 	
 	public List<StoreOrder> getOrderListDate(Date fromDate1, Date toDate2, int storeId);
+//	public List<StoreOrder> getOrderListSid(int storeId);
 
 	// StoreOrderList의 정보를 가져온다 
 	public StoreOrderList getOrderListOne(int storeOrderListId);

@@ -29,6 +29,7 @@ public interface StoreOrderService {
 	public void saveOrder(StoreOrder orderDao, List<MenuPayItem> payitemList);
 
 	public StoreOrder getOrder(int storeId, String oID);
+	public StoreOrder getOrder(int storeId);
 
 	public StoreOrder getOrderbyOrderNum(String sp_order_no);
 	

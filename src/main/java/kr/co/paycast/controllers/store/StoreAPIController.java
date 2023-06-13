@@ -5,8 +5,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +42,11 @@ import kr.co.paycast.models.self.service.SelfService;
 import kr.co.paycast.models.store.StoreCookAlarm;
 import kr.co.paycast.models.store.StoreCookTask;
 import kr.co.paycast.models.store.StoreOrder;
+import kr.co.paycast.models.store.StoreOrderCook;
+import kr.co.paycast.models.store.StoreOrderList;
+import kr.co.paycast.models.store.StoreOrderPay;
+import kr.co.paycast.models.store.dao.StoreCookDao;
+import kr.co.paycast.models.store.dao.StoreOrderDao;
 import kr.co.paycast.models.store.service.StoreCancelService;
 import kr.co.paycast.models.store.service.StoreCookService;
 import kr.co.paycast.models.store.service.StoreNumberService;
@@ -47,6 +57,8 @@ import kr.co.paycast.utils.Util;
 import kr.co.paycast.viewmodels.pay.MenuDispItem;
 import kr.co.paycast.viewmodels.pay.MenuGroupItem;
 import kr.co.paycast.viewmodels.pay.OptionalMenuItem;
+import kr.co.paycast.viewmodels.store.CookJsonList;
+import kr.co.paycast.viewmodels.store.CookingData;
 import kr.co.paycast.viewmodels.store.MenuJsonPrintItem;
 import kr.co.paycast.viewmodels.store.MenuListJsonPrintItem;
 import kr.co.paycast.viewmodels.store.RefillView;
@@ -103,12 +115,18 @@ public class StoreAPIController {
 
 	@Autowired
 	private MenuService menuService;
-	
+
 	@Autowired
 	private MessageManager msgMgr;
-	
+
 	@Autowired
 	private DeviceService devService;
+
+	@Autowired
+	private StoreOrderDao storeOrderDao;
+
+	@Autowired
+	private StoreCookDao storeCookDao;
 
 	/**
 	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
@@ -133,63 +151,151 @@ public class StoreAPIController {
 
 		document.write(pw);
 	}
-	
+
 	/**
-	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
+	 * 매장 오픈 정보 및 키오스크 사용 가능 여부 정보 내려주는곳
 	 */
 	@RequestMapping(value = "/storeStateInfo", method = RequestMethod.GET)
-	public @ResponseBody Map<String, Object> stbStoreState(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-			throws ServletException, IOException {
+	public @ResponseBody Map<String, Object> stbStoreState(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws ServletException, IOException {
 		Map<String, Object> info = new HashMap<String, Object>();
 		boolean success = true;
 		String message = "OK";
 
 		String storeId = (String) request.getParameter("storeId");
-		
 		String deviceId = (String) request.getParameter("deviceId");
 		Map<String, Object> info2 = new HashMap<String, Object>();
 		info2.put("openType", null);
 		info2.put("kioskEnable", null);
 		Store store = storeService.getStore(Util.parseInt(storeId));
-		if(store == null) {
+		if (store == null) {
 			success = false;
-			
+
 			info.put("data", info2);
 			info.put("success", success);
 			info.put("message", "요청하신 상점을 찾을 수 없습니다.");
-			
+
 			return info;
 		}
-		
+
 		Device device = devService.getDeviceByUkid(Util.parseString(deviceId));
 		if (device == null) {
-			
+
 			success = false;
-			
+
 			info.put("data", info2);
 			info.put("success", success);
 			info.put("message", "요청하신 기기를 찾을 수 없습니다.");
-			
+
 			return info;
 		}
-		
-		if(store.getId() != device.getStore().getId()){
-			
+
+		if (store.getId() != device.getStore().getId()) {
+
 			success = false;
 			info.put("data", info2);
 			info.put("success", success);
 			info.put("message", "상점 정보과 device 정보를 확인하여 주시기 바랍니다.");
-			
+
 			return info;
 		}
-		
+
 		info2.put("openType", store.getOpenType());
-		info2.put("kioskEnable",String.valueOf(store.isKioskOrderEnabled()));
-		
+		info2.put("kioskEnable", String.valueOf(store.isKioskOrderEnabled()));
+
 		info.put("data", info2);
 		info.put("success", success);
 		info.put("message", message);
-	
+
+		return info;
+	}
+
+	/**
+	 * 매장 오픈 정보 및 키오스크 사용 가능 여부 정보 내려주는곳
+	 */
+	@RequestMapping(value = "/orderListInfo", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> orderListInfo(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session, Locale locale) throws ServletException, IOException {
+		Map<String, Object> info = new HashMap<String, Object>();
+		boolean success = true;
+		String message = "OK";
+		SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String StrstoreId = (String) request.getParameter("storeId");
+		int storeId = Integer.parseInt(StrstoreId);
+
+		if (StrstoreId == null) {
+			success = false;
+			message = "요청하신 상점을 찾을 수 없습니다.";
+			info.put("data", null);
+			info.put("message", message);
+			info.put("success", success);
+			return info;
+		}
+
+		Date now = new Date();
+
+		String today = transFormat.format(now);
+		try {
+			Date tday = transFormat.parse(today);
+
+			info.put("message", message);
+			info.put("success", success);
+
+//			List<StoreOrder> orderList = storeOrderDao.getOrderListDate( storeId);
+			List<StoreOrderCook> orderCookList = storeCookDao.getStoreCookStayList(storeId, "Y", true);// TODO:오늘 날짜로 필터
+			ArrayList<CookingData> cookingList = new ArrayList<CookingData>();
+			System.out.println(orderCookList);
+			if (orderCookList.size() > 0) {
+				for (StoreOrderCook order : orderCookList) {
+					System.out.println(order);
+					String orderNum = order.getWhoCreatedBy();
+					System.out.println(orderNum);
+					
+					List<StoreOrderList> orderMenuList = storeOrderDao.getOrderListByStatus(orderNum, "Y");
+					if (orderMenuList.size() > 0) {
+						System.out.println(orderMenuList);
+						for (StoreOrderList storeOrderList : orderMenuList) {
+							
+							String stOrderNum = storeOrderList.getOrderNumber();
+							
+							System.out.println("test orderNum"+stOrderNum);
+							storeOrderDao.testlog();
+							StoreOrder storeOrder = storeOrderDao.getOrderNumberByStoreOrderNum(stOrderNum);
+							
+							int orderNumber = Integer.parseInt(storeOrder.getOrderSeq());
+							
+							CookingData cookingDataItem = new CookingData();
+							cookingDataItem.setOrderNumber(orderNumber);
+							cookingDataItem.setCount(storeOrderList.getOrderMenuAmount());
+							cookingDataItem.setMenuName(storeOrderList.getOrderMenuName());
+							cookingDataItem.setCookingState(storeOrderList.getOrderMenuNotice());
+							cookingDataItem.setLastUpdateDate(storeOrderList.getWhoLastUpdateDate());
+							cookingList.add(cookingDataItem);
+
+						}
+					} 
+				}
+
+				Collections.sort(cookingList, Collections.reverseOrder());
+
+				info.put("data", cookingList);
+				System.out.println(cookingList);
+				return info;
+
+			} else {
+				success = false;
+				message = "결제 내역을 확인해 주세요";
+				info.put("data", null);
+				info.put("message", message);
+				info.put("success", success);
+				return info;
+			}
+
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return info;
 	}
 
@@ -353,11 +459,11 @@ public class StoreAPIController {
 
 		List<MenuJsonPrintItem> list = storeOrderService.makeMenuListPrint(storeId, deviceId);
 		try {
-			JSONArray jArray = new JSONArray();//배열이 필요할때
+			JSONArray jArray = new JSONArray();// 배열이 필요할때
 			if (list.size() > 0) {
 				for (MenuJsonPrintItem item : list) {
 					List<String> addList = new ArrayList<String>();
-					JSONObject menuObject = new JSONObject();//배열 내에 들어갈 json
+					JSONObject menuObject = new JSONObject();// 배열 내에 들어갈 json
 					// ���� �Է�
 					menuObject.put("recommand", item.getRecommand());
 					menuObject.put("name", item.getStoreName());
@@ -381,18 +487,18 @@ public class StoreAPIController {
 					menuObject.put("deliMsg", item.getDeliMsg());
 					menuObject.put("bookingTime", item.getBookingTime());
 
-					JSONArray jMenuListArray = new JSONArray();//배열이 필요할때
+					JSONArray jMenuListArray = new JSONArray();// 배열이 필요할때
 					List<MenuListJsonPrintItem> orderMenu = item.getOrderMenu();
-					if(orderMenu.size() > 0){
-						for(MenuListJsonPrintItem itemmenu : orderMenu){
-							JSONObject menuListObject = new JSONObject();//배열 내에 들어갈 json
-							
+					if (orderMenu.size() > 0) {
+						for (MenuListJsonPrintItem itemmenu : orderMenu) {
+							JSONObject menuListObject = new JSONObject();// 배열 내에 들어갈 json
+
 							menuListObject.put("id", itemmenu.getProductID());
 							menuListObject.put("name", itemmenu.getProductName());
 							menuListObject.put("cnt", itemmenu.getOrderCount());
 							menuListObject.put("price", itemmenu.getOrderPrice());
 							menuListObject.put("packing", itemmenu.getOrderMenuPacking());
-							// 1. ","으로 split 
+							// 1. ","으로 split
 							// 2. "_"으로 split
 							// 3. "\\("으로 split
 							// 4. 추가 선택에 대한 메뉴 명만
@@ -412,7 +518,7 @@ public class StoreAPIController {
 									}
 								}
 							}
-							// 1. ","으로 split 
+							// 1. ","으로 split
 							// 2. "_"으로 split
 							// 3. "\\|\\|"으로 split
 							// 4. "\\("으로 split
@@ -453,7 +559,7 @@ public class StoreAPIController {
 					jArray.add(menuObject);
 				}
 			} else {
-				JSONObject menuObject = new JSONObject();//배열 내에 들어갈 json
+				JSONObject menuObject = new JSONObject();// 배열 내에 들어갈 json
 				menuObject.put("recommand", 0);
 				jArray.add(menuObject);
 			}
@@ -469,7 +575,7 @@ public class StoreAPIController {
 			out.close();
 
 		} catch (JSONException e) {
-        	logger.error("JSONException > printmenu", "json 생성시 오류");
+			logger.error("JSONException > printmenu", "json 생성시 오류");
 		}
 	}
 
@@ -645,11 +751,10 @@ public class StoreAPIController {
 				}
 			}
 			logger.info("/kioskpaymentinfo >> 데이터 생성 완료 후 저장 시작 ");
-			
+
 			success = storeOrderService.kioskPayMent(jsonMenu);
-			
+
 			logger.info("/kioskpaymentinfo >> 데이터 생성 완료 후 저장 완료 ");
-			
 
 		} catch (Exception e) {
 			logger.error("updatePick", e);
@@ -670,16 +775,16 @@ public class StoreAPIController {
 		response.setContentType("text/plain;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 
-		 logger.info("/kioskpaymentinfo >> 키오스크에서 결제 완료 데이터 저장 종료");
-	        
-	        out.print(success ? "Y" : "N");
-	        out.close();
-	    }
-		
-		/**
-		 * 대기자 목록을 조회 한다. (주문 목록의 대기 수를 조회 하여 보여준다.)
-		 */
-	@RequestMapping(value = {"/cookStayCntRead"}, method = {RequestMethod.GET})
+		logger.info("/kioskpaymentinfo >> 키오스크에서 결제 완료 데이터 저장 종료");
+
+		out.print(success ? "Y" : "N");
+		out.close();
+	}
+
+	/**
+	 * 대기자 목록을 조회 한다. (주문 목록의 대기 수를 조회 하여 보여준다.)
+	 */
+	@RequestMapping(value = { "/cookStayCntRead" }, method = { RequestMethod.GET })
 	public @ResponseBody Map<String, Object> cookStayCntRead(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		Map<String, Object> info = new HashMap<String, Object>();
@@ -704,7 +809,7 @@ public class StoreAPIController {
 	}
 
 	/**
-	 * DID 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳 
+	 * DID 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
 	 */
 	@RequestMapping(value = "/storedidinfo", method = RequestMethod.GET)
 	public void storeDIDInfo(HttpServletRequest request, HttpServletResponse response)
@@ -786,24 +891,24 @@ public class StoreAPIController {
 	 * 주문 알림 된 내용 List를 보내준다(DID 목록 내려주기 . XML 형식)
 	 */
 	@RequestMapping(value = "/cookAlarmListRead", method = RequestMethod.GET)
-    public void cookAlramListRead(HttpServletRequest request, 
-    		HttpServletResponse response) throws ServletException, IOException {
-    	
+	public void cookAlramListRead(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
 		String storeId = (String) request.getParameter("storeId");
 		String deviceId = (String) request.getParameter("deviceId");
-		
+
 		Document document = DocumentHelper.createDocument();
 		document = storeCookService.getCookAlramListByStoreIdDeviceId(Util.parseInt(storeId), deviceId, document);
-		
-        response.setHeader("Cache-Control", "no-store");              // HTTP 1.1
-        response.setHeader("Pragma", "no-cache, must-revalidate");    // HTTP 1.0
-        response.setContentType("text/xml;charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
 
-        PrintWriter pw = response.getWriter();
-        document.write(pw);
-    }
-	
+		response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
+		response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
+		response.setContentType("text/xml;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+
+		PrintWriter pw = response.getWriter();
+		document.write(pw);
+	}
+
 	/**
 	 * 주문 알림 된 내용 List를 보내준다(DID 목록 내려주기 . XML 형식)
 	 */
@@ -827,9 +932,9 @@ public class StoreAPIController {
 		document.write(pw);
 	}
 
-	   /**
-		 * DID 정상확인 내용 완료 보고
-		 */
+	/**
+	 * DID 정상확인 내용 완료 보고
+	 */
 	@RequestMapping(value = "/cookdispcom", method = RequestMethod.GET)
 	public void cookdispcom(HttpServletRequest request, HttpServletResponse response, HttpSession session)
 			throws ServletException, IOException {
@@ -877,12 +982,11 @@ public class StoreAPIController {
 		out.close();
 	}
 
-	  // ------------------------------ 취소 로직 추가 ------------------------------
-    
-    
-		/**
-		 * 주문 한 메뉴를 취소 하기위해서 승인번호가 맞는지 체크 하는 로직
-		 */
+	// ------------------------------ 취소 로직 추가 ------------------------------
+
+	/**
+	 * 주문 한 메뉴를 취소 하기위해서 승인번호가 맞는지 체크 하는 로직
+	 */
 	@RequestMapping(value = "/cancelVerifiCheck", method = RequestMethod.GET)
 	public void cancelVerifiCheck(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -953,34 +1057,32 @@ public class StoreAPIController {
 		out.close();
 	}
 
+	// ------------------------------ 키오스크 마감 정산 START
+	// ------------------------------
 
-	// ------------------------------ 키오스크 마감 정산 START ------------------------------
-	
 	@RequestMapping(value = "/operEnd", method = { RequestMethod.GET, RequestMethod.POST })
-    public void operEnd(HttpServletRequest request, 
-    		HttpServletResponse response) throws ServletException, IOException {
-    	
-		String storeId = (String) request.getParameter("storeId");
-		
-		boolean success = calculateService.operEnd(storeId, null);
-		
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-        
-        response.setHeader("Cache-Control", "no-store");              // HTTP 1.1
-        response.setHeader("Pragma", "no-cache, must-revalidate");    // HTTP 1.0
-        response.setContentType("text/plain;charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
+	public void operEnd(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        out.print(success ? "Y" : "N");
-        out.close();
-    }
-	// ------------------------------ 키오스크 마감 정산 END ------------------------------ 
-	
-	
+		String storeId = (String) request.getParameter("storeId");
+
+		boolean success = calculateService.operEnd(storeId, null);
+
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
+
+		response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
+		response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
+		response.setContentType("text/plain;charset=UTF-8");
+		response.setCharacterEncoding("UTF-8");
+
+		out.print(success ? "Y" : "N");
+		out.close();
+	}
+	// ------------------------------ 키오스크 마감 정산 END ------------------------------
+
 	/**
-	 * 주문 번호 중앙 관리를 위한 키오스크용 API 
+	 * 주문 번호 중앙 관리를 위한 키오스크용 API
 	 */
-	@RequestMapping(value = {"/ordernum"}, method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = { "/ordernum" }, method = { RequestMethod.GET, RequestMethod.POST })
 	public @ResponseBody Map<String, Object> ordernum(HttpServletRequest request, Locale locale, HttpSession session)
 			throws ServletException, IOException {
 		Map<String, Object> info = new HashMap<String, Object>();
@@ -1021,9 +1123,9 @@ public class StoreAPIController {
 			}
 		}
 	}
-	
+
 	/**
-	 * 리필 가능 체크 키오스크용 API 
+	 * 리필 가능 체크 키오스크용 API
 	 */
 	@RequestMapping(value = "/refillCheck", method = { RequestMethod.GET, RequestMethod.POST })
 	public void refillCheck(HttpServletRequest request, HttpServletResponse response, Locale locale,
@@ -1043,7 +1145,7 @@ public class StoreAPIController {
 		RefillView refillView = storeOrderService.refillbyOrderListKiosk(Util.parseInt(storeId, 0), deviceId, viewTel,
 				rfMenuId);
 
-    	JSONObject menuObject = new JSONObject();//배열 내에 들어갈 json
+		JSONObject menuObject = new JSONObject();// 배열 내에 들어갈 json
 		menuObject.put("RFyn", refillView.getRFyn());
 		menuObject.put("paOrderId", refillView.getPaOrderId());
 		menuObject.put("RFCnt", refillView.getRFCnt());
@@ -1063,12 +1165,10 @@ public class StoreAPIController {
 		out.close();
 	}
 
-
 	// ------------------------------ 바나나 포스 ------------------------------ 시작
-	
-	
+
 	/**
-	 * 바나나 포스 연동 - 주문 결제 내역 상세 
+	 * 바나나 포스 연동 - 주문 결제 내역 상세
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/pospayment", method = { RequestMethod.GET, RequestMethod.POST })
@@ -1097,22 +1197,22 @@ public class StoreAPIController {
 			if (list.size() > 0) {
 				for (MenuJsonPrintItem item : list) {
 					Element catagoryElement = root.addElement("Catagory");
-					catagoryElement.addElement("storeName").addText(store.getBizName());  //결제 매장명
-					if(store.getPhone()!=null) { //결제 매장 번호
-						catagoryElement.addElement("storeTel").addText(store.getPhone()); 
-					}else {
-						catagoryElement.addElement("storeTe").addText("");  
+					catagoryElement.addElement("storeName").addText(store.getBizName()); // 결제 매장명
+					if (store.getPhone() != null) { // 결제 매장 번호
+						catagoryElement.addElement("storeTel").addText(store.getPhone());
+					} else {
+						catagoryElement.addElement("storeTe").addText("");
 					}
-					
-					catagoryElement.addElement("appNum").addText(item.getRecommand());  //결제내역의 고유번호 (orderID)
-					
+
+					catagoryElement.addElement("appNum").addText(item.getRecommand()); // 결제내역의 고유번호 (orderID)
+
 					// 결제정보(AD:선불/DE:후불/RF:리필) && 주문선택(S:매장/P:포장/D:배달/I:리필)
 					if ("RF".equals(item.getPayment()) && "I".equals(item.getOrderType())) {
-						catagoryElement.addElement("price").addText("0"); //결제금액(총금액)
+						catagoryElement.addElement("price").addText("0"); // 결제금액(총금액)
 					} else {
-						catagoryElement.addElement("price").addText(item.getGoodsAmt()); //결제금액(총금액)
+						catagoryElement.addElement("price").addText(item.getGoodsAmt()); // 결제금액(총금액)
 					}
-					
+
 					if ("D".equals(item.getOrderType())) {
 						if (item.getDeliPrice() != null)
 							catagoryElement.addElement("deliveryPrice").addText(item.getDeliPrice());
@@ -1121,17 +1221,17 @@ public class StoreAPIController {
 					} else {
 						catagoryElement.addElement("deliveryPrice").addText("0");
 					}
-					catagoryElement.addElement("date").addText(item.getOrderDate()); //결제시간
-					catagoryElement.addElement("ordNum").addText(item.getOrderNumber()); //주문번호(고객 주문번호)
+					catagoryElement.addElement("date").addText(item.getOrderDate()); // 결제시간
+					catagoryElement.addElement("ordNum").addText(item.getOrderNumber()); // 주문번호(고객 주문번호)
 					String info = "S";
 					if ("Y".equals(item.getMenuCancelYN())) {
 						info = "C";
 					}
-					catagoryElement.addElement("appInfo").addText(info); //결제 정보(S:결제완료 / C:결제취소)
-					if(item.getOrderTable()!= null){
-						catagoryElement.addElement("table").addText(item.getOrderTable()); //테이블 번호						
-					}else{
-						catagoryElement.addElement("table").addText("0000"); //테이블 번호	
+					catagoryElement.addElement("appInfo").addText(info); // 결제 정보(S:결제완료 / C:결제취소)
+					if (item.getOrderTable() != null) {
+						catagoryElement.addElement("table").addText(item.getOrderTable()); // 테이블 번호
+					} else {
+						catagoryElement.addElement("table").addText("0000"); // 테이블 번호
 					}
 					catagoryElement.addElement("device").addText(item.getDevice());
 					catagoryElement.addElement("type").addText(item.getOrderType());
@@ -1157,7 +1257,7 @@ public class StoreAPIController {
 								packing = "Y";
 							}
 							menuElement.addElement("packing").addText(packing);
-							// 1. ","으로 split 
+							// 1. ","으로 split
 							// 2. "_"으로 split
 							// 3. "\\("으로 split
 							// 4. 추가 선택에 대한 메뉴 명만
@@ -1192,7 +1292,7 @@ public class StoreAPIController {
 									}
 								}
 							}
-							// 1. ","으로 split 
+							// 1. ","으로 split
 							// 2. "_"으로 split
 							// 3. "\\|\\|"으로 split
 							// 4. "\\("으로 split
@@ -1240,7 +1340,7 @@ public class StoreAPIController {
 				}
 			} else {
 				root.addAttribute("response", "0000");
-				//조회된 값이 없습니다. 
+				// 조회된 값이 없습니다.
 				root.addAttribute("errcode", "0001");
 			}
 
@@ -1259,39 +1359,38 @@ public class StoreAPIController {
 
 		PrintWriter pw = response.getWriter();
 
-        logger.info("POS XML 생성 >> 종료  storeKey[{}]", storeKey);
+		logger.info("POS XML 생성 >> 종료  storeKey[{}]", storeKey);
 
 		document.write(pw);
 	}
 
-
 	/**
-	 * 바나나 포스 연동 - 메뉴 내려주기 
+	 * 바나나 포스 연동 - 메뉴 내려주기
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/posmenu", method = { RequestMethod.GET, RequestMethod.POST })
-	public void posmenu(HttpServletRequest request, Locale locale,
-			HttpServletResponse response) throws ServletException, IOException {
-		
-		String storeKey = Util.parseString((String)request.getParameter("store"));
+	public void posmenu(HttpServletRequest request, Locale locale, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		String storeKey = Util.parseString((String) request.getParameter("store"));
 		logger.info("storeKey >>> [{}]", storeKey);
-		
+
 		Document document = DocumentHelper.createDocument();
 		// 1. 파일 다운로드 될 XML을 생성한다.
-		Element root = document.addElement("PayCast")
-				.addAttribute("version", "1.0")
-				.addAttribute("generated", new Date().toString());
-		
+		Element root = document.addElement("PayCast").addAttribute("version", "1.0").addAttribute("generated",
+				new Date().toString());
+
 		Store res = storeService.getStoreByStoreKey(storeKey);
-    	if (res != null) {
+		if (res != null) {
 			List<MenuGroupItem> menuGroup = menuService.getAllMenusPos(res.getId());
-			if(menuGroup.size() > 0){
-				for(MenuGroupItem menuGroupOne : menuGroup){
+			if (menuGroup.size() > 0) {
+				for (MenuGroupItem menuGroupOne : menuGroup) {
 					Element catagoryElement = root.addElement("Catagory");
-					catagoryElement.addElement("seq").addText(String.valueOf(menuGroupOne.getSiblingSeq())); //그룹 순서
-					catagoryElement.addElement("code").addText(String.valueOf(menuGroupOne.getId())); //그룹 ID
-					catagoryElement.addElement("name").addText(menuGroupOne.getName()); //그룹 명
-					catagoryElement.addElement("status").addText("D".equals(menuGroupOne.getStatus())? menuGroupOne.getStatus(): "U"); //그룹 상태
+					catagoryElement.addElement("seq").addText(String.valueOf(menuGroupOne.getSiblingSeq())); // 그룹 순서
+					catagoryElement.addElement("code").addText(String.valueOf(menuGroupOne.getId())); // 그룹 ID
+					catagoryElement.addElement("name").addText(menuGroupOne.getName()); // 그룹 명
+					catagoryElement.addElement("status")
+							.addText("D".equals(menuGroupOne.getStatus()) ? menuGroupOne.getStatus() : "U"); // 그룹 상태
 
 					List<MenuDispItem> menuList = menuGroupOne.getDMenus();
 					if (menuList.size() > 0) {
@@ -1346,7 +1445,7 @@ public class StoreAPIController {
 									optionElement.addElement("status").addText(useMenuSt);
 
 									HashMap<String, String> menuUseMap = new HashMap<String, String>();
-									//선택 옵션인 필수 옵션이 사용하는지 사용하지 않는지 확인하고 위해서 사용
+									// 선택 옵션인 필수 옵션이 사용하는지 사용하지 않는지 확인하고 위해서 사용
 									List<String> menuStrList = Util.tokenizeValidStr(optManMenuOne.getMenus(), ",");
 									if (menuStrList.size() > 0) {
 										for (String menuStrOne : menuStrList) {
@@ -1376,24 +1475,28 @@ public class StoreAPIController {
 										opListElement.addElement("price").addText(String.format("%.0f", v.getPrice()));
 
 										String useStatus = (String) menuUseMap.get(String.valueOf(v.getId()));
-						    			if(!Util.isNotValid(useStatus)){
-						    				opListElement.addElement("status").addText(useStatus); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
-						    			}else{
-						    				opListElement.addElement("status").addText("Z"); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
-						    			}
-					                }
-									 
-					                LinkedHashMap<String, OptionalMenuListDelete> hm2 = optManMenuOne.getOptMenuDeleteChoose();
-					                Iterator<String> keyData2 = hm2.keySet().iterator();
-					                while (keyData2.hasNext()) {
-					                	String k = (String) keyData2.next();
-					                	OptionalMenuListDelete v = (OptionalMenuListDelete) hm2.get(k);
-					                	
-					                	Element opListElement = optionElement.addElement("OpList");
-					                	opListElement.addElement("code").addText(String.valueOf(v.getOptListId()));
-					                	opListElement.addElement("name").addText(v.getName());
-					                	opListElement.addElement("price").addText(String.format("%.0f", v.getPrice()));
-					                	opListElement.addElement("status").addText(menuOne.getStatus()); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
+										if (!Util.isNotValid(useStatus)) {
+											opListElement.addElement("status").addText(useStatus); // 메뉴 상태가 삭제일 경우 옵션도
+																									// 모두 삭제
+										} else {
+											opListElement.addElement("status").addText("Z"); // 메뉴 상태가 삭제일 경우 옵션도 모두 삭제
+										}
+									}
+
+									LinkedHashMap<String, OptionalMenuListDelete> hm2 = optManMenuOne
+											.getOptMenuDeleteChoose();
+									Iterator<String> keyData2 = hm2.keySet().iterator();
+									while (keyData2.hasNext()) {
+										String k = (String) keyData2.next();
+										OptionalMenuListDelete v = (OptionalMenuListDelete) hm2.get(k);
+
+										Element opListElement = optionElement.addElement("OpList");
+										opListElement.addElement("code").addText(String.valueOf(v.getOptListId()));
+										opListElement.addElement("name").addText(v.getName());
+										opListElement.addElement("price").addText(String.format("%.0f", v.getPrice()));
+										opListElement.addElement("status").addText(menuOne.getStatus()); // 메뉴 상태가 삭제일
+																											// 경우 옵션도 모두
+																											// 삭제
 									}
 								}
 							}
@@ -1413,7 +1516,7 @@ public class StoreAPIController {
 									optionElement.addElement("status").addText(useMenuSt);
 
 									HashMap<String, String> menuUseMap = new HashMap<String, String>();
-									//선택 옵션인 필수 옵션이 사용하는지 사용하지 않는지 확인하고 위해서 사용
+									// 선택 옵션인 필수 옵션이 사용하는지 사용하지 않는지 확인하고 위해서 사용
 									List<String> menuStrList = Util.tokenizeValidStr(optManMenuOne.getMenus(), ",");
 									if (menuStrList.size() > 0) {
 										for (String menuStrOne : menuStrList) {
@@ -1441,10 +1544,11 @@ public class StoreAPIController {
 										opListElement.addElement("price").addText(String.format("%.0f", v.getPrice()));
 
 										String useStatus = (String) menuUseMap.get(String.valueOf(v.getId()));
-										if(!Util.isNotValid(useStatus)){
-						    				opListElement.addElement("status").addText(useStatus); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
-						    			}else{
-						    				opListElement.addElement("status").addText("Z"); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
+										if (!Util.isNotValid(useStatus)) {
+											opListElement.addElement("status").addText(useStatus); // 메뉴 상태가 삭제일 경우 옵션도
+																									// 모두 삭제
+										} else {
+											opListElement.addElement("status").addText("Z"); // 메뉴 상태가 삭제일 경우 옵션도 모두 삭제
 										}
 									}
 									LinkedHashMap<String, OptionalMenuListDelete> hm2 = optManMenuOne
@@ -1458,7 +1562,9 @@ public class StoreAPIController {
 										opListElement.addElement("code").addText(String.valueOf(v.getOptListId()));
 										opListElement.addElement("name").addText(v.getName());
 										opListElement.addElement("price").addText(String.format("%.0f", v.getPrice()));
-										opListElement.addElement("status").addText(menuOne.getStatus()); //메뉴 상태가 삭제일 경우 옵션도 모두 삭제
+										opListElement.addElement("status").addText(menuOne.getStatus()); // 메뉴 상태가 삭제일
+																											// 경우 옵션도 모두
+																											// 삭제
 									}
 								}
 							}
@@ -1486,6 +1592,6 @@ public class StoreAPIController {
 		document.write(pw);
 	}
 
-	// ------------------------------ 바나나 포스 종료  ------------------------------ 
+	// ------------------------------ 바나나 포스 종료 ------------------------------
 
 }

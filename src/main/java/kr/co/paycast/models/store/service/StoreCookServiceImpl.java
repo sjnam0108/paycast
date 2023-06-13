@@ -388,6 +388,7 @@ public class StoreCookServiceImpl implements StoreCookService {
 			// 1. orderIDList로 넘어온 id 값을 가지고 StoreOrderList 테이블의 알림(orderMenuNotice)을 Y로 변경
 			StoreOrder storeOrderOne = storeOrderDao.getOrderOne(Util.parseInt(storeOrderId));
 			
+			logger.info("orderIDList >> " + orderIDList);
 			logger.info("alarmUpdate >>> storeOrderOne.getOrderNumber() [{}]", storeOrderOne.getOrderNumber());
 			logger.info("alarmUpdate >>> storeOrderOne.getOrderSeq() [{}]", storeOrderOne.getOrderSeq());
 			
@@ -396,23 +397,39 @@ public class StoreCookServiceImpl implements StoreCookService {
 			List<StoreOrderList> resList = storeOrderDao.getOrderList(storeOrderOne.getOrderNumber());
 			String allMenu = "";	// 알림톡 사용 - 주문메뉴
 			String finMenu = "";		// 알림톡 사용 - 완료메뉴
+			//TODO:  y 
+			logger.info(complteYn);
 			for(StoreOrderList storeOrderListOne : resList){
 				boolean noticeChk = true;
 				String listId = String.valueOf(storeOrderListOne.getId());
-
+				
+				if("Y".equals(storeOrderListOne.getOrderMenuNotice())) {
+					continue;
+				}
+				
+				if(complteYn.equals("Y")) {
+					logger.info(storeOrderListOne.getOrderMenuNotice());
+					storeOrderListOne.setOrderMenuNotice("Y");
+					storeOrderListOne.setWhoLastUpdateDate(new Date());
+					continue;
+				}
+				
 				// 기존에 한번 newalarm으로 울렸을 경우 Y로 변경 하여 완료 로 만들어준다.
 				if("O".equals(storeOrderListOne.getOrderMenuNotice())){
-					storeOrderListOne.setOrderMenuNotice("Y");
+//					storeOrderListOne.setOrderMenuNotice("Y");
+					storeOrderListOne.setWhoLastUpdateDate(new Date());
 					noticeChk = false;
 				}
 				
 				// 화면에서 선택한 메뉴와 DB에서 조회된 메뉴 ID가 같을 경우 OrderMenuNotice(알림)을 Y로 변경
 				// 2019.04.23 기존의 O로 Noti 한내용을 Y로 변경했을 경우 해당 내용은 넘어간다. 
+				// 2023.6.8 주문 완료처리된 메뉴는 다시 O으로 되돌리지 않는다.
 				if(noticeChk){
 					for(Object stbObj : orderIDList) {
 						String stbObjSt = (String) stbObj;
 						if( stbObjSt.equals(listId) ){
 							storeOrderListOne.setOrderMenuNotice("O");
+							storeOrderListOne.setWhoLastUpdateDate(new Date());
 						}
 					}
 				}
@@ -448,7 +465,7 @@ public class StoreCookServiceImpl implements StoreCookService {
     			logger.info("alarmUpdate>>  stbGroupStbs.size()>>> [{}]", deviceList.size());
     			
         		for (Device device : deviceList) {
-        			if (device.getDeviceType().equals("N")) {	// 알리미일 때
+        			if (device.getDeviceType().equals("N")) {	// 알s리미일 때
 						StoreCookAlarm storeCookAlarm = new StoreCookAlarm(Util.parseInt(storeId), Util.parseInt(storeOrderId), storeOrderOne.getOrderNumber(), 
 								device.getId(), device.getUkid(), session);
 						
@@ -500,6 +517,9 @@ public class StoreCookServiceImpl implements StoreCookService {
 				orderCook.touchWho(session);
 				
 				storeCookDao.saveOrUpdate(orderCook);
+				// STORE ORDER LIST Y 작업 추가
+				
+				
 				
 			}else{
 				// 1.알림톡 허용이 되어 있지 않을 경우   2. 전화 번호가 없을 경우   : 알림톡 전송 제외

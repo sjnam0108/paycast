@@ -116,20 +116,25 @@ public class StoreNumberServiceImpl implements StoreNumberService {
 			String oToday = mSimpleDateFormat.format ( today );
 			today = mSimpleDateFormat.parse( oToday );
 			
-			if(PayGlobalInfo.OrderNumMap.get(store.getId()) != null && PayGlobalInfo.OrderNumDt.get(store.getId()) != null){
+			if(PayGlobalInfo.OrderNumMap.get(store.getId()) != null && PayGlobalInfo.OrderNumDt.get(store.getId()) != null){ // 주문번호가 존재하는 경우
 				logger.info("PayGlobalInfo.OrderNumDt.get(store.getId()) [{}], today [{}]", PayGlobalInfo.OrderNumDt.get(store.getId()), today);
 				logger.info("today.compareTo(PayGlobalInfo.OrderNumDt.get(store.getId())) [{}]", today.compareTo(PayGlobalInfo.OrderNumDt.get(store.getId())));
-				if(today.compareTo(PayGlobalInfo.OrderNumDt.get(store.getId())) == 0){
+				if(today.compareTo(PayGlobalInfo.OrderNumDt.get(store.getId())) == 0 ){
 					int oldNum = (int)PayGlobalInfo.OrderNumMap.get(store.getId());
 					logger.info("oldNum [{}], today [{}]", oldNum, today);
 					PayGlobalInfo.OrderNumMap.put(store.getId(), oldNum+1);
 					number = oldNum;	
-				}else{
+				}else if (store.isOpenHour_24() == true){
+					int oldNum = (int)PayGlobalInfo.OrderNumMap.get(store.getId());
+					logger.info("oldNum [{}], today [{}]", oldNum, today);
+					PayGlobalInfo.OrderNumMap.put(store.getId(), oldNum+1);
+					number = oldNum;
+				}else {
 					// 날짜가 다를 경우 
 					PayGlobalInfo.OrderNumMap.put(store.getId(), number+1);
 					PayGlobalInfo.OrderNumDt.put(store.getId(), today);
 				}
-			}else{
+			}else{	// 주문번호가 없을때
 				PayGlobalInfo.OrderNumMap.put(store.getId(), number+1);
 				PayGlobalInfo.OrderNumDt.put(store.getId(), today);
 			}

@@ -383,6 +383,20 @@ public class StoreOrder {
 	public void setDeliveryPay(int deliveryPay) {
 		this.deliveryPay = deliveryPay;
 	}
+
+	@Override
+	public String toString() {
+		return "StoreOrder [id=" + id + ", storeId=" + storeId + ", orderNumber=" + orderNumber + ", goodsName="
+				+ goodsName + ", goodsTotal=" + goodsTotal + ", goodsAmt=" + goodsAmt + ", discountAmt=" + discountAmt
+				+ ", paymentAmt=" + paymentAmt + ", savingType=" + savingType + ", useCoupon=" + useCoupon
+				+ ", orderSeq=" + orderSeq + ", orderTid=" + orderTid + ", orderPayId=" + orderPayId + ", orderDevice="
+				+ orderDevice + ", orderPrint=" + orderPrint + ", orderTable=" + orderTable + ", orderCancelId="
+				+ orderCancelId + ", orderCancelStatus=" + orderCancelStatus + ", orderCancelPrint=" + orderCancelPrint
+				+ ", orderCancelPad=" + orderCancelPad + ", telNumber=" + telNumber + ", orderType=" + orderType
+				+ ", payment=" + payment + ", deliveryId=" + deliveryId + ", deliveryPay=" + deliveryPay
+				+ ", orderParent=" + orderParent + ", whoCreationDate=" + whoCreationDate + ", whoLastUpdateDate="
+				+ whoLastUpdateDate + ", whoCreatedBy=" + whoCreatedBy + ", whoLastUpdatedBy=" + whoLastUpdatedBy + "]";
+	}
 	
 
 }

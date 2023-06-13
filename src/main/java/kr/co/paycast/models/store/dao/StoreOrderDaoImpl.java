@@ -71,6 +71,32 @@ public class StoreOrderDaoImpl implements StoreOrderDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	
+	@Override
+	public StoreOrder getOrder(int storeId) {
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<StoreOrder> list = session.createCriteria(StoreOrder.class)
+		.add(Restrictions.eq("storeId", storeId))
+		.list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public StoreOrder getOrderNumberByStoreOrderNum(String orderNum) {
+		Session session = sessionFactory.getCurrentSession();
+		System.out.println("DAO orderNum"+ orderNum);
+		@SuppressWarnings("unchecked")
+		List<StoreOrder> list = session.createCriteria(StoreOrder.class)
+		.add(Restrictions.eq("orderNumber", orderNum))
+		.list();
+		System.out.println("DAO list" + list);
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	
 
 	@Override
 	public StoreOrder getOrderOne(int id) {
@@ -159,6 +185,19 @@ public class StoreOrderDaoImpl implements StoreOrderDao {
 		List<StoreOrderList> list = session.createCriteria(StoreOrderList.class)
 				.add(Restrictions.eq("orderNumber", order))
 				.list();
+		
+		return list;
+	}
+	
+	@Override
+	public List<StoreOrderList> getOrderListByStatus(String order,String status) {
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<StoreOrderList> list = session.createCriteria(StoreOrderList.class)
+		.add(Restrictions.eq("orderNumber", order))
+		.add(Restrictions.ne("orderMenuNotice", status))
+		.list();
 		
 		return list;
 	}
@@ -398,6 +437,11 @@ public class StoreOrderDaoImpl implements StoreOrderDao {
                 .add(Restrictions.isNotNull("telNumber"))
                 .add(Restrictions.ne("telNumber",""))
 				.list();
+	}
+	
+	@Override
+	public void testlog() {
+		System.out.println("Test");
 	}
 
 }

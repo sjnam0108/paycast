@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * PayCast Agent 컨트롤러
@@ -170,56 +173,137 @@ public class AgentController {
     /**
 	 * FCM 토큰 등록
 	 */
+//    @RequestMapping(value = "/token", method = {RequestMethod.GET, RequestMethod.POST})
+//    public void setFCMToken(HttpServletRequest request, HttpServletResponse response) 
+//    		throws ServletException, IOException {
+//        
+//        String ret = "F";
+//        
+//    	request.setCharacterEncoding("UTF-8");
+//    	
+//        String deviceId = Util.parseString(request.getParameter("deviceId"), "");
+//        String token = Util.parseString(request.getParameter("token"), "");
+//        
+//        if (!Util.isValid(deviceId) || !Util.isValid(token)) {
+//        	// 잘못된 인자 전달
+//        	// Pass: return "F"
+//        } else {
+//        	ret = "N";
+//        	
+//        	Device device = devService.getEffDeviceByUkid(deviceId);
+//        	if (device != null) {
+//        		try {
+//        			if (device.getFcmToken() == null || !device.getFcmToken().equals(token)) {
+//        				device.setFcmToken(URLDecoder.decode(token,"UTF-8"));
+//        				device.touchWho(null);
+//            			
+//        				devService.saveOrUpdate(device);
+//        			}
+//        		} catch (Exception e) {
+//                	logger.error("setFCMToken", e);
+//        		}
+//        		
+//        		ret = "Y";
+//        	}
+//
+//    		String syncUrl = Util.getFileProperty("url.syncToken");
+//    		if (Util.isValid(syncUrl)) {
+//    			String result = Util.readResponseFromUrl(syncUrl.replace("{0}", deviceId).replace("{1}", token));
+//    			if (Util.isValid(result) && result.equals("N")) {
+//		        	logger.info("setFCMToken - wrong deviceID: " + deviceId);
+//    			}
+//    		}
+//        }
+//        
+//        response.setHeader("Cache-Control", "no-store");              // HTTP 1.1
+//        response.setHeader("Pragma", "no-cache, must-revalidate");    // HTTP 1.0
+//        response.setContentType("text/plain;charset=UTF-8");
+//        response.setCharacterEncoding("UTF-8");
+//
+//        PrintWriter pw = response.getWriter();
+//
+//        pw.print(ret);
+//        pw.flush();
+//    }
+    
     @RequestMapping(value = "/token", method = {RequestMethod.GET, RequestMethod.POST})
-    public void setFCMToken(HttpServletRequest request, HttpServletResponse response) 
+    public @ResponseBody Map<String, Object> setFCMToken(HttpServletRequest request, HttpServletResponse response) 
     		throws ServletException, IOException {
-        
-        String ret = "F";
-        
+    	Map<String, Object> info = new HashMap<String, Object>();
+    	String ret = "F";
+    	String message = "OK";
+    	boolean success = true;
     	request.setCharacterEncoding("UTF-8");
     	
-        String deviceId = Util.parseString(request.getParameter("deviceId"), "");
-        String token = Util.parseString(request.getParameter("token"), "");
-        
-        if (!Util.isValid(deviceId) || !Util.isValid(token)) {
-        	// 잘못된 인자 전달
-        	// Pass: return "F"
-        } else {
-        	ret = "N";
-        	
-        	Device device = devService.getEffDeviceByUkid(deviceId);
-        	if (device != null) {
-        		try {
-        			if (device.getFcmToken() == null || !device.getFcmToken().equals(token)) {
-        				device.setFcmToken(URLDecoder.decode(token,"UTF-8"));
-        				device.touchWho(null);
-            			
-        				devService.saveOrUpdate(device);
-        			}
-        		} catch (Exception e) {
-                	logger.error("setFCMToken", e);
-        		}
-        		
-        		ret = "Y";
-        	}
+    	String deviceId = Util.parseString(request.getParameter("deviceId"), "");
+    	String token = Util.parseString(request.getParameter("token"), "");
+    	
+    	if (!Util.isValid(deviceId) || !Util.isValid(token)) {
+    		// 잘못된 인자 전달
+    		// Pass: return "F"
+    		message = "잘못된 정보입니다 디바이스 ID들 확인하세요";
+    		success = false;
+    		info.put("data", ret);
+    		info.put("message", message);
+    		info.put("success", success);
+    		
+    		return info;
+    		
+    	} else {
+    		ret = "N";
+    		
+    		Device device = devService.getEffDeviceByUkid(deviceId);
+    		
 
+    		
+    		if (device != null) {
+    			try {
+    				if (device.getFcmToken() == null || !device.getFcmToken().equals(token)) {
+    					device.setFcmToken(URLDecoder.decode(token,"UTF-8"));
+    					device.touchWho(null);
+    					
+    					devService.saveOrUpdate(device);
+    				}
+    			} catch (Exception e) {
+    				logger.error("setFCMToken", e);
+    			}
+    			
+    			ret = "Y";
+    			
+    			info.put("data", ret);
+        		info.put("message", message);
+        		info.put("success", success);
+        		
+        		return info;
+    			
+    		}
+    		
     		String syncUrl = Util.getFileProperty("url.syncToken");
     		if (Util.isValid(syncUrl)) {
     			String result = Util.readResponseFromUrl(syncUrl.replace("{0}", deviceId).replace("{1}", token));
     			if (Util.isValid(result) && result.equals("N")) {
-		        	logger.info("setFCMToken - wrong deviceID: " + deviceId);
+    				logger.info("setFCMToken - wrong deviceID: " + deviceId);
+    				message = "FCM토큰 저장, 인증되지 않은 디바이스" + deviceId;
+    				success = false;
+    				info.put("data", ret);
+    	    		info.put("message", message);
+    	    		info.put("success", success);
+    	    		
+    	    		return info;
+    				
     			}
     		}
-        }
-        
-        response.setHeader("Cache-Control", "no-store");              // HTTP 1.1
-        response.setHeader("Pragma", "no-cache, must-revalidate");    // HTTP 1.0
-        response.setContentType("text/plain;charset=UTF-8");
-        response.setCharacterEncoding("UTF-8");
-
-        PrintWriter pw = response.getWriter();
-
-        pw.print(ret);
-        pw.flush();
+    		
+    		message = "유효기간이 만료된 디바이스입니다.";
+    		success = false;
+    		info.put("data", ret);
+    		info.put("message", message);
+    		info.put("success", success);
+    		
+    		return info;
+    		
+    	}
+    	
+//    	return info;
     }
 }

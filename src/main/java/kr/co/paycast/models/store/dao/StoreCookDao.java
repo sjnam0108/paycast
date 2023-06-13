@@ -12,8 +12,10 @@ public interface StoreCookDao {
 	
 	public StoreOrderCook getStoreCookbyStoreOrderId(int storeOrderId);
 	
-	// StoreOrderCook에 대기상태의 List 목록을 가져온다. 
 	public List<StoreOrderCook> getStoreCookStayList(int storeIdInt, String orderMenuComplete);
+	
+	// StoreOrderCook에 대기상태의 List 목록을 가져온다. 
+	public List<StoreOrderCook> getStoreCookStayList(int storeIdInt, String orderMenuComplete, boolean today);
 
 	// 결제된 내역을 저장 
 	public void saveOrUpdate(StoreOrderCook storeOrderCook);
@@ -32,5 +34,7 @@ public interface StoreCookDao {
 
 	// StoreCookAlarm 1건 가져오기
 	public StoreCookAlarm getDplyStoreCookAlarm(int cookAlarmId);
+	
+	public List<StoreOrderCook> getStoreOrderCookListByCreated (String createdBy, String orderMenuComplete);
 
 }

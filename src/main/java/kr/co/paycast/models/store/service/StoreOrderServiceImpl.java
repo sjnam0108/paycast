@@ -170,6 +170,11 @@ public class StoreOrderServiceImpl implements StoreOrderService {
 	}
 	
 	@Override
+	public StoreOrder getOrder(int storeId) {
+		return storeOrderDao.getOrder(storeId);
+	}
+	
+	@Override
 	public StoreOrder getOrderbyOrderNum(String sp_order_no) {
 		return storeOrderDao.getOrderbyOrderNum(sp_order_no);
 	}

@@ -699,12 +699,21 @@ public class HomeController {
     }
 	
 	/**
-	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳 
+	 * 매장 오픈 정보 및 키오스크 사용 가능 여부 정보 내려주는곳  
 	 */
 	@RequestMapping(value = "/info/storeState", method = RequestMethod.GET)
 	public String stbStoreState(HttpServletRequest request, HttpServletResponse response, 
 			HttpSession session) {
 		return "forward:/store/api/storeStateInfo";
+	}
+	
+	/**
+	 * 매장 오픈 정보 및 키오스크 사용 가능 여부 정보 내려주는곳  
+	 */
+	@RequestMapping(value = "/info/orderList", method = RequestMethod.GET)
+	public String orderListInfo(HttpServletRequest request, HttpServletResponse response, 
+			HttpSession session) {
+		return "forward:/store/api/orderListInfo";
 	}
 	
 	/**

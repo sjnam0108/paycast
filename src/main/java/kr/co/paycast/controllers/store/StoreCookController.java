@@ -186,6 +186,7 @@ public class StoreCookController {
     	String storeOrderId = (String)model.get("storeOrderId");
     	ArrayList<Object> orderIDList = (ArrayList<Object>) model.get("orderIDList");
     	
+    	
     	logger.info("/alarmUpdate >>> 대기목록 알림 시작 [{}] Y일 경우 완료", complteYn);
     	boolean success = false;
     	try {
