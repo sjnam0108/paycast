@@ -21,6 +21,8 @@ import org.springframework.web.servlet.view.document.AbstractExcelView;
 
 import kr.co.paycast.utils.Util;
 
+
+@SuppressWarnings("deprecation")
 public class ExcelDownloadView extends AbstractExcelView {
 	@Override
 	protected void buildExcelDocument(Map<String, Object> ModelMap,

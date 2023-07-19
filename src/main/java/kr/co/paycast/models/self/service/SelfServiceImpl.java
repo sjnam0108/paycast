@@ -154,10 +154,14 @@ public class SelfServiceImpl implements SelfService {
 		else if("KE".equals(page.trim())){
 			pageCommand = "KioskEnabled.bbmc";
 		}
+		else if("A".equals(page.trim())){
+			pageCommand = "BannerInfoChg.bbmc";
+		}
 		
 		// if cmd == StoreInfoChg.bbmc -> K: 키오스크, P: 프린터  (2019.07.23 N: 알리미  제외 - kdk)
 		// if cmd == MenuInfoChg.bbmc  -> K: 키오스크
 		// if cmd == KioskEnabled.bbmc -> K: 키오스크
+		// if cmd == BannerInfoChg.bbmc -> K: 키오스크
 		
 		List<Device> deviceList = devService.getDeviceListByStoreId(store.getId());
 		for(Device device : deviceList) {
@@ -166,7 +170,7 @@ public class SelfServiceImpl implements SelfService {
 				if (device.getDeviceType().equals("K") || device.getDeviceType().equals("P")) {
 					regRequired = true;
 				}
-			} else if (pageCommand.equals("MenuInfoChg.bbmc") || pageCommand.equals("KioskEnabled.bbmc")) {
+			} else if (pageCommand.equals("MenuInfoChg.bbmc") || pageCommand.equals("KioskEnabled.bbmc")|| pageCommand.equals("BannerInfoChg.bbmc")) {
 				if (device.getDeviceType().equals("K")) {
 					regRequired = true;
 				}

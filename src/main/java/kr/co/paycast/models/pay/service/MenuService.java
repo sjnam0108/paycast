@@ -35,6 +35,7 @@ public interface MenuService {
 	// for Menu specific
 	public void saveAndReorder(Menu menu, HttpSession httpSession);
 	public List<Menu> getMenuListByStoreIdGroupId(int storeId, Integer groupId);
+	public List<Menu> getMenuListByStoreIdGroupIdPublished(int storeId, Integer groupId,String published);
 	public void reorderMenu(int storeId, Integer groupId, HttpSession httpSession);
 	public void reorder(Menu menu, int index, HttpSession httpSession);
 	
@@ -51,6 +52,7 @@ public interface MenuService {
 	// for MenuGroup specific
 	public void saveAndReorder(MenuGroup menuGroup, HttpSession httpSession);
 	public List<MenuGroup> getMenuGroupListByStoreId(int storeId);
+	public List<MenuGroup> getMenuGroupListByStoreIdByPublished(int storeId, String published);
 	public void reorder(MenuGroup group, int index, HttpSession httpSession);
 	
 	

@@ -36,7 +36,7 @@
     </beans:bean>
 
 	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<beans:property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
 <!-- 			// test server -->
 <!-- 		<beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycastv1_4_01" /> -->
 <!-- 	    <beans:property name="username" value="paycastuser" /> -->
@@ -44,7 +44,7 @@
 <!-- 			// test server -->
 
 <!-- 			// dev 테스트 server -->
-<!--   		<beans:property name="url" value="jdbc:mysql://localhost:3306/paycast" /> -->
+<!--   		<beans:property name="url" value="jdbc:mysql://localhost:3306/paycast?zeroDateTimeBehavior=convertToNull" /> -->
 <!-- 	    <beans:property name="username" value="root" /> -->
 <!-- 	    <beans:property name="password" value="bbmc2757" /> -->
 	    <beans:property name="url" value="jdbc:mysql://121.254.176.84:3306/paycast_demotest_20210107" />
@@ -123,6 +123,7 @@
 				<beans:value>kr.co.paycast.models.pay.StoreUser</beans:value>
 				<beans:value>kr.co.paycast.models.pay.TokenActivity</beans:value>
 				<beans:value>kr.co.paycast.models.pay.UploadFile</beans:value>
+				<beans:value>kr.co.paycast.models.pay.Ad</beans:value>
 				
 				<beans:value>kr.co.paycast.models.pay.OptionalMenuList</beans:value>
 				<beans:value>kr.co.paycast.models.pay.MenuDelete</beans:value>
@@ -180,17 +181,17 @@
 		</beans:property>
 		<beans:property name="fallbackToSystemLocale" value="false" />
 	</beans:bean>
-	
-	
 	<!-- // demo server -->
 	<!-- <beans:value>D:/uploadtemp</beans:value> -->
 	<!-- // real server -->	
 	<!-- <beans:value>/data1/v2_files/paycastv1_4/uploadtemp</beans:value> -->
+	
 	<beans:bean id="uploadDirResource" class="org.springframework.core.io.FileSystemResource">
 		<beans:constructor-arg>
 			<beans:value>/data1/v2_files/paycastv1_4/uploadtemp</beans:value>
 		</beans:constructor-arg>
 	</beans:bean>
+	
 	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" >
 		<beans:property name="maxUploadSize" value="10737418240" />
 		<beans:property name="maxInMemorySize" value="1048576" />

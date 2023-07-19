@@ -166,7 +166,7 @@ public class MyStoreSettingController {
 
 		uploadModel.setStoreId(store == null ? -1 : store.getId());
 		uploadModel.setType("TITLE");
-		uploadModel.setAllowedExtensions("[\".jpg\", \".jpeg\", \".png\"]");
+		uploadModel.setAllowedExtensions("[\".jpg\", \".jpeg\", \".png\", \".mp4\"]");
 		
     	msgMgr.addViewMessages(model, locale,
     			new Message[] {
@@ -268,19 +268,22 @@ public class MyStoreSettingController {
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public @ResponseBody String update(@RequestBody Map<String, Object> model, Locale locale, 
     		HttpSession session) {
-
+//    	System.out.println(model);
     	Store target = storeService.getStore((int)model.get("id"));
+//    	System.out.println(target);
     	if (target != null) {
         	String kLogoType = Util.parseString((String)model.get("kLogoType"));
         	String kLogoImage = Util.parseString((String)model.get("kLogoImage"));
+        	String kAd = Util.parseString((String)model.get("kAd"));
         	String kLogoUniqueName = Util.parseString((String)model.get("kLogoUniqueName"));
+        	String vLogoUniqueName = Util.parseString((String)model.get("vLogoUniqueName"));
         	String kLogoText = Util.parseString((String)model.get("kLogoText"));
         	String kMatrix = Util.parseString((String)model.get("kMatrix"));
         	String mLogoType = Util.parseString((String)model.get("mLogoType"));
         	String mLogoImage = Util.parseString((String)model.get("mLogoImage"));
         	String mLogoUniqueName = Util.parseString((String)model.get("mLogoUniqueName"));
         	String mLogoText = Util.parseString((String)model.get("mLogoText"));
-        	
+//        	logger.info("ad"+kAd);
         	// 즉시취소 ON/OFF
         	boolean immediateTF = (boolean)model.get("immediateTF");
         	logger.info("immediateTF [{}]", immediateTF);
@@ -311,9 +314,10 @@ public class MyStoreSettingController {
         	
     		String tempRootDir = SolUtil.getPhysicalRoot("UpTemp");
     		String dstKioskDir = SolUtil.getPhysicalRoot("KioskTitle", target.getId());
+    		String dstKioskDirAd = SolUtil.getPhysicalRoot("Ad", target.getId());
     		String dstMobileDir = SolUtil.getPhysicalRoot("MobileTitle", target.getId());
     		
-    		UploadFile kLogoImageFile = null, mLogoImageFile = null;
+    		UploadFile kLogoImageFile = null, mLogoImageFile = null, kAdImageFile = null;
     		
         	try {
         		//
@@ -324,10 +328,15 @@ public class MyStoreSettingController {
         		//                    2) 임시 폴더에서 대상 폴더로 파일 이동
         		//
         		File kLogoFile = new File(tempRootDir + "/" + kLogoUniqueName);
+        		File kAdFile = new File(tempRootDir + "/" + vLogoUniqueName);
         		if (Util.isValid(kLogoUniqueName) && kLogoFile.exists()) {
         			long kLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstKioskDir, kLogoUniqueName);
+        			long vLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstKioskDirAd, vLogoUniqueName);
         			
         			kLogoImageFile = new UploadFile(target, kLogoUniqueName, kLogoImage, kLogoFileLen, session);
+        			if(Util.isValid(kLogoUniqueName) && kAdFile.exists()) {
+        				kAdImageFile = new UploadFile(target, vLogoUniqueName, kAd, vLogoFileLen, session);
+        			}
         		}
         		
         		File mLogoFile = new File(tempRootDir + "/" + mLogoUniqueName);

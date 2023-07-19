@@ -162,6 +162,9 @@ public class Store {
 	private Set<UploadFile> uploadFiles = new HashSet<UploadFile>(0);
 	
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+	private Set<Ad> ads = new HashSet<Ad>(0);
+	
+	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	private Set<Menu> menus = new HashSet<Menu>(0);
 	
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
@@ -565,6 +568,15 @@ public class Store {
 
 	public void setCouponPolicys(Set<CouponPolicy> couponPolicys) {
 		this.couponPolicys = couponPolicys;
+	}
+	
+	@JsonIgnore
+	public Set<Ad> getAd() {
+		return ads;
+	}
+
+	public void setAd(Set<Ad> ads) {
+		this.ads = ads;
 	}
 	
 }

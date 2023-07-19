@@ -136,4 +136,14 @@ public class UploadFile {
 	public void setWhoLastUpdateLogin(int whoLastUpdateLogin) {
 		this.whoLastUpdateLogin = whoLastUpdateLogin;
 	}
+
+	@Override
+	public String toString() {
+		return "UploadFile [id=" + id + ", filename=" + filename + ", orgFilename=" + orgFilename + ", fileLength="
+				+ fileLength + ", store=" + store + ", whoCreationDate=" + whoCreationDate + ", whoCreatedBy="
+				+ whoCreatedBy + ", whoLastUpdateLogin=" + whoLastUpdateLogin + "]";
+	}
+	
+	
+	
 }

@@ -909,7 +909,7 @@ public class StoreMenuController {
         	throw new ServerOperationForbiddenException("OperationError");
         }
 
-		if (!success) {
+		if (!success) {  
         	throw new ServerOperationForbiddenException("OperationError");
 		}
 		

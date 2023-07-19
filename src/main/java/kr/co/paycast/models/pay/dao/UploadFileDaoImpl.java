@@ -1,14 +1,19 @@
 package kr.co.paycast.models.pay.dao;
 
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.paycast.models.pay.Ad;
+import kr.co.paycast.models.pay.StoreUser;
 import kr.co.paycast.models.pay.UploadFile;
 
 @Transactional
@@ -33,6 +38,34 @@ public class UploadFileDaoImpl implements UploadFileDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<UploadFile> getList(int listSize) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		return session.createCriteria(UploadFile.class)
+				.setFirstResult(0)
+				.setMaxResults(listSize)
+				.addOrder(Order.desc("whoCreationDate"))
+				.add(Restrictions.like("filename", ".mp4", MatchMode.END)).list();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Ad> getList(int listSize, int storeId, String enabled) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		return session.createCriteria(Ad.class)
+				.setFirstResult(0)
+				.setMaxResults(5)
+				.addOrder(Order.desc("createDate"))
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", storeId))
+				.add(Restrictions.eq("enabled", enabled)).list();
+	}
 
 	@Override
 	public void saveOrUpdate(UploadFile uploadFile) {
@@ -40,6 +73,14 @@ public class UploadFileDaoImpl implements UploadFileDao {
 		Session session = sessionFactory.getCurrentSession();
 		
 		session.saveOrUpdate(uploadFile);
+	}
+	
+	@Override
+	public void saveOrUpdate(Ad ad) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		session.saveOrUpdate(ad);
 	}
 
 	@Override

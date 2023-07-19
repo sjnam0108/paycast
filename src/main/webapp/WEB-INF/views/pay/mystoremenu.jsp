@@ -1318,15 +1318,59 @@ function closeOptMenuAdd() {
 }
 
 
+// function validateTagInputValue(str){
+	
+// 	var menus = str.split(" ");
+	
+// 	if(menus.length > 1) {
+// 		var moneyInput = menus[menus.length - 1];
+		
+// 		if(!$.isNumeric(moneyInput)){
+// 			showToastNotification("error", "${tip_checkPrice}");
+// 			return false;
+// 		}
+		
+// 		 return true;
+// 	} else {
+// 		showToastNotification("error", "${tip_checkBlank}");
+// 		return false;
+// 	}
+// }
+
 function validateTagInputValue(str){
 	
 	var menus = str.split(" ");
-	
+	var row = $(this).closest("tr");
+	console.log(menus);
+	var names = $("#form-6 input[name='menus']").val();
+	console.log(names);
+
+
 	if(menus.length > 1) {
 		var moneyInput = menus[menus.length - 1];
-		
+		var menuType = menus[0];
+		console.log(menuType);
+		console.log(menus[0]);
+
+		if(names !=null){
+			var stnames = names.replace(/[0-9]/g,""); // 숫자제거
+			var onenames = stnames.split(",");
+			console.log(stnames);
+			console.log(onenames);
+			if(onenames.find(element => element == menuType + " ")){
+				showToastNotification("error", "${tip_checkMenu}");
+				return false
+			}
+		}
+			
+
 		if(!$.isNumeric(moneyInput)){
 			showToastNotification("error", "${tip_checkPrice}");
+			return false;
+		}
+
+		if(menuType == names) {
+			showToastNotification("error", "${tip_checkBlank}");
 			return false;
 		}
 		
@@ -1336,6 +1380,8 @@ function validateTagInputValue(str){
 		return false;
 	}
 }
+
+
 
 
 function addOptMenuEventActions(type) {

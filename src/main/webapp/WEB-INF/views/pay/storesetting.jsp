@@ -191,6 +191,12 @@ $(document).ready(function() {
 			${tab_mobileOrder}
 		</a>
 	</li>
+	<li class="nav-item">
+		<a class="nav-link" data-toggle="tab" href="#ad-order">
+			<i class="mr-1 fas fa-video"></i>
+			광고 설정
+		</a>
+	</li>
 </ul>
 
 <div class="tab-content">
@@ -267,7 +273,6 @@ $(document).ready(function() {
 						</div>
 					</div>
 				</div>				
-				
 			</div>
 			<hr class="m-0" />
 			<div class="card-body">
@@ -281,6 +286,33 @@ $(document).ready(function() {
 					<option value="3x4">3 x 4</option>
 					<option value="4x4">4 x 4</option>
 				</select>
+			</div>
+		</div>
+	</div>
+	<div class="tab-pane" id="ad-order">
+		<div class="card">
+			<div class="card-body">
+				<div class="pb-2 mb-2">
+					광고 업로드
+				</div>
+				<div class="row no-gutters row-bordered text-center">
+					<div class="d-flex col-md flex-column pt-3 pb-4">
+                  
+						<div class="form-group px-4 mt-3">
+							<div class="input-group">
+								<span class="input-group-prepend">
+									<button class="btn btn-secondary" type="button" onclick="uploadImage('V')">
+										<span class="fas fa-cloud-upload-alt"></span>
+									</button>
+								</span>
+								<input name="adFilename" type="text" class="form-control" readonly="readonly">
+								<span class="input-group-append">
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>				
+				
 			</div>
 		</div>
 	</div>
@@ -485,7 +517,7 @@ $(document).ready(function() {
 	height: 200px;
 }
 
-.k-upload-files {
+.k-upload-` {
 	height: 100px;
 	overflow-x: hidden;
 	overflow-y: hidden;
@@ -551,10 +583,14 @@ var uploadType = "";
 var kLogoType = "";
 var mLogoType = "";
 
+var vPreviewFile = "/ad/${storeRoot}/";
 var kPreviewFile = "/titles/${storeRoot}/";
 var mPreviewFile = "/m/titles/${storeRoot}/";
 
 var kFilename = "";
+var vFilename = "";
+var vFilenameList = [];
+var List = [];
 var mFilename = "";
 
 var objImgSel = null;
@@ -606,6 +642,7 @@ function selectRadioBtn(type, val) {
 	
 	var kImgFilename = $.trim($("#kiosk-order input[name='imgFilename']").val());
 	var kLogoText = $.trim($("#kiosk-order input[name='txtLogo']").val());
+	var kadFilename = $.trim($("#ad-order input[name='adFilename']").val());
 	var mImgFilename = $.trim($("#mobile-order input[name='imgFilename']").val());
 	var mLogoText = $.trim($("#mobile-order input[name='txtLogo']").val());
 	
@@ -725,7 +762,7 @@ function initSmartWizard() {
 	});
 
 	$("#wizard-form input[name='files']").kendoUpload({
-		multiple: false,
+		multiple: true,
 		async: {
 			saveUrl: "${uploadModel.saveUrl}",
 			autoUpload: false
@@ -751,7 +788,12 @@ function initSmartWizard() {
 		},
 		success: function(e) {
 			$("#wizard-form button[name='confirm-btn']").removeClass("disabled");
-			$("#wizard-form input[name='uploadImgFilename']").val(e.files[0].name);
+			for (var i = 0; i < e.files.length; i++) {
+				var iname = e.files[i].name
+				vFilenameList.push(iname);
+				$("#wizard-form input[name='uploadImgFilename']").val(vFilenameList);
+			}
+			
 			
 			$("#wizard-form div[name='smartWizard']").smartWizard("next");
 		},
@@ -773,6 +815,11 @@ function viewImg(type) {
 		var filename = $("#mobile-order input[name='imgFilename']").val();
 		if (filename) {
 			viewUnivImage(mPreviewFile);
+		}
+	}else if (type == "V") {
+		var filename = $("#ad-order input[name='adFilename']").val();
+		if (filename) {
+			viewUnivImage(vPreviewFile);
 		}
 	}
 }
@@ -796,6 +843,8 @@ function uploadImage(type) {
 		$("#wizard-form span[name='form-title']").html("${wizard_kioskTitle}");
 	} else if (type == "M") {
 		$("#wizard-form span[name='form-title']").html("${wizard_mobileTitle}");
+	} else if (type == "V") {
+		$("#wizard-form span[name='form-title']").html("광고파일 업로드");
 	}
 	
 	$('#wizard-modal .modal-dialog').draggable({ handle: '.modal-header' });
@@ -806,6 +855,7 @@ function uploadImage(type) {
 function confirmWizardForm() {
 
 	var uploadedFilename = $("#wizard-form input[name='uploadImgFilename']").val();
+
 	if (uploadedFilename) {
 		if ($("#wizard-form li[name='tab-0']").hasClass("active")) {
 			$("#wizard-form div[name='smartWizard']").smartWizard("next");
@@ -814,6 +864,7 @@ function confirmWizardForm() {
 		if ($("#wizard-form").valid()) {
 	    	var data = {
 	    		uploadedFilename: uploadedFilename,
+	    		uploadType: uploadType,
 	       	};
 	        
 			$.ajax({
@@ -833,6 +884,10 @@ function confirmWizardForm() {
         				$("#mobile-order input[name='imgFilename']").val(uploadedFilename);
         				mPreviewFile = "/uptemp/" + form;
     					mFilename = form;
+    				} else if (uploadType == "V") {
+        				$("#ad-order input[name='adFilename']").val(uploadedFilename);
+        				vPreviewFile = "/uptemp/" + form;
+        				vFilename = form;
     				}
     			},
     			error: ajaxSaveError
@@ -860,7 +915,9 @@ $(document).ready(function() {
     		id: storeId,
     		kLogoType: kLogoType,
     		kLogoImage: $.trim($("#kiosk-order input[name='imgFilename']").val()),
+    		kAd: $.trim($("#ad-order input[name='adFilename']").val()),
     		kLogoUniqueName: kFilename,
+    		vLogoUniqueName: $.trim(vFilename),
 			kLogoText: $.trim($("#kiosk-order input[name='txtLogo']").val()),
    			kMatrix: $("#kiosk-order select[name='kioskMenuMatrix']").val(),
     		mLogoType: mLogoType,
@@ -879,6 +936,7 @@ $(document).ready(function() {
 			success: function (form) {
 				showAlertModal("success", "${msg_updateComplete}");
 				kPreviewFile = "/titles/${storeRoot}/" + kFilename;
+				vPreviewFile = "/ad/${storeRoot}/" + vFilename;
 				mPreviewFile = "/m/titles/${storeRoot}/" + mFilename;
 			},
 			error: ajaxSaveError
@@ -897,8 +955,10 @@ $(document).ready(function() {
 				$("#kiosk-order input[name='imgFilename']").val(data.kioskLogoImage.orgFilename);
 				
 				kFilename = data.kioskLogoImage.filename;
+				vFilename = data.kioskLogoImage.filename;
 				if (data.kioskLogoImage.orgFilename) {
 					kPreviewFile = "/titles/${storeRoot}/" + kFilename;
+					vPreviewFile = "/ad/${storeRoot}/" + vFilename;
 				}
 			}
 			if (data.kioskLogoType) {

@@ -5,9 +5,13 @@
 <hibernate-configuration>
     <session-factory>
     	<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-    	<property name="connection.url">jdbc:mysql://121.254.176.35:3306/paycast?createDatabaseIfNotExist=true</property>
-     	<property name="connection.username">signcast</property>
-     	<property name="connection.password">signcastfnd</property>
+    	<property name="connection.url">jdbc:mysql://localhost:3306/paycast?createDatabaseIfNotExist=true</property>
+     	<property name="connection.username">root</property>
+     	<property name="connection.password">bbmc2757</property>
+     	<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+<!--     	<property name="connection.url">jdbc:mysql://121.254.176.35:3306/paycast?createDatabaseIfNotExist=true</property> -->
+<!--      	<property name="connection.username">signcast</property> -->
+<!--      	<property name="connection.password">signcastfnd</property> -->
 <!--  		<property name="connection.url">jdbc:mysql://121.254.176.84:3306/paycast_run_update_20191125_1?createDatabaseIfNotExist=true</property>
     	<property name="connection.username">paycastuser</property>
     	<property name="connection.password">paycastuser!@</property>
@@ -94,6 +98,10 @@
     	<mapping class="kr.co.paycast.models.pay.StoreUser"/>
     	<mapping class="kr.co.paycast.models.pay.TokenActivity"/>
     	<mapping class="kr.co.paycast.models.pay.UploadFile"/>
+    	<mapping class="kr.co.paycast.models.pay.Ad"/>
+    	<mapping class="kr.co.paycast.models.pay.CouponPolicy"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreCoupon"/>
+    	<mapping class="kr.co.paycast.models.pay.StorePolicy"/>
     	<!-- Solution ext                                                  end -->
     	<!-- 배달료 관련  class -->
     	<mapping class="kr.co.paycast.models.pay.StoreDeliveryPay"/>

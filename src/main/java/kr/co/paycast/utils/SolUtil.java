@@ -346,6 +346,8 @@ public class SolUtil {
             return Util.getValidRootDir(rootDirPath) + ftpDirName + "/contents";
 		} else if (ukid.equals("UpTemp")) {
             return Util.getValidRootDir(rootDirPath) + "uptemp";
+		} else if (ukid.equals("Ad")) {
+            return Util.getValidRootDir(rootDirPath) + "ad";
 		}
 
         return Util.getPhysicalRoot(ukid);

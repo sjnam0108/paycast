@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
+import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.AppUser;
+import kr.co.paycast.models.pay.StoreUser;
 import kr.co.paycast.models.pay.UploadFile;
 
 @Transactional
@@ -39,7 +41,10 @@ public interface PayService {
 	//
 	// Common
 	public UploadFile getUploadFile(Integer id);
+	public List<UploadFile> getUploadFilebySize(int listSize);
+	public List<Ad> getAdbySize(int listSize,int storeId, String enabled);
 	public void saveOrUpdate(UploadFile uploadFile);
+	public void saveOrUpdate(Ad ad);
 	public void deleteUploadFile(UploadFile uploadFile);
 	public void deleteUploadFiles(List<UploadFile> uploadFiles);
 	

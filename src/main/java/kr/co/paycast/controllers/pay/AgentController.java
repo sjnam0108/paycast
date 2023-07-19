@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -133,6 +134,8 @@ public class AgentController {
 				openType = store.getOpenType();
         	}
         }
+        
+//        Stream<String> stream = 
         
         stbEl.addAttribute("stbid", stbId);
         stbEl.addAttribute("stbname", stbName);

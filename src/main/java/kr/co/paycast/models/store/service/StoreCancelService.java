@@ -4,6 +4,8 @@ import kr.co.paycast.models.store.StoreOrderCancel;
 import kr.co.paycast.models.store.StoreOrderVerification;
 import kr.co.paycast.viewmodels.store.StoreCanCelView;
 
+import java.util.Map;
+
 import org.dom4j.Document;
 import org.json.simple.JSONArray;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +39,7 @@ public interface StoreCancelService {
 	public void cancelFailSave(StoreOrderCancel storeOrderCancel, int storeId, String verifiCode);
 
 	//키오스크에서 취소 요청시 승인 번화 확인
-	public Document checkVerifiCodebyStoreIdVerifiCodeDeviceID(int storeId, String deviceId, String cancelCode, Document document, String deviceGubun);
+	public Map<String, Object> checkVerifiCodebyStoreIdVerifiCodeDeviceID(int storeId, String deviceId, String cancelCode, Map<String, Object> map, String deviceGubun);
 
 	//키오스크에서 취소 완료시 해당 결제 내역 취소 처리
 	public boolean cancelSuccessbyStoreIdOrderIdDeviceID(JSONArray objectList);

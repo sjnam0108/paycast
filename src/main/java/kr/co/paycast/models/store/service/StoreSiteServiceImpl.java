@@ -129,6 +129,19 @@ public class StoreSiteServiceImpl implements StoreSiteService {
 				commandElement.addAttribute("rcCommandId", Integer.toString(deviceTask.getId()) );
 				commandElement.addAttribute("command", deviceTask.getCommand() );
 				commandElement.addAttribute("execTime", "");
+				if("StoreInfoChg.bbmc".equals(deviceTask.getCommand())) {
+					commandElement.addAttribute("rcCommandId", Integer.toString(deviceTask.getId()) );
+					commandElement.addAttribute("command", deviceTask.getCommand() );
+					commandElement.addAttribute("execTime", "");
+					Element sellerInfoElement = commandElement.addElement("sellerInfo");
+					
+					sellerInfoElement.addAttribute("addressInfo", store.getAddr2());
+					sellerInfoElement.addAttribute("storeTelNumber", store.getPhone());
+					sellerInfoElement.addAttribute("storeName", store.getBizName());
+					sellerInfoElement.addAttribute("businessNumber", store.getBizNum());
+					sellerInfoElement.addAttribute("ceoName", store.getBizRep());
+					
+				}
 				logger.info("-----------------------------------------------------------------------");
 				logger.info("deviceId >>> [{}] , rcCommandId[{}]", deviceId, deviceTask.getId());
 				logger.info("rcCommandId >>> [{}] , deviceTask.getCommand()[{}]", deviceTask.getId(), deviceTask.getCommand());

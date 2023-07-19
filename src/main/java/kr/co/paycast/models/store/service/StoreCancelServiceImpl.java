@@ -3,11 +3,14 @@ package kr.co.paycast.models.store.service;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -40,6 +43,8 @@ import kr.co.paycast.models.store.dao.StoreOrderDao;
 import kr.co.paycast.utils.FireMessage;
 import kr.co.paycast.utils.PayUtil;
 import kr.co.paycast.utils.Util;
+import kr.co.paycast.viewmodels.store.CookingData;
+import kr.co.paycast.viewmodels.store.MenuListJsonPrintItem;
 import kr.co.paycast.viewmodels.store.StoreCanCelView;
 
 @Transactional
@@ -323,20 +328,16 @@ public class StoreCancelServiceImpl implements StoreCancelService {
 	}
 	
 	@Override
-	public Document checkVerifiCodebyStoreIdVerifiCodeDeviceID(int storeId, String deviceId, String verifiCode, Document document, String deviceGubun) {
-		
-		Element root = document.addElement("PayCast")
-				.addAttribute("version", "1.0")
-				.addAttribute("generated", new Date().toString());
+	public Map<String, Object> checkVerifiCodebyStoreIdVerifiCodeDeviceID(int storeId, String deviceId, String verifiCode,Map<String, Object> map, String deviceGubun) {
+		Map<String, Object> info = new HashMap<String, Object>();
 		
 		Date now = new Date();
 		StoreOrderVerification storeOrderVerification = storeCancelDao.checkVerifiCode(storeId, verifiCode);
 		
-		Element storeElement = root.addElement("verification");
 		if(storeOrderVerification != null && !"N".equals(storeOrderVerification.getStatus())){
-//			logger.info("storeOrderVerification.getStatus() 사용가능 상태 >>> [{}]", storeOrderVerification.getStatus());
-//			logger.info("now.after(storeOrderVerification.getDestDate() >> [{}]", now.after(storeOrderVerification.getDestDate()));
-//			logger.info("now.before(storeOrderVerification.getCancelDate()) >>> [{}]", now.before(storeOrderVerification.getCancelDate()));
+			logger.info("storeOrderVerification.getStatus() 사용가능 상태 >>> [{}]", storeOrderVerification.getStatus());
+			logger.info("now.after(storeOrderVerification.getDestDate() >> [{}]", now.after(storeOrderVerification.getDestDate()));
+			logger.info("now.before(storeOrderVerification.getCancelDate()) >>> [{}]", now.before(storeOrderVerification.getCancelDate()));
 			
 			if(now.after(storeOrderVerification.getDestDate()) && now.before(storeOrderVerification.getCancelDate())){
 				
@@ -349,62 +350,80 @@ public class StoreCancelServiceImpl implements StoreCancelService {
 				if(deviceGubun.equals("M") ){
 					deviceGubun = "ME";
 				}
-//				logger.info("storeOrder.getOrderDevice() >>> [{}]", storeOrder.getOrderDevice());
-//				logger.info("deviceGubun >>> [{}]", deviceGubun);
+				logger.info("storeOrder.getOrderDevice() >>> [{}]", storeOrder.getOrderDevice());
+				logger.info("deviceGubun >>> [{}]", deviceGubun);
 				if(deviceGubun.equals(storeOrder.getOrderDevice())){
 					StoreOrderPay storeOrderPay = storePayService.getOrderPay(storeOrder.getOrderPayId());
 					
-//					logger.info("주문 번호 : [{}]", storeOrder.getOrderSeq());// 주문번호
-//					logger.info("storeOrder.getOrderPayId() : [{}]", storeOrder.getOrderPayId());// 주문번호
-//					logger.info("결제일자 : [{}]", storeOrderPay.getPayAuthDate());// 승인일자(결제일자)
-//					logger.info("승인번호 : [{}]", storeOrderPay.getPayAuthCode());// 승인번호
-//					logger.info("결제 금액 : [{}]", storeOrderPay.getPayAmt());// 결제 금액
+					logger.info("주문 번호 : [{}]", storeOrder.getOrderSeq());// 주문번호
+					logger.info("storeOrder.getOrderPayId() : [{}]", storeOrder.getOrderPayId());// 주문번호
+					logger.info("결제일자 : [{}]", storeOrderPay.getPayAuthDate());// 승인일자(결제일자)
+					logger.info("승인번호 : [{}]", storeOrderPay.getPayAuthCode());// 승인번호
+					logger.info("결제 금액 : [{}]", storeOrderPay.getPayAmt());// 결제 금액
 					
-					storeElement.addAttribute("verificationYN", "Y");
-					storeElement.addAttribute("verifiMsg", "결제 내역 조회 성공");
+					info.put("success", true);
+					info.put("message", "결제 내역 조회 성공");
 					
-					Element menuElement = storeElement.addElement("payInfo");
-					menuElement.addAttribute("tid", storeOrderPay.getOrderTid());
-					menuElement.addAttribute("mid", storeOrderPay.getPayMid());
-					menuElement.addAttribute("totalindex", storeOrderPay.getPayAmt());
-					menuElement.addAttribute("goodsAmt", storeOrderPay.getPayAmt());	
-					menuElement.addAttribute("orderNumber", storeOrderPay.getOrderNumber());	
-					menuElement.addAttribute("orderDate", storeOrderPay.getPayAuthDate());	
-					menuElement.addAttribute("AuthCode", storeOrderPay.getPayAuthCode());	
-					menuElement.addAttribute("fnCd", storeOrderPay.getPayFnCd());	
-					menuElement.addAttribute("fnName", storeOrderPay.getPayFnName());	
-					menuElement.addAttribute("fnCd1", storeOrderPay.getPayFnCd1());	
-					menuElement.addAttribute("fnName1", storeOrderPay.getPayFnName1());
-					menuElement.addAttribute("storeOrderId", String.valueOf(storeOrder.getId()));
-					
+					Map<String, Object> menuData = new HashMap<String, Object>();
+
+					menuData.put("tid", storeOrderPay.getOrderTid());
+					menuData.put("mid", storeOrderPay.getPayMid());
+					menuData.put("totalIndex", storeOrderPay.getPayAmt());
+					menuData.put("goodsAmt", storeOrderPay.getPayAmt());	
+					menuData.put("orderNumber", storeOrderPay.getOrderNumber());	
+					menuData.put("orderDate", storeOrderPay.getPayAuthDate());	
+					menuData.put("AuthCode", storeOrderPay.getPayAuthCode());	
+					menuData.put("fnCd", storeOrderPay.getPayFnCd());	
+					menuData.put("fnName", storeOrderPay.getPayFnName());	
+					menuData.put("fnCd1", storeOrderPay.getPayFnCd1());	
+					menuData.put("fnName1", storeOrderPay.getPayFnName1());
+					menuData.put("storeOrderId", String.valueOf(storeOrder.getId()));
+					info.put("data", menuData);
+					ArrayList<MenuListJsonPrintItem> orderList = new ArrayList<MenuListJsonPrintItem>();
 					// DB에 저장되어 있는 메뉴 List
 					List<StoreOrderList> resList = storeOrderDao.getOrderList(storeOrder.getOrderNumber());
+					Map<String, Object> orderData = new HashMap<String, Object>();
 					for(StoreOrderList storeOrderListOne : resList){
-						Element orderMenuElement = menuElement.addElement("orderMenu");
-						orderMenuElement.addAttribute("productID", String.valueOf(storeOrderListOne.getOrderMenuId()));
-						orderMenuElement.addAttribute("productName", storeOrderListOne.getOrderMenuName());
-						orderMenuElement.addAttribute("orderCount", String.valueOf(storeOrderListOne.getOrderMenuAmount()));
-						orderMenuElement.addAttribute("orderPrice", String.valueOf(storeOrderListOne.getOrderMenuAmt()));
-						orderMenuElement.addAttribute("orderMenuPacking", String.valueOf(storeOrderListOne.getOrderMenuPacking()));
+						
+						MenuListJsonPrintItem item = new MenuListJsonPrintItem();
+						
+						item.setProductID(String.valueOf(storeOrderListOne.getOrderMenuId()));
+						item.setProductName (storeOrderListOne.getOrderMenuName());
+						item.setOrderCount(String.valueOf(storeOrderListOne.getOrderMenuAmount()));
+						item.setOrderPrice(String.valueOf(storeOrderListOne.getOrderMenuAmt()));
+						item.setOrderMenuPacking(String.valueOf(storeOrderListOne.getOrderMenuPacking()));
+						
+						orderList.add(item);
+						
+//						orderData.put("productID", String.valueOf(storeOrderListOne.getOrderMenuId()));
+//						orderData.put("productName", storeOrderListOne.getOrderMenuName());
+//						orderData.put("orderCount", String.valueOf(storeOrderListOne.getOrderMenuAmount()));
+//						orderData.put("orderPrice", String.valueOf(storeOrderListOne.getOrderMenuAmt()));
+//						orderData.put("orderMenuPacking", String.valueOf(storeOrderListOne.getOrderMenuPacking()));
+						
+						
 						//필수 선택
 						if(!Util.isNotValid(storeOrderListOne.getOrderSelectEss())){
 							String[] menu1 = storeOrderListOne.getOrderSelectEss().split(",");
+							Map<String, Object> optionData = new HashMap<String, Object>();
+							Map<String, Object> option = new HashMap<String, Object>();
 							for(int t=0; t < menu1.length; t++){
 								if(!Util.isNotValid(menu1[t])){
 									String[] menu2 = menu1[t].split("_");
-									
-									Element optMenuElement = orderMenuElement.addElement("optionMenu");
-									optMenuElement.addAttribute("id", menu2[0]);
-									optMenuElement.addAttribute("gubun", "0"); // 0 : 필수 선택 메뉴 / 1 : 추가 선택 메뉴
+									optionData.put("id", menu2[0]);
+									optionData.put("gubun", "0"); // 0 : 필수 선택 메뉴 / 1 : 추가 선택 메뉴
+									orderData.put("optionMenu", optionData);
 									if(menu2.length > 0){
 										String[] menu3 = menu2[1].split("\\(");
 										if(menu3.length > 0){
 											String viewName = PayUtil.separationistName(menu3);
 											String viewPrice = PayUtil.separationistPrice(menu3);
+
+//											Element optionElement = optMenuElement.addElement("option");
 											
-											Element optionElement = optMenuElement.addElement("option");
-											optionElement.addAttribute("name", viewName);
-											optionElement.addAttribute("price", viewPrice);
+											option.put("name", viewName);
+											option.put("price", viewPrice);
+											optionData.put("option", option);
 										}
 									}
 								}
@@ -412,13 +431,16 @@ public class StoreCancelServiceImpl implements StoreCancelService {
 						}
 						//추가 선택
 						if(!Util.isNotValid(storeOrderListOne.getOrderSelectAdd())){
-							Element optMenuElement = orderMenuElement.addElement("optionMenu");
+							Map<String, Object> optionData = new HashMap<String, Object>();
+//							Element optMenuElement = orderMenuElement.addElement("optionMenu");
 							String[] menu1 = storeOrderListOne.getOrderSelectAdd().split(",");
+							Map<String, Object> option = new HashMap<String, Object>();
 							for(int t=0; t < menu1.length; t++){
 								if(!Util.isNotValid(menu1[t])){
 									String[] menu2 = menu1[t].split("_");
-									optMenuElement.addAttribute("id", menu2[0]);
-									optMenuElement.addAttribute("gubun", "1"); // 0 : 필수 선택 메뉴 / 1 : 추가 선택 메뉴
+									optionData.put("id", menu2[0]);
+									optionData.put("gubun", "1"); // 0 : 필수 선택 메뉴 / 1 : 추가 선택 메뉴
+									orderData.put("optionMenu", optionData);
 									if(menu2.length > 0){
 										String[] menu3 = menu2[1].split("\\|\\|");
 										if(menu3.length > 0){
@@ -427,9 +449,12 @@ public class StoreCancelServiceImpl implements StoreCancelService {
 												String viewName = PayUtil.separationistName(menu4);
 												String viewPrice = PayUtil.separationistPrice(menu4);
 												
-												Element optionElement = optMenuElement.addElement("option");
-												optionElement.addAttribute("name", viewName);
-												optionElement.addAttribute("price", viewPrice);
+
+//												Element optionElement = optMenuElement.addElement("option");
+												
+												option.put("name", viewName);
+												option.put("price", viewPrice);
+												optionData.put("option", option);
 											}
 										}
 									}
@@ -437,14 +462,16 @@ public class StoreCancelServiceImpl implements StoreCancelService {
 							}
 						}
 					}
-					
+					menuData.put("orderMenu", orderList);
 					//주문의 상태 변경
 					storeOrder.setOrderCancelStatus("2"); // 고객이 취소 요청을 했을 경우 상태  : 2
 					storeOrderDao.saveOrUpdate(storeOrder);
 				}else{
 					logger.info("kiosk > verifiCode >> [{}] 해당내용은 모바일이아닌 다른기기에서 결제가 되었습니다. [{}]", verifiCode, "X");
-	    			storeElement.addAttribute("verificationYN", "X"); //
-	    			storeElement.addAttribute("verifiMsg", "매장관리자에게 문의하세요."); //주문 번호
+					info.put("data" , null);
+					info.put("success", false); //
+					info.put("message", "매장관리자에게 문의하세요."); //주문 번호
+					return info;
 				}
         	}else{
         		logger.info("kiosk > verifiCode >> [{}] 승인번호사용 가능 시간을 초과 하였습니다.  ", verifiCode);
@@ -454,19 +481,22 @@ public class StoreCancelServiceImpl implements StoreCancelService {
     			storeOrderVerification1.setCancelStoreAuth("");
     			storeOrderVerification1.setStatus("N"); //해당 코드 사용 불 가능으로 만들기
     			storeCancelDao.saveOrUpdate(storeOrderVerification1);
-    			
-    			storeElement.addAttribute("verificationYN", "N"); //
-    			storeElement.addAttribute("verifiMsg", "매장관리자에게 문의하세요."); //주문 번호
+    			info.put("data" , null);
+    			info.put("success", false); //
+    			info.put("message", "매장관리자에게 문의하세요."); //주문 번호
+    			return info;
         	}
 		}else{
 			logger.info("kiosk > verifiCode >> [{}] 승인번호를 알수 없습니다. ", verifiCode);
-			storeElement.addAttribute("verificationYN", "F"); //
-			storeElement.addAttribute("verifiMsg", "매장관리자에게 문의하세요."); //승인번호를 알수 없습니다. 
+			info.put("data" , null);
+			info.put("success", false); //
+			info.put("message", "매장관리자에게 문의하세요."); //승인번호를 알수 없습니다. 
+			return info;
     	}
 		
 		logger.info("/cancelVerifiCheck >> 주문 한 메뉴를 취소 하기위해서 승인번호가 맞는지 체크");
 		
-		return document;
+		return info;
 	}
 	
 	@SuppressWarnings("unchecked")

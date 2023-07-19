@@ -17,5 +17,6 @@ public interface MenuGroupDao {
 	// for MenuGroup specific
 	public void saveAndReorder(MenuGroup menuGroup, HttpSession httpSession);
 	public List<MenuGroup> getListByStoreId(int storeId);
+	public List<MenuGroup> getListByStoreIdByPublished(int storeId, String published);
 	public void reorder(MenuGroup group, int index, HttpSession httpSession);
 }

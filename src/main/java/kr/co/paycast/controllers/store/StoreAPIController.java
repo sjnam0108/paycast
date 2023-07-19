@@ -1,17 +1,20 @@
 package kr.co.paycast.controllers.store;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,18 +28,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import kr.co.paycast.exceptions.ServerOperationForbiddenException;
 import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.calc.service.CalculateService;
+import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.ContentFile;
 import kr.co.paycast.models.pay.Device;
-import kr.co.paycast.models.pay.DeviceTask;
+import kr.co.paycast.models.pay.Menu;
+import kr.co.paycast.models.pay.MenuGroup;
+import kr.co.paycast.models.pay.OptionalMenu;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.OptionalMenuListDelete;
 import kr.co.paycast.models.pay.Store;
+import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.service.ContentService;
 import kr.co.paycast.models.pay.service.DeviceService;
 import kr.co.paycast.models.pay.service.MenuService;
+import kr.co.paycast.models.pay.service.PayService;
 import kr.co.paycast.models.pay.service.StoreService;
 import kr.co.paycast.models.self.service.SelfService;
 import kr.co.paycast.models.store.StoreCookAlarm;
@@ -44,7 +51,6 @@ import kr.co.paycast.models.store.StoreCookTask;
 import kr.co.paycast.models.store.StoreOrder;
 import kr.co.paycast.models.store.StoreOrderCook;
 import kr.co.paycast.models.store.StoreOrderList;
-import kr.co.paycast.models.store.StoreOrderPay;
 import kr.co.paycast.models.store.dao.StoreCookDao;
 import kr.co.paycast.models.store.dao.StoreOrderDao;
 import kr.co.paycast.models.store.service.StoreCancelService;
@@ -52,12 +58,18 @@ import kr.co.paycast.models.store.service.StoreCookService;
 import kr.co.paycast.models.store.service.StoreNumberService;
 import kr.co.paycast.models.store.service.StoreOrderService;
 import kr.co.paycast.models.store.service.StoreSiteService;
+import kr.co.paycast.utils.MultipartFileSender;
 import kr.co.paycast.utils.PayUtil;
+import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
+import kr.co.paycast.viewmodels.pay.DownloadFiles;
 import kr.co.paycast.viewmodels.pay.MenuDispItem;
 import kr.co.paycast.viewmodels.pay.MenuGroupItem;
 import kr.co.paycast.viewmodels.pay.OptionalMenuItem;
-import kr.co.paycast.viewmodels.store.CookJsonList;
+import kr.co.paycast.viewmodels.self.CategoryObject;
+import kr.co.paycast.viewmodels.self.MenuObject;
+import kr.co.paycast.viewmodels.self.MenuOptionData;
+import kr.co.paycast.viewmodels.self.SubOption;
 import kr.co.paycast.viewmodels.store.CookingData;
 import kr.co.paycast.viewmodels.store.MenuJsonPrintItem;
 import kr.co.paycast.viewmodels.store.MenuListJsonPrintItem;
@@ -74,6 +86,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -127,6 +140,9 @@ public class StoreAPIController {
 
 	@Autowired
 	private StoreCookDao storeCookDao;
+	
+	@Autowired
+	private PayService payService;
 
 	/**
 	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
@@ -141,7 +157,7 @@ public class StoreAPIController {
 		Document document = DocumentHelper.createDocument();
 
 		document = storeSiteService.getMonListByStoreId(storeId, deviceId, document, session);
-
+		System.out.println("Sid" + storeId + "DID"+ deviceId + "XML "+ document);
 		response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
 		response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
 		response.setContentType("text/xml;charset=UTF-8");
@@ -165,6 +181,7 @@ public class StoreAPIController {
 		String storeId = (String) request.getParameter("storeId");
 		String deviceId = (String) request.getParameter("deviceId");
 		Map<String, Object> info2 = new HashMap<String, Object>();
+		Map<String, Object> info3 = new HashMap<String, Object>();
 		info2.put("openType", null);
 		info2.put("kioskEnable", null);
 		Store store = storeService.getStore(Util.parseInt(storeId));
@@ -199,10 +216,17 @@ public class StoreAPIController {
 
 			return info;
 		}
-
+		info3.put("addressInfo", store.getAddr2());
+		info3.put("storeTelNumber", store.getPhone());
+		info3.put("storeName", store.getBizName());
+		info3.put("businessNumber", store.getBizNum());
+		info3.put("ceoName", store.getBizRep());
+		
 		info2.put("openType", store.getOpenType());
 		info2.put("kioskEnable", String.valueOf(store.isKioskOrderEnabled()));
+		info2.put("sellerInfo", info3);
 
+		
 		info.put("data", info2);
 		info.put("success", success);
 		info.put("message", message);
@@ -378,6 +402,176 @@ public class StoreAPIController {
 		PrintWriter pw = response.getWriter();
 
 		documentList.write(pw);
+	}
+	
+	@RequestMapping(value = "/bannerInfo", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> bannerInfo(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		Map<String, Object> info = new HashMap<String, Object>();
+		Map<String, Object> bannerList = new HashMap<String, Object>();
+		String storeId = (String) request.getParameter("storeId");
+		
+		Store target = storeService.getStore(Integer.parseInt(storeId));
+		
+		String dstKioskDirAd = SolUtil.getPhysicalRoot("Ad", target.getId());
+		
+		ArrayList<File> list = new ArrayList<File>();
+		
+		File dir = new File(dstKioskDirAd);
+		if (dir.exists()) {
+			if (dir.isDirectory()) {
+				File[] listFiles = dir.listFiles();
+				if (listFiles != null && listFiles.length > 0) {
+					for (File file : listFiles) {
+						list.add(file);
+					}
+				}
+			}
+		}
+		
+		int listSize = list.size();
+		System.out.println(listSize);
+		List<Ad> adNameList = payService.getAdbySize(listSize,Integer.parseInt(storeId),"Y");
+		
+		ArrayList<DownloadFiles> list2 = new ArrayList<DownloadFiles>();
+		ArrayList<String> list1 = new ArrayList<>();
+		
+		String url = request.getRequestURL().toString().replace("bannerInfo", "");
+		
+		for(Ad ad : adNameList ) {
+			DownloadFiles files = new DownloadFiles();
+			
+			files.setLocal_filename(ad.getOrgFilename());
+			files.setUrl(url+"video/"+ad.getFileName());
+			files.setFile_size(ad.getFileLength());
+			files.setUid(ad.getFileName());
+			list2.add(files);
+		}
+		
+		System.out.println(list2);
+		System.out.println(adNameList);
+		System.out.println(dstKioskDirAd);
+		
+		info.put("bannerList", list2);
+		info.put("message", "OK");
+		info.put("success", true);
+		
+		
+		
+		return info;
+	}
+	
+	@RequestMapping(value = "/menuInfo", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> menuInfo(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		Map<String, Object> info = new HashMap<String, Object>();
+		Map<String, Object> ResMenuCategory  = new HashMap<String, Object>();
+		
+		String storeId = (String) request.getParameter("storeId");
+		Store store = storeService.getStore(Integer.parseInt(storeId));
+		
+		List<MenuGroup> groupList = menuService.getMenuGroupListByStoreIdByPublished(store.getId(),"Y");
+		
+		int groupSize = groupList.size();
+		String kLogoImageFilename = "";
+		String contentImgUrl = "img/";
+		
+		info.put("message", "OK");
+		info.put("success", true);
+		
+		ResMenuCategory.put("storeId", store.getStoreOpt().getKioskLogoText());
+		ResMenuCategory.put("storeName", store.getStoreName());
+		
+		ResMenuCategory.put("storeImage", contentImgUrl + kLogoImageFilename); //매장 로고 이미지
+
+		ResMenuCategory.put("storeBackground", "");
+		ResMenuCategory.put("categoryNum", Integer.toString(groupSize));
+		ResMenuCategory.put("unit", "KRW");
+		info.put("resMenuCategory", ResMenuCategory);
+		
+		ArrayList<CategoryObject> categoryGroup = new ArrayList<CategoryObject>();
+		
+		for(MenuGroup group : groupList) {
+			List<Menu> list = menuService.getMenuListByStoreIdGroupIdPublished(group.getStore().getId(), group.getId(),"Y");
+			CategoryObject categoryObject = new CategoryObject();
+				
+				int menuListSize = list.size();
+				
+				categoryObject.setSeq(String.valueOf(group.getSiblingSeq()));
+				categoryObject.setName(group.getName());
+				categoryObject.setMenuNum(String.valueOf(menuListSize));
+				categoryGroup.add(categoryObject);
+		
+			ResMenuCategory.put("categoryObjectList", categoryGroup);
+						
+			ArrayList<MenuObject> menuObjectList = new ArrayList<MenuObject>();
+			for(Menu menu : list) {				
+				
+				List<OptionalMenu> optList = menuService.getOptionalMenuListByMenuId(menu.getId());
+				
+				MenuObject MenuItem = new MenuObject();	
+				
+				MenuItem.setProductId(String.valueOf(menu.getId()));
+				MenuItem.setSeq(String.valueOf(menu.getSiblingSeq()));
+				MenuItem.setName(menu.getName());
+				float priceFl = menu.getPrice();
+				int priceint = (int)priceFl;
+				MenuItem.setPrice(String.valueOf(priceint));
+				MenuItem.setImageFile("");
+				MenuItem.setDescription(menu.getIntro());
+
+				if(menu.getFlagType() == "R") {
+					MenuItem.setPopular("true");
+					MenuItem.setNewMenu("false");
+				} else {
+					MenuItem.setPopular("false");
+					MenuItem.setNewMenu("ture");
+				}
+				
+				MenuItem.setSoldOut(menu.isSoldOut());
+				
+				menuObjectList.add(MenuItem);
+				
+				
+				categoryObject.setMenuObjectList(menuObjectList);
+
+				ArrayList<MenuOptionData> MenuOptionDataList = new ArrayList<MenuOptionData>();
+				
+				for(OptionalMenu optMenu : optList) {
+					List<OptionalMenuList> manMenuList = menuService.getOptionalMenuListByOptionId(optMenu.getId());
+					
+					MenuOptionData optionItem = new MenuOptionData();
+					
+					optionItem.setMenuOptName(optMenu.getName());
+					optionItem.setMenuGubun(optMenu.getOptType());
+					optionItem.setMenuOptSeq(String.valueOf(optMenu.getSiblingSeq()));
+					
+					MenuOptionDataList.add(optionItem);
+					
+					MenuItem.setOptMenusList(MenuOptionDataList);
+						
+						ArrayList<SubOption> SubOptionList = new ArrayList<SubOption>();
+						
+					for(OptionalMenuList manMeList : manMenuList){
+						
+						SubOption subItem = new SubOption(); 
+						
+						subItem.setOptionName(manMeList.getName());
+						subItem.setPrice(manMeList.getPrice().toString());
+					
+						SubOptionList.add(subItem);
+						
+						optionItem.setOptionList(SubOptionList);
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		return info;
 	}
 
 	/**
@@ -988,25 +1182,18 @@ public class StoreAPIController {
 	 * 주문 한 메뉴를 취소 하기위해서 승인번호가 맞는지 체크 하는 로직
 	 */
 	@RequestMapping(value = "/cancelVerifiCheck", method = RequestMethod.GET)
-	public void cancelVerifiCheck(HttpServletRequest request, HttpServletResponse response)
+	public @ResponseBody Map<String, Object> cancelVerifiCheck(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		String storeId = (String) request.getParameter("storeId");
 		String deviceId = (String) request.getParameter("deviceId");
 		String cancelCode = (String) request.getParameter("cancelCode");
-		Document document = DocumentHelper.createDocument();
+		Map<String, Object> map = new HashMap<String, Object>();
 
-		document = storeCancelService.checkVerifiCodebyStoreIdVerifiCodeDeviceID(Util.parseInt(storeId), deviceId,
-				cancelCode, document, "K");
-
-		response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
-		response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
-		response.setContentType("text/xml;charset=UTF-8");
-		response.setCharacterEncoding("UTF-8");
-
-		PrintWriter pw = response.getWriter();
-
-		document.write(pw);
+		Map<String, Object> info = storeCancelService.checkVerifiCodebyStoreIdVerifiCodeDeviceID(Util.parseInt(storeId), deviceId,
+				cancelCode,map, "K");
+		
+		return info;
 	}
 
 	/**
@@ -1210,7 +1397,7 @@ public class StoreAPIController {
 					if ("RF".equals(item.getPayment()) && "I".equals(item.getOrderType())) {
 						catagoryElement.addElement("price").addText("0"); // 결제금액(총금액)
 					} else {
-						catagoryElement.addElement("price").addText(item.getGoodsAmt()); // 결제금액(총금액)
+						catagoryElement.addElement("price").addText(item.getGoodsAmt()); // 결제금액(총금액)	
 					}
 
 					if ("D".equals(item.getOrderType())) {
@@ -1593,5 +1780,94 @@ public class StoreAPIController {
 	}
 
 	// ------------------------------ 바나나 포스 종료 ------------------------------
+	  
+	  @RequestMapping(value="/video/{video_name:.+}", method= RequestMethod.GET) 
+	  public String getContentMediaVideo(@PathVariable("video_name")String video_name,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
 
+		  String filePath = SolUtil.getPhysicalRoot("Ad");
+		  
+	    //progressbar 에서 특정 위치를 클릭하거나 해서 임의 위치의 내용을 요청할 수 있으므로
+	    //파일의 임의의 위치에서 읽어오기 위해 RandomAccessFile 클래스를 사용한다.
+	    //해당 파일이 없을 경우 예외 발생
+	    
+	    File file = new File(filePath+"/"+ video_name);
+	    if( ! file.exists() ) new FileNotFoundException();
+	    
+	    RandomAccessFile randomFile = new RandomAccessFile(file, "r");
+
+	    long rangeStart = 0; //요청 범위의 시작 위치
+	    long rangeEnd = 0;  //요청 범위의 끝 위치
+	    boolean isPart=false; //부분 요청일 경우 true, 전체 요청의 경우 false
+
+	    //randomFile 을 클로즈 하기 위하여 try~finally 사용
+	    try{
+	        //동영상 파일 크기
+	        long movieSize = randomFile.length(); 
+	        //스트림 요청 범위, request의 헤더에서 range를 읽는다.
+	        String range = request.getHeader("range");
+
+
+	        //브라우저에 따라 range 형식이 다른데, 기본 형식은 "bytes={start}-{end}" 형식이다.
+	        //range가 null이거나, reqStart가  0이고 end가 없을 경우 전체 요청이다.
+	        //요청 범위를 구한다.
+	        if(range!=null) {
+	            //처리의 편의를 위해 요청 range에 end 값이 없을 경우 넣어줌
+	            if(range.endsWith("-")){
+	                range = range+(movieSize - 1); 
+	            }
+	            int idxm = range.trim().indexOf("-");                           //"-" 위치
+	            rangeStart = Long.parseLong(range.substring(6,idxm));
+	            rangeEnd = Long.parseLong(range.substring(idxm+1));
+	            if(rangeStart > 0){
+	                isPart = true;
+	            }
+	       }else{   //range가 null인 경우 동영상 전체 크기로 초기값을 넣어줌. 0부터 시작하므로 -1
+	            rangeStart = 0;
+	            rangeEnd = movieSize - 1;
+	       }
+
+	       //전송 파일 크기
+	       long partSize = rangeEnd - rangeStart + 1;
+
+
+	       //전송시작
+	       response.reset();
+
+	       //전체 요청일 경우 200, 부분 요청일 경우 206을 반환상태 코드로 지정
+	       response.setStatus(isPart ? 206 : 200);
+
+	       //mime type 지정
+	       response.setContentType("video/mp4");
+
+	       //전송 내용을 헤드에 넣어준다. 마지막에 파일 전체 크기를 넣는다.
+	       response.setHeader("Content-Range", "bytes "+rangeStart+"-"+rangeEnd+"/"+movieSize);
+	       response.setHeader("Accept-Ranges", "bytes");
+	       response.setHeader("Content-Length", ""+partSize);
+
+	       OutputStream out = response.getOutputStream();
+	       //동영상 파일의 전송시작 위치 지정
+	       randomFile.seek(rangeStart);
+
+	       //파일 전송...  java io는 1회 전송 byte수가 int로 지정됨
+	       //동영상 파일의 경우 int형으로는 처리 안되는 크기의 파일이 있으므로
+	       //8kb로 잘라서 파일의 크기가 크더라도 문제가 되지 않도록 구현
+	       int bufferSize = 8*1024;
+	       byte[] buf = new byte[bufferSize];
+	       do{
+	           int block = partSize > bufferSize ? bufferSize : (int)partSize;
+	           int len = randomFile.read(buf, 0, block);
+	           out.write(buf, 0, len);
+	           partSize -= block;
+	       }while(partSize > 0);
+
+	   }catch(IOException e){
+	       //전송 중에 브라우저를 닫거나, 화면을 전환한 경우 종료해야 하므로 전송취소.
+	       // progressBar를 클릭한 경우에는 클릭한 위치값으로 재요청이 들어오므로 전송 취소.
+
+	   }finally{
+	       randomFile.close();
+	   }
+	    return null;
+	  }
+	
 }

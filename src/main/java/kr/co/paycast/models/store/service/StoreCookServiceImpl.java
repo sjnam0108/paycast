@@ -403,16 +403,16 @@ public class StoreCookServiceImpl implements StoreCookService {
 				boolean noticeChk = true;
 				String listId = String.valueOf(storeOrderListOne.getId());
 				
-				if("Y".equals(storeOrderListOne.getOrderMenuNotice())) {
-					continue;
-				}
-				
-				if(complteYn.equals("Y")) {
-					logger.info(storeOrderListOne.getOrderMenuNotice());
-					storeOrderListOne.setOrderMenuNotice("Y");
-					storeOrderListOne.setWhoLastUpdateDate(new Date());
-					continue;
-				}
+//				if("Y".equals(storeOrderListOne.getOrderMenuNotice())) {
+//					continue;
+//				}
+//				
+//				if(complteYn.equals("Y")) {
+//					logger.info(storeOrderListOne.getOrderMenuNotice());
+//					storeOrderListOne.setOrderMenuNotice("Y");
+//					storeOrderListOne.setWhoLastUpdateDate(new Date());
+//					continue;
+//				}
 				
 				// 기존에 한번 newalarm으로 울렸을 경우 Y로 변경 하여 완료 로 만들어준다.
 				if("O".equals(storeOrderListOne.getOrderMenuNotice())){
@@ -669,9 +669,18 @@ public class StoreCookServiceImpl implements StoreCookService {
 		
 		try{
 			StoreOrderCook orderCook = storeCookDao.getStoreCookbyOne(Util.parseInt(cookId)) ;
+			String orderNum = orderCook.getWhoCreatedBy();
+			List<StoreOrderList> orderList = storeOrderDao.getOrderList(orderNum);
+			Date now = new Date();
+			for (StoreOrderList list : orderList) {
+//				list.setOrderMenuNotice("N");
+				list.setWhoLastUpdateDate(now);
+			}
+			storeOrderDao.saveOrderList(orderList);
 			orderCook.setOrderMenuComplete("N");
 			orderCook.touchWho(session);
 			storeCookDao.saveOrUpdate(orderCook);
+			
 			
 			
 			StoreOrder storeOrderOne = storeOrderDao.getOrderOne(orderCook.getStoreOrderId());
@@ -686,12 +695,14 @@ public class StoreCookServiceImpl implements StoreCookService {
 			JSONArray mobileDidTokens = new JSONArray(); // 전송할 fcm 토큰 LIST
 			JSONArray mobileCookTokens = new JSONArray(); // 전송할 fcm 토큰 LIST
 	//		String currentSiteId = (String)session.getAttribute("currentSiteId");
-			
-			logger.info("comCancelUpdate >>> siteId [{}]", siteId);
+			Store store = storeService.getStore(Integer.parseInt(storeId));
+			Site site = store.getSite();
+			int siteId2 = site.getId();
+			logger.info("comCancelUpdate >>> siteId [{}]", siteId2);
 			//site를 조회 하여 STB 그룹을 사용하는지 확인
-			Site site = siteService.getSite(siteId);
+//			Site site = siteService.getSite(siteId);
 			if(site != null){
-				Store store = storeService.getStore(Util.parseInt(storeId));
+				store = storeService.getStore(Util.parseInt(storeId));
 				if (store != null) {
 	        		List<Device> deviceList = devService.getDeviceListByStoreId(store.getId());
 	        		

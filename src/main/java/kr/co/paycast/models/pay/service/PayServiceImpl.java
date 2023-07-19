@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
+import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.AppUser;
+import kr.co.paycast.models.pay.StoreUser;
 import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.dao.AppUserDao;
 import kr.co.paycast.models.pay.dao.UploadFileDao;
@@ -85,11 +87,28 @@ public class PayServiceImpl implements PayService {
 		
 		return uploadFileDao.get(id);
 	}
+	@Override
+	public List<UploadFile> getUploadFilebySize(int listSize) {
+		
+		return uploadFileDao.getList(listSize);
+	}
+	
+	@Override
+	public List<Ad> getAdbySize(int listSize,int storeId, String enabled) {
+		
+		return uploadFileDao.getList(listSize,storeId,enabled);
+	}
 
 	@Override
 	public void saveOrUpdate(UploadFile uploadFile) {
 		
 		uploadFileDao.saveOrUpdate(uploadFile);
+	}
+	
+	@Override
+	public void saveOrUpdate(Ad ad) {
+		
+		uploadFileDao.saveOrUpdate(ad);
 	}
 
 	@Override

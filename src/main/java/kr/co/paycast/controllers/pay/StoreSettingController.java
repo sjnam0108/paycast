@@ -2,6 +2,7 @@ package kr.co.paycast.controllers.pay;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import kr.co.paycast.models.Message;
 import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.ModelManager;
 import kr.co.paycast.models.PayMessageManager;
+import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.PayUploadTransModel;
 import kr.co.paycast.models.pay.Store;
 import kr.co.paycast.models.pay.StoreOpt;
@@ -127,7 +129,7 @@ public class StoreSettingController {
 
 		uploadModel.setStoreId(store == null ? -1 : store.getId());
 		uploadModel.setType("TITLE");
-		uploadModel.setAllowedExtensions("[\".jpg\", \".jpeg\", \".png\"]");
+		uploadModel.setAllowedExtensions("[\".jpg\", \".jpeg\", \".png\", \".mp4\"]");
 		
     	msgMgr.addViewMessages(model, locale,
     			new Message[] {
@@ -185,15 +187,49 @@ public class StoreSettingController {
     @RequestMapping(value = "/upcmpl", method = RequestMethod.POST)
     public @ResponseBody String renameUploadedFile(@RequestBody Map<String, Object> model, 
     		HttpSession session, Locale locale) {
-		
     	String uploadedFilename = (String)model.get("uploadedFilename");
+    	String uploadType = (String)model.get("uploadType");
     	if (Util.isNotValid(uploadedFilename)) {
     		throw new ServerOperationForbiddenException(
     				msgMgr.message("common.server.msg.wrongParamError", locale));
     	}
-
+    	if(uploadType.equals("V")) {
+    		System.out.println(uploadedFilename);
+    		System.out.println(uploadType);
+    	String newFilename = "";
+    	String [] list = uploadedFilename.split(",");
+    	System.out.println(list);
+    	ArrayList name = new ArrayList<>();
+    	for(int i=0; i<list.length; i++) {
+    	
 		String typeRootDir = SolUtil.getPhysicalRoot("UpTemp");
-		File upFile = new File(typeRootDir + "/" + uploadedFilename);
+		File upFile = new File(typeRootDir + "/" + list[i]);
+		
+		System.out.println(upFile);
+		if (!upFile.exists()) {
+    		throw new ServerOperationForbiddenException(
+    				msgMgr.message("common.server.msg.wrongParamError", locale));
+		}
+		
+		newFilename = Util.uniqueIFilename(list[i]);
+		boolean success = false;
+		name.add(newFilename);
+		try {
+			success = upFile.renameTo(new File(typeRootDir + "/" + newFilename));
+        } catch (Exception e) {
+        	logger.error("upcmpl", e);
+        	throw new ServerOperationForbiddenException("OperationError");
+        }
+		
+		if (!success) {
+        	throw new ServerOperationForbiddenException("OperationError");
+		}
+		
+    	}
+    	return name.toString();
+    	} else {
+    	String typeRootDir = SolUtil.getPhysicalRoot("UpTemp");
+		File upFile = new File(typeRootDir + "/" +uploadedFilename);
 		if (!upFile.exists()) {
     		throw new ServerOperationForbiddenException(
     				msgMgr.message("common.server.msg.wrongParamError", locale));
@@ -201,19 +237,14 @@ public class StoreSettingController {
 		
 		String newFilename = Util.uniqueIFilename(uploadedFilename);
 		boolean success = false;
-		
 		try {
 			success = upFile.renameTo(new File(typeRootDir + "/" + newFilename));
-        } catch (Exception e) {
-        	logger.error("upcmpl", e);
-        	throw new ServerOperationForbiddenException("OperationError");
-        }
-
-		if (!success) {
-        	throw new ServerOperationForbiddenException("OperationError");
-		}
-		
-    	return newFilename;
+		}catch (Exception e) {
+	        	logger.error("upcmpl", e);
+	        	throw new ServerOperationForbiddenException("OperationError");
+	        }
+		return newFilename;
+    	}
     }
     
 	
@@ -228,7 +259,9 @@ public class StoreSettingController {
     	if (target != null) {
         	String kLogoType = Util.parseString((String)model.get("kLogoType"));
         	String kLogoImage = Util.parseString((String)model.get("kLogoImage"));
+        	String kAd = Util.parseString((String)model.get("kAd"));
         	String kLogoUniqueName = Util.parseString((String)model.get("kLogoUniqueName"));
+        	String vLogoUniqueName = Util.parseString((String)model.get("vLogoUniqueName"));
         	String kLogoText = Util.parseString((String)model.get("kLogoText"));
         	String kMatrix = Util.parseString((String)model.get("kMatrix"));
         	String mLogoType = Util.parseString((String)model.get("mLogoType"));
@@ -236,7 +269,13 @@ public class StoreSettingController {
         	String mLogoUniqueName = Util.parseString((String)model.get("mLogoUniqueName"));
         	String mLogoText = Util.parseString((String)model.get("mLogoText"));
         	String mType = Util.parseString((String)model.get("mType"));
+        	logger.info("ad"+kAd);
         	
+        	String vLogoUniqueName1 = vLogoUniqueName.replace("[", "");
+        	String vLogoUniqueName2 = vLogoUniqueName1.replace("]", "");
+        	String vLogoUniqueName3 = vLogoUniqueName2.replace(" ", "");
+        	
+        	System.out.println(vLogoUniqueName3);
         	//
         	// 잘못된 전달인자:
         	//    1) 키오스크 메뉴 매트릭스 값이 없음
@@ -253,6 +292,8 @@ public class StoreSettingController {
         				msgMgr.message("common.server.msg.wrongParamError", locale));
         	}
         	//-
+        	String [] list = vLogoUniqueName3.split(",");
+        	String [] list2 = kAd.split(",");
         	
         	StoreOpt opt = target.getStoreOpt();
         	if (opt == null) {
@@ -263,10 +304,12 @@ public class StoreSettingController {
         	
     		String tempRootDir = SolUtil.getPhysicalRoot("UpTemp");
     		String dstKioskDir = SolUtil.getPhysicalRoot("KioskTitle", target.getId());
+    		String dstKioskDirAd = SolUtil.getPhysicalRoot("Ad", target.getId());
     		String dstMobileDir = SolUtil.getPhysicalRoot("MobileTitle", target.getId());
     		
     		UploadFile kLogoImageFile = null, mLogoImageFile = null;
-    		
+    		Ad adFile = null;
+//    		List<UploadFile> = kAdImageFile2 = null;
         	try {
         		//
         		// 임시 폴더에 전달된 고유 파일이 존재하면, 새로 파일이 등록된 상태
@@ -275,13 +318,33 @@ public class StoreSettingController {
         		//    새로 등록 액션: 1) 대상 폴더에 불필요 파일 삭제
         		//                    2) 임시 폴더에서 대상 폴더로 파일 이동
         		//
+        		
         		File kLogoFile = new File(tempRootDir + "/" + kLogoUniqueName);
+        			
+        		
         		if (Util.isValid(kLogoUniqueName) && kLogoFile.exists()) {
         			long kLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstKioskDir, kLogoUniqueName);
-        			
+
         			kLogoImageFile = new UploadFile(target, kLogoUniqueName, kLogoImage, kLogoFileLen, session);
+
         		}
         		
+        		for (int i = 0; i < list.length;i++) {
+        		
+        		File kAdFile = new File(tempRootDir + "/" + list[i]);
+        			System.out.println(kAdFile);
+    				if(Util.isValid(list[i]) && kAdFile.exists()) {
+    					long vLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstKioskDirAd, list[i]);
+    					
+    					adFile = new Ad(target, list[i], list2[i], vLogoFileLen,i,"Y", "/store/api/video/",session);
+    					
+    		        	if (adFile != null) {
+    		        		payService.saveOrUpdate(adFile);
+    		        		selfService.setMonTask("A", String.valueOf(target.getId()), session);
+    		        	}
+    					
+    				}
+        		}
         		File mLogoFile = new File(tempRootDir + "/" + mLogoUniqueName);
         		if (Util.isValid(mLogoUniqueName) && mLogoFile.exists()) {
         			long mLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstMobileDir, mLogoUniqueName);
@@ -304,6 +367,8 @@ public class StoreSettingController {
         		payService.saveOrUpdate(kLogoImageFile);
         		opt.setKioskLogoImageId(kLogoImageFile.getId());
         	}
+        	
+
 
         	if (mLogoImageFile != null) {
         		payService.saveOrUpdate(mLogoImageFile);
@@ -327,7 +392,8 @@ public class StoreSettingController {
      */
     private long cleanFolderAndmoveFile(String srcFolderStr, String dstFolderStr, String filename)
     		throws Exception {
-    	
+    	System.out.println("F"+filename);
+    	System.out.println("d"+dstFolderStr);
     	Util.checkDirectory(dstFolderStr);
     	
     	ArrayList<File> list = new ArrayList<File>();
@@ -345,7 +411,7 @@ public class StoreSettingController {
 		}
     	
 		for(File file : list) {
-			file.delete();
+//			file.delete();
 		}
 
 		File srcFile = new File(srcFolderStr + "/" + filename);

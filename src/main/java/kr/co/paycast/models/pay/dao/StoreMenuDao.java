@@ -17,6 +17,7 @@ public interface StoreMenuDao {
 	// for Menu specific
 	public void saveAndReorder(Menu menu, HttpSession httpSession);
 	public List<Menu> getListByStoreIdGroupId(int storeId, Integer groupId);
+	public List<Menu> getListByStoreIdGroupIdPublished(int storeId, Integer groupId,String published);
 	public void reorder(int storeId, Integer groupId, HttpSession httpSession);
 	public void reorder(Menu menu, int index, HttpSession httpSession);
 }
