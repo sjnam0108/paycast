@@ -14,7 +14,10 @@
 
 <c:url value="/pay/storesetting/create" var="createUrl" />
 <c:url value="/pay/storesetting/read" var="readUrl" />
+<c:url value="/pay/storesetting/readAd" var="readAdUrl" />
 <c:url value="/pay/storesetting/update" var="updateUrl" />
+<c:url value="/pay/storesetting/updateMenu" var="updateMenuUrl" />
+<c:url value="/pay/storesetting/destroy" var="destroyUrl" />
 
 <c:url value="/pay/storesetting/upcmpl" var="uploadCmplUrl" />
 
@@ -22,6 +25,8 @@
 <!-- Opening tags -->
 
 <common:pageOpening />
+
+
 
 
 <!-- Page title -->
@@ -180,19 +185,19 @@ $(document).ready(function() {
 
 <ul class="nav nav-tabs tabs-alt mb-4">
 	<li class="nav-item">
-		<a class="nav-link active" data-toggle="tab" href="#kiosk-order">
+		<a class="nav-link active" data-toggle="tab" href="#kiosk-order" id="K">
 			<i class="mr-1 fas fa-hamburger"></i>
 			${tab_kiosk}
 		</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link" data-toggle="tab" href="#mobile-order">
+		<a class="nav-link" data-toggle="tab" href="#mobile-order" id="M">
 			<i class="mr-1 fas fa-wifi"></i>
 			${tab_mobileOrder}
 		</a>
 	</li>
 	<li class="nav-item">
-		<a class="nav-link" data-toggle="tab" href="#ad-order">
+		<a class="nav-link" data-toggle="tab" href="#ad-order" id="A">
 			<i class="mr-1 fas fa-video"></i>
 			광고 설정
 		</a>
@@ -297,7 +302,14 @@ $(document).ready(function() {
 				</div>
 				<div class="row no-gutters row-bordered text-center">
 					<div class="d-flex col-md flex-column pt-3 pb-4">
-                  
+				<div class="clearfix">
+						<div class="float-left">
+	         	         <button type="button" class="btn btn-primary" onclick="addRow()" >메뉴 추가</button>
+	                  </div>
+						<div class="float-right">
+	               		   <button id="delete-btn" type="button" class="btn btn-danger">${cmd_delete}</button>
+	                  </div>
+                  </div>
 						<div class="form-group px-4 mt-3">
 							<div class="input-group">
 								<span class="input-group-prepend">
@@ -309,10 +321,34 @@ $(document).ready(function() {
 								<span class="input-group-append">
 								</span>
 							</div>
-						</div>
+						</div>	
+
+
+					<table class="table" id ="table_tb">
+						<thead>
+							<tr>
+								<th scope="col">번호</th>
+								<th scope="col">파일명</th>
+								<th scope="col">원본 파일명</th>
+								<th scope="col">생성 날짜</th>
+							</tr>
+						</thead>
+							<tbody>
+						<c:forEach items="${adList }" var="ad">
+
+							<tr id="${ad.fileName }">
+								<td id="index"><c:out value="${ad.index }"></c:out></td>
+								<td id="fileName"><c:out value="${ad.fileName }"></c:out></td>
+								<td id="orgFilename"><c:out value="${ad.orgFilename }"></c:out></td>
+								<td id="createDate"><c:out value="${ad.createDate }"></c:out></td>
+							</tr>
+
+						</c:forEach>
+						</tbody>
+					</table>
+					
 					</div>
 				</div>				
-				
 			</div>
 		</div>
 	</div>
@@ -575,11 +611,13 @@ div.k-dropzone.k-dropzone-hovered em, div.k-dropzone em { color: #2e2e2e; }
 <!--  Scripts -->
 
 <script>
-
+var tdArr = new Array();	// 배열 선언
 var storeId = -1;
 
 var uploadType = "";
 
+var rows = "";
+var debugStr = "";
 var kLogoType = "";
 var mLogoType = "";
 
@@ -896,8 +934,99 @@ function confirmWizardForm() {
 	}
 }
 
+function addRow() {
+	  // table element 찾기
+	  var table = document.getElementById('table_tb');
+	  var curDate = new Date();
+
+	  var curTime = curDate.getFullYear() + "-" + (curDate.getMonth() + 1) + "-" + curDate.getDate() + " " + curDate.getHours() + ":" + curDate.getMinutes() + ":" + curDate.getSeconds();
+	  // 새 행(Row) 추가
+	  var newRow = table.insertRow();
+	  
+	  // 새 행(Row)에 Cell 추가
+	  var newCell1 = newRow.insertCell(0);
+	  var newCell2 = newRow.insertCell(1);
+	  var newCell3 = newRow.insertCell(2);
+	  var newCell4 = newRow.insertCell(3);
+	  var type = "M";
+	  
+	  // Cell에 텍스트 추가
+	  newCell1.innerText = '1';
+	  newCell2.innerText = '메뉴판';
+	  newCell3.innerText = '메뉴판';
+	  newCell4.innerText = curTime;
+	  
+  	var data = {
+    		id: storeId,
+    		menu: '메뉴판',
+    		type: type,
+    		createDate: curTime,
+
+   		};
+    	
+    	$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: "${updateMenuUrl}",
+			data: JSON.stringify(data),
+			success: function (form) {
+			},
+			error: ajaxSaveError
+		});
+	  
+}
 
 $(document).ready(function() {
+	
+	$("#table_tb").tableDnD({
+		onDragClass: "myDragClass",
+	    onDrop: function(table, row) {
+            rows = table.tBodies[0].rows;
+            debugStr = "";
+            for (var i=0; i<rows.length; i++) {
+                debugStr += rows[i].id+",";
+            }
+            console.log(rows);
+            console.log(debugStr);
+	    },
+
+	});
+
+	 
+	$("#table_tb tr").click(function(){ 	
+
+		var str = ""
+			tdArr = new Array();
+		
+		// 현재 클릭된 Row(<tr>)
+		var tr = $(this);
+		var td = tr.children();
+		
+		// tr.text()는 클릭된 Row 즉 tr에 있는 모든 값을 가져온다.
+		console.log("클릭한 Row의 모든 데이터 : "+tr.text());
+		
+		// 반복문을 이용해서 배열에 값을 담아 사용할 수 도 있다.
+		td.each(function(i){
+			
+			tdArr.push(td.eq(i).text());
+		});
+		
+		console.log("배열에 담긴 값 : "+tdArr);
+		
+		// td.eq(index)를 통해 값을 가져올 수도 있다.
+		var no = td.eq(0).text();
+		var userid = td.eq(1).text();
+		var name = td.eq(2).text();
+		var email = td.eq(3).text();
+		
+		
+		str +=	" * 클릭된 Row의 td값 = No. : <font color='red'>" + no + "</font>" +
+				", 아이디 : <font color='red'>" + userid + "</font>" +
+				", 이름 : <font color='red'>" + name + "</font>" +
+				", 이메일 : <font color='red'>" + email + "</font>";		
+	});
+
 
 <c:if test="${not empty sessionScope['currentStoreId']}">
 	storeId = ${sessionScope['currentStoreId']};
@@ -911,9 +1040,12 @@ $(document).ready(function() {
 	bootstrapSelectVal($("#mobile-order select[name='mobileOrderType']"), "type2");
 	
 	$("#save-btn").click(function(e) {
+		
     	var data = {
     		id: storeId,
     		kLogoType: kLogoType,
+    		rows: rows,
+    		debugStr: debugStr,
     		kLogoImage: $.trim($("#kiosk-order input[name='imgFilename']").val()),
     		kAd: $.trim($("#ad-order input[name='adFilename']").val()),
     		kLogoUniqueName: kFilename,
@@ -934,7 +1066,10 @@ $(document).ready(function() {
 			url: "${updateUrl}",
 			data: JSON.stringify(data),
 			success: function (form) {
-				showAlertModal("success", "${msg_updateComplete}");
+// 				bootbox.alert('${msg_updateComplete}', function() {
+
+//                     });
+				showSaveSuccessMsg();
 				kPreviewFile = "/titles/${storeRoot}/" + kFilename;
 				vPreviewFile = "/ad/${storeRoot}/" + vFilename;
 				mPreviewFile = "/m/titles/${storeRoot}/" + mFilename;
@@ -942,6 +1077,7 @@ $(document).ready(function() {
 			error: ajaxSaveError
 		});
 	});
+
 
 	$.ajax({
 		type: "POST",
@@ -955,10 +1091,8 @@ $(document).ready(function() {
 				$("#kiosk-order input[name='imgFilename']").val(data.kioskLogoImage.orgFilename);
 				
 				kFilename = data.kioskLogoImage.filename;
-				vFilename = data.kioskLogoImage.filename;
 				if (data.kioskLogoImage.orgFilename) {
 					kPreviewFile = "/titles/${storeRoot}/" + kFilename;
-					vPreviewFile = "/ad/${storeRoot}/" + vFilename;
 				}
 			}
 			if (data.kioskLogoType) {
@@ -984,6 +1118,29 @@ $(document).ready(function() {
 		},
 		error: ajaxReadError
 	});
+	
+	$("#delete-btn").click(function(e) {
+		e.preventDefault();
+			var num = tdArr[0];
+			showDelConfirmModal(function(result) {
+				if (result) {
+					$.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						url: "${destroyUrl}",
+						data: JSON.stringify({num}),
+						success: function (form) {
+        					showDeleteSuccessMsg();
+							grid.dataSource.read();
+						},
+						error: ajaxDeleteError
+					});
+				}
+			}, true, num);
+		
+	});
+	
 	
 });
 

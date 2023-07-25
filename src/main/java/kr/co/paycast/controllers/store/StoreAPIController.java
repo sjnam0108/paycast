@@ -15,13 +15,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Map;import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +64,7 @@ import kr.co.paycast.utils.MultipartFileSender;
 import kr.co.paycast.utils.PayUtil;
 import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
+import kr.co.paycast.viewmodels.pay.BannerInfo;
 import kr.co.paycast.viewmodels.pay.DownloadFiles;
 import kr.co.paycast.viewmodels.pay.MenuDispItem;
 import kr.co.paycast.viewmodels.pay.MenuGroupItem;
@@ -408,7 +411,6 @@ public class StoreAPIController {
 	public @ResponseBody Map<String, Object> bannerInfo(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		Map<String, Object> info = new HashMap<String, Object>();
-		Map<String, Object> bannerList = new HashMap<String, Object>();
 		String storeId = (String) request.getParameter("storeId");
 		
 		Store target = storeService.getStore(Integer.parseInt(storeId));
@@ -429,34 +431,59 @@ public class StoreAPIController {
 			}
 		}
 		
-		int listSize = list.size();
-		System.out.println(listSize);
-		List<Ad> adNameList = payService.getAdbySize(listSize,Integer.parseInt(storeId),"Y");
+
+		List<Ad> adNameList = payService.getAdbySize(list.size(),Integer.parseInt(storeId),"Y");
 		
-		ArrayList<DownloadFiles> list2 = new ArrayList<DownloadFiles>();
-		ArrayList<String> list1 = new ArrayList<>();
+		ArrayList<BannerInfo> bannerList = new ArrayList<BannerInfo>();
+		ArrayList<DownloadFiles> fileList = new ArrayList<DownloadFiles>();
 		
 		String url = request.getRequestURL().toString().replace("bannerInfo", "");
 		
 		for(Ad ad : adNameList ) {
-			DownloadFiles files = new DownloadFiles();
+
+			BannerInfo banners = new BannerInfo();
+			if(ad.getType().equals("M")) {
+				if(fileList.size() > 0) {
+					banners = new BannerInfo();
+					banners.setE_menu_type(false);
+					banners.setBannerList(fileList);
+					fileList = new ArrayList<DownloadFiles>();
+					bannerList.add(banners);
+				}
+				BannerInfo banners2 = new BannerInfo();
+				banners2.setE_menu_type(true);
+				banners2.setBannerList(null);
+				bannerList.add(banners2);
+				
+			}else {
+
+				DownloadFiles files = new DownloadFiles();
+				
+				files.setLocal_filename(ad.getOrgFilename());
+				files.setUrl(url+"video/"+ad.getFileName());
+				files.setFile_size(ad.getFileLength());
+				files.setUid(ad.getFileName());
+				fileList.add(files);
+			}
 			
-			files.setLocal_filename(ad.getOrgFilename());
-			files.setUrl(url+"video/"+ad.getFileName());
-			files.setFile_size(ad.getFileLength());
-			files.setUid(ad.getFileName());
-			list2.add(files);
+			System.out.println(ad);
 		}
 		
-		System.out.println(list2);
+		if(fileList.size() > 0) {
+			BannerInfo banners = new BannerInfo();
+			banners.setE_menu_type(false);
+			banners.setBannerList(fileList);
+			fileList = new ArrayList<DownloadFiles>();
+			bannerList.add(banners);
+		}
+		System.out.println(bannerList);
+		System.out.println(fileList);
 		System.out.println(adNameList);
 		System.out.println(dstKioskDirAd);
 		
-		info.put("bannerList", list2);
+		info.put("data", bannerList);
 		info.put("message", "OK");
 		info.put("success", true);
-		
-		
 		
 		return info;
 	}
@@ -487,9 +514,13 @@ public class StoreAPIController {
 		ResMenuCategory.put("storeBackground", "");
 		ResMenuCategory.put("categoryNum", Integer.toString(groupSize));
 		ResMenuCategory.put("unit", "KRW");
+		
+		
+		
 		info.put("resMenuCategory", ResMenuCategory);
 		
-		ArrayList<CategoryObject> categoryGroup = new ArrayList<CategoryObject>();
+		List<CategoryObject> categoryGroup = new ArrayList<CategoryObject>();
+		
 		
 		for(MenuGroup group : groupList) {
 			List<Menu> list = menuService.getMenuListByStoreIdGroupIdPublished(group.getStore().getId(), group.getId(),"Y");
@@ -497,12 +528,13 @@ public class StoreAPIController {
 				
 				int menuListSize = list.size();
 				
+				
 				categoryObject.setSeq(String.valueOf(group.getSiblingSeq()));
 				categoryObject.setName(group.getName());
 				categoryObject.setMenuNum(String.valueOf(menuListSize));
 				categoryGroup.add(categoryObject);
 		
-			ResMenuCategory.put("categoryObjectList", categoryGroup);
+
 						
 			ArrayList<MenuObject> menuObjectList = new ArrayList<MenuObject>();
 			for(Menu menu : list) {				
@@ -531,8 +563,7 @@ public class StoreAPIController {
 				MenuItem.setSoldOut(menu.isSoldOut());
 				
 				menuObjectList.add(MenuItem);
-				
-				
+					
 				categoryObject.setMenuObjectList(menuObjectList);
 
 				ArrayList<MenuOptionData> MenuOptionDataList = new ArrayList<MenuOptionData>();
@@ -567,9 +598,11 @@ public class StoreAPIController {
 				}
 				
 			}
-			
 		}
-		
+		List<CategoryObject> a = categoryGroup.stream().sorted(Comparator.comparing(CategoryObject::getSeq)).collect(Collectors.toList());
+		System.out.println(a);
+		ResMenuCategory.put("categoryObjectList", a);
+
 		
 		return info;
 	}

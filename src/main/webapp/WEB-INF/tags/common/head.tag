@@ -36,10 +36,12 @@
 	<script src="<c:url value='/resources/vendor/js/fa57.all.min.js' />"></script>
 	
 	<script src="<c:url value='/resources/js/jquery.min.js' />"></script>
+	<script src="<c:url value='/resources/js/jquery.tablednd.js' />"></script>
 	<script src="<c:url value='/resources/js/jszip.min.js' />"></script>
 	<script src="<c:url value='/resources/js/kendo.all.min.js' />"></script>
 	
-	<script src="<c:url value='/resources/vendor/lib/jquery-ui/jquery-ui.min.js' />"></script>
+<%-- 	<script src="<c:url value='/resources/vendor/lib/jquery-ui/jquery-ui.min.js' />"></script> --%>
+	<script type="text/javascript" src="/resources/js/jquery-ui.js" ></script>
 
 	<script src="<c:url value='/resources/shared/js/prettify.js'/>"></script>
 	<script src="<c:url value='/resources/shared/js/sockjs.min.js'/>"></script>

@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import kr.co.paycast.exceptions.ServerOperationForbiddenException;
 import kr.co.paycast.models.Message;
@@ -130,7 +132,7 @@ public class StoreSettingController {
 		uploadModel.setStoreId(store == null ? -1 : store.getId());
 		uploadModel.setType("TITLE");
 		uploadModel.setAllowedExtensions("[\".jpg\", \".jpeg\", \".png\", \".mp4\"]");
-		
+		List<Ad> adList = payService.getAdList(store.getId());
     	msgMgr.addViewMessages(model, locale,
     			new Message[] {
 					new Message("label_cancel", "upload.cancel"),
@@ -144,7 +146,7 @@ public class StoreSettingController {
 					new Message("label_clearSelectedFiles", "upload.clearSelectedFiles"),
 					new Message("label_invalidFileExtension", "upload.invalidFileExtension"),
     			});
-
+    	model.addAttribute("adList",adList);
     	model.addAttribute("uploadModel", uploadModel);
     	//-
     	
@@ -169,9 +171,10 @@ public class StoreSettingController {
         		return null;
         	} else {
         		StoreOpt opt = store.getStoreOpt();
-
+        		
         		opt.setKioskLogoImage(payService.getUploadFile(opt.getKioskLogoImageId()));
         		opt.setMobileLogoImage(payService.getUploadFile(opt.getMobileLogoImageId()));
+        		
 
         		return opt;
         	}
@@ -180,6 +183,7 @@ public class StoreSettingController {
     		throw new ServerOperationForbiddenException("ReadError");
     	}
     }
+    
     
     /**
      * 업로드된 파일을 임의 파일명으로 변경 액션
@@ -269,7 +273,11 @@ public class StoreSettingController {
         	String mLogoUniqueName = Util.parseString((String)model.get("mLogoUniqueName"));
         	String mLogoText = Util.parseString((String)model.get("mLogoText"));
         	String mType = Util.parseString((String)model.get("mType"));
+        	String debugStr = Util.parseString((String)model.get("debugStr"));
         	logger.info("ad"+kAd);
+        	logger.info("debugStr"+debugStr);
+        	
+        	int storeId= SolUtil.getSessionStoreId(session);
         	
         	String vLogoUniqueName1 = vLogoUniqueName.replace("[", "");
         	String vLogoUniqueName2 = vLogoUniqueName1.replace("]", "");
@@ -294,6 +302,20 @@ public class StoreSettingController {
         	//-
         	String [] list = vLogoUniqueName3.split(",");
         	String [] list2 = kAd.split(",");
+        	String [] indexList = debugStr.split(",");
+        	List<Ad> adList = payService.getAdList(storeId);
+        	
+        	System.out.println(indexList.length);
+        	if(indexList.length >0 && Util.isValid(debugStr)) {
+            	for(int i = 0; i < adList.size(); i++) {
+            		Ad ad = payService.getAdByFileName(indexList[i]);
+                	System.out.println(indexList[i]);
+            		ad.setIndex(i);
+            		payService.saveOrUpdate(ad);
+            	}
+        	}
+
+        	
         	
         	StoreOpt opt = target.getStoreOpt();
         	if (opt == null) {
@@ -329,14 +351,14 @@ public class StoreSettingController {
 
         		}
         		
+        		int adSize = payService.getAdList(storeId).size();
         		for (int i = 0; i < list.length;i++) {
-        		
+
         		File kAdFile = new File(tempRootDir + "/" + list[i]);
         			System.out.println(kAdFile);
     				if(Util.isValid(list[i]) && kAdFile.exists()) {
     					long vLogoFileLen = cleanFolderAndmoveFile(tempRootDir, dstKioskDirAd, list[i]);
-    					
-    					adFile = new Ad(target, list[i], list2[i], vLogoFileLen,i,"Y", "/store/api/video/",session);
+    					adFile = new Ad(target, list[i], list2[i], vLogoFileLen, adSize + i,"A","Y", "/store/api/video/",session);
     					
     		        	if (adFile != null) {
     		        		payService.saveOrUpdate(adFile);
@@ -380,11 +402,55 @@ public class StoreSettingController {
         	storeService.saveOrUpdate(opt);
         	
         	if (refreshRequired) {
-        		selfService.setMonTask("M", String.valueOf(target.getId()), session);
+//        		selfService.setMonTask("M", String.valueOf(target.getId()), session);
         	}
     	}
 		
         return "OK";
+    }
+    /**
+     * 변경 액션
+     */
+    @RequestMapping(value = "/updateMenu", method = RequestMethod.POST)
+    public @ResponseBody String updateMenu(@RequestBody Map<String, Object> model, Locale locale, 
+    		HttpSession session) {
+    	
+    	Store target = storeService.getStore((int)model.get("id"));
+    	if (target != null) {
+    		String menu = Util.parseString((String)model.get("menu"));
+    		String type = Util.parseString((String)model.get("type"));
+
+    		
+    		int storeId= SolUtil.getSessionStoreId(session);
+    		
+    		StoreOpt opt = target.getStoreOpt();
+    		if (opt == null) {
+    			opt = new StoreOpt(target, session);
+    		}
+
+    		Ad adFile = null;
+    		int adSize = payService.getAdList(storeId).size();
+    		try {
+    				if(Util.isValid(menu)) {
+
+    					adFile = new Ad(target, menu, menu,0, adSize,type,"Y", "Menu",session);
+    					
+    					if (adFile != null) {
+    						payService.saveOrUpdate(adFile);
+    						selfService.setMonTask("A", String.valueOf(target.getId()), session);
+    					}
+    					
+    				} 
+    			
+
+    		} catch (Exception e) {
+    			logger.error("update - move file", e);
+    			throw new ServerOperationForbiddenException("OperationError");
+    		}
+    		
+    	}
+    	
+    	return "OK";
     }
     
     /**
@@ -456,5 +522,27 @@ public class StoreSettingController {
     	}
     	
     	return false;
+    }
+    
+	/**
+	 * 삭제 액션
+	 */
+    @RequestMapping(value = "/destroy", method = RequestMethod.POST)
+    public @ResponseBody String destroy(@RequestBody Map<String, Object> model) {
+
+    	String indexNumStr = Util.parseString((String)model.get("num"));
+    	
+    	int indexNum = Integer.parseInt(indexNumStr);
+    	
+    	Ad ad = payService.getAdByIndex(indexNum);
+    	
+    	try {
+        	payService.deleteAd(ad);
+    	} catch (Exception e) {
+    		logger.error("destroy", e);
+    		throw new ServerOperationForbiddenException("DeleteError");
+    	}
+
+        return "OK";
     }
 }

@@ -11,6 +11,7 @@ import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
 import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.AppUser;
+import kr.co.paycast.models.pay.Store;
 import kr.co.paycast.models.pay.StoreUser;
 import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.dao.AppUserDao;
@@ -59,6 +60,18 @@ public class PayServiceImpl implements PayService {
 	public void deleteAppUsers(List<AppUser> appUsers) {
 		appUserDao.delete(appUsers);
 	}
+	
+	@Override
+	public void deleteAd(Ad ad) {
+		
+		uploadFileDao.delete(ad);
+	}
+	
+	@Override
+	public void deleteAds(List<Ad> ads) {
+		
+		uploadFileDao.deleteAds(ads);
+	}
 
 	@Override
 	public DataSourceResult getAppUserList(DataSourceRequest request) {
@@ -86,6 +99,34 @@ public class PayServiceImpl implements PayService {
 	public UploadFile getUploadFile(Integer id) {
 		
 		return uploadFileDao.get(id);
+	}
+	
+	@Override
+	public Ad getAd(Integer id) {
+		
+		return uploadFileDao.getAd(id);
+	}
+	
+	@Override
+	public Ad getAdByIndex(int index) {
+		
+		return uploadFileDao.getAdByIndex(index);
+	}
+	
+	@Override
+	public Ad getAdByFileName(String fileName) {
+		
+		return uploadFileDao.getAdByFileName(fileName);
+	}
+	@Override
+	public Ad getAdByStoreId(Integer id) {
+		
+		return uploadFileDao.getAdByStoreId(id);
+	}
+	@Override
+	public List<Ad> getAdList(int id) {
+		
+		return uploadFileDao.getAdList(id);
 	}
 	@Override
 	public List<UploadFile> getUploadFilebySize(int listSize) {

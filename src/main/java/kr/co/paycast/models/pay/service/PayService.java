@@ -8,6 +8,7 @@ import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
 import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.AppUser;
+import kr.co.paycast.models.pay.Store;
 import kr.co.paycast.models.pay.StoreUser;
 import kr.co.paycast.models.pay.UploadFile;
 
@@ -26,6 +27,8 @@ public interface PayService {
 	public void saveOrUpdate(AppUser appUser);
 	public void deleteAppUser(AppUser appUser);
 	public void deleteAppUsers(List<AppUser> appUsers);
+	public void deleteAd(Ad ad);
+	public void deleteAds(List<Ad> ad);
 
 	// for Kendo Grid Remote Read
 	public DataSourceResult getAppUserList(DataSourceRequest request);
@@ -41,6 +44,11 @@ public interface PayService {
 	//
 	// Common
 	public UploadFile getUploadFile(Integer id);
+	public Ad getAd(Integer id);
+	public Ad getAdByIndex(int index);
+	public Ad getAdByFileName(String fileName);
+	public Ad getAdByStoreId(Integer id);
+	public List<Ad> getAdList(int id);
 	public List<UploadFile> getUploadFilebySize(int listSize);
 	public List<Ad> getAdbySize(int listSize,int storeId, String enabled);
 	public void saveOrUpdate(UploadFile uploadFile);

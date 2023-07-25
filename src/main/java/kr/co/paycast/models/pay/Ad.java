@@ -27,8 +27,8 @@ public class Ad {
 	@Column(name = "FILE_NAME", nullable = false, length = 50)
 	private String fileName;
 	
-	@Column(name = "IDEX", nullable = false, length = 50)
-	private int index;
+	@Column(name = "FILE_INDEX", nullable = false, length = 50)
+	private int fileIndex;
 
 	@Column(name = "STORAGE_PATH", nullable = false, length = 50)
 	private String storagePath;
@@ -48,6 +48,9 @@ public class Ad {
 	@Column(name = "FILE_LENGTH", nullable = false)
 	private long fileLength;
 	
+	@Column(name = "TYPE", nullable = false)
+	private String type;
+	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "STORE_ID", nullable = false)
 	private Store store;
@@ -55,14 +58,15 @@ public class Ad {
 
 	public Ad() {}
 	
-	public Ad(Store store, String filename, String orgFilename, long fileLength, int index, String enabled, String storagePath,
+	public Ad(Store store, String filename, String orgFilename, long fileLength, int fileIndex,String type, String enabled, String storagePath,
 			HttpSession session) {
 		
 		this.store = store;
 		this.fileName = filename;
 		this.orgFilename = orgFilename;
 		this.fileLength = fileLength;
-		this.index = index;
+		this.fileIndex = fileIndex + 1;
+		this.type = type;
 		this.enabled = enabled;
 		this.storagePath = storagePath;
 		
@@ -96,12 +100,12 @@ public class Ad {
 
 
 	public int getIndex() {
-		return index;
+		return fileIndex;
 	}
 
 
-	public void setIndex(int index) {
-		this.index = index;
+	public void setIndex(int fileIndex) {
+		this.fileIndex = fileIndex;
 	}
 
 
@@ -177,12 +181,22 @@ public class Ad {
 	}
 
 
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	@Override
 	public String toString() {
-		return "Ad [id=" + id + ", fileName=" + fileName + ", index=" + index + ", storagePath=" + storagePath
+		return "Ad [id=" + id + ", fileName=" + fileName + ", fileIndex=" + fileIndex + ", storagePath=" + storagePath
 				+ ", enabled=" + enabled + ", createDate=" + createDate + ", lastUpdateDate=" + lastUpdateDate
-				+ ", orgFilename=" + orgFilename + ", fileLength=" + fileLength + ", store=" + store + "]";
+				+ ", orgFilename=" + orgFilename + ", fileLength=" + fileLength + ", type=" + type + ", store=" + store
+				+ "]";
 	}
+
 
 
 	

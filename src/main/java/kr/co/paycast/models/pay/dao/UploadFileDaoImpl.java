@@ -39,6 +39,82 @@ public class UploadFileDaoImpl implements UploadFileDao {
 		return (list.isEmpty() ? null : list.get(0));
 	}
 	
+	@Override
+	public Ad getAd(Integer id) {
+		
+		if (id == null) {
+			return null;
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Ad> list = session.createCriteria(Ad.class)
+		.add(Restrictions.eq("id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public Ad getAdByIndex(Integer index) {
+		
+		if (index == null) {
+			return null;
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Ad> list = session.createCriteria(Ad.class)
+		.add(Restrictions.eq("fileIndex", index)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public Ad getAdByFileName(String fileName) {
+		
+		if (fileName == null) {
+			return null;
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Ad> list = session.createCriteria(Ad.class)
+		.add(Restrictions.eq("fileName", fileName)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	@Override
+	public Ad getAdByStoreId(Integer id) {
+		
+		if (id == null) {
+			return null;
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Ad> list = session.createCriteria(Ad.class)
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Ad> getAdList(int id) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		return session.createCriteria(Ad.class)
+				.addOrder(Order.asc("fileIndex"))
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", id)).list();
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<UploadFile> getList(int listSize) {
@@ -59,9 +135,9 @@ public class UploadFileDaoImpl implements UploadFileDao {
 		Session session = sessionFactory.getCurrentSession();
 		
 		return session.createCriteria(Ad.class)
-				.setFirstResult(0)
-				.setMaxResults(5)
-				.addOrder(Order.desc("createDate"))
+//				.setFirstResult(0)
+//				.setMaxResults(5)
+				.addOrder(Order.asc("fileIndex"))
 				.createAlias("store", "store")
 				.add(Restrictions.eq("store.id", storeId))
 				.add(Restrictions.eq("enabled", enabled)).list();
@@ -84,6 +160,14 @@ public class UploadFileDaoImpl implements UploadFileDao {
 	}
 
 	@Override
+	public void delete(Ad ad) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		session.delete(session.load(Ad.class, ad.getId()));
+	}
+	
+	@Override
 	public void delete(UploadFile uploadFile) {
 
 		Session session = sessionFactory.getCurrentSession();
@@ -99,6 +183,16 @@ public class UploadFileDaoImpl implements UploadFileDao {
         for (UploadFile uploadFile : uploadFiles) {
             session.delete(session.load(UploadFile.class, uploadFile.getId()));
         }
+	}
+	
+	@Override
+	public void deleteAds(List<Ad> Ads) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		for (Ad ad : Ads) {
+			session.delete(session.load(Ad.class, ad.getIndex()));
+		}
 	}
 
 }

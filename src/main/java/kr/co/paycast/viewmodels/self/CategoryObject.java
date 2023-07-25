@@ -41,6 +41,12 @@ public class CategoryObject {
 	public void setMenuObjectList(List<MenuObject> menuObjectList) {
 		this.menuObjectList = menuObjectList;
 	}
+	
+	@Override
+	public String toString() {
+		return "CategoryObject [seq=" + seq + ", name=" + name + ", image=" + image + ", menuNum=" + menuNum
+				+ ", menuObjectList=" + menuObjectList + "]";
+	}
 
 
 	
