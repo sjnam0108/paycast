@@ -279,19 +279,6 @@ $(document).ready(function() {
 					</div>
 				</div>				
 			</div>
-			<hr class="m-0" />
-			<div class="card-body">
-				<div class="pb-2">
-					${title_menuMatrix}
-					<span class="small text-muted pl-3">${desc_menuMatrix}</span>
-				</div>
-				<select name="kioskMenuMatrix" class="selectpicker col-sm-3 px-0" data-style="btn-default" data-none-selected-text="">
-					<option value="2x2">2 x 2</option>
-					<option value="3x3">3 x 3</option>
-					<option value="3x4">3 x 4</option>
-					<option value="4x4">4 x 4</option>
-				</select>
-			</div>
 		</div>
 	</div>
 	<div class="tab-pane" id="ad-order">
@@ -328,7 +315,7 @@ $(document).ready(function() {
 						<thead>
 							<tr>
 								<th scope="col">번호</th>
-								<th scope="col">파일명</th>
+								<th scope="col" style="display:none;">파일명</th>
 								<th scope="col">원본 파일명</th>
 								<th scope="col">생성 날짜</th>
 							</tr>
@@ -336,13 +323,12 @@ $(document).ready(function() {
 							<tbody>
 						<c:forEach items="${adList }" var="ad">
 
-							<tr id="${ad.fileName }">
+							<tr id="${ad.fileName }" class="clickableRow">
 								<td id="index"><c:out value="${ad.index }"></c:out></td>
-								<td id="fileName"><c:out value="${ad.fileName }"></c:out></td>
+								<td id="fileName" style="display:none;"><c:out value="${ad.fileName }"></c:out></td>
 								<td id="orgFilename"><c:out value="${ad.orgFilename }"></c:out></td>
 								<td id="createDate"><c:out value="${ad.createDate }"></c:out></td>
 							</tr>
-
 						</c:forEach>
 						</tbody>
 					</table>
@@ -602,7 +588,10 @@ div.k-dropzone.k-dropzone-hovered em, div.k-dropzone em { color: #2e2e2e; }
 .k-upload .k-upload-files ~ .k-clear-selected:hover {
 	background: rgba(24,28,33,0.06);
 }
+.highlight{
+background-color:#D2E0FF;
 
+}
 </style>
 
 <!-- / Smart wizard -->
@@ -611,6 +600,12 @@ div.k-dropzone.k-dropzone-hovered em, div.k-dropzone em { color: #2e2e2e; }
 <!--  Scripts -->
 
 <script>
+var adSize = [];
+var adType = [];
+<c:forEach var="ad" items="${adList }" >
+adSize.push("${ad.index }");
+adType.push("${ad.type }");
+</c:forEach>
 var tdArr = new Array();	// 배열 선언
 var storeId = -1;
 
@@ -629,6 +624,7 @@ var kFilename = "";
 var vFilename = "";
 var vFilenameList = [];
 var List = [];
+
 var mFilename = "";
 
 var objImgSel = null;
@@ -934,7 +930,24 @@ function confirmWizardForm() {
 	}
 }
 
+function checkType() {
+	var num = adSize.length-1;
+	var type = adType[num]
+	console.log(type);
+	console.log(adType[num]);
+	
+	return type == "M";
+	
+
+}
+
 function addRow() {
+		
+		if(checkType()) {
+			alert("메뉴 다음에 메뉴가 올 수 없습니다.");
+			return;
+		}
+	
 	  // table element 찾기
 	  var table = document.getElementById('table_tb');
 	  var curDate = new Date();
@@ -942,23 +955,20 @@ function addRow() {
 	  var curTime = curDate.getFullYear() + "-" + (curDate.getMonth() + 1) + "-" + curDate.getDate() + " " + curDate.getHours() + ":" + curDate.getMinutes() + ":" + curDate.getSeconds();
 	  // 새 행(Row) 추가
 	  var newRow = table.insertRow();
-	  
 	  // 새 행(Row)에 Cell 추가
 	  var newCell1 = newRow.insertCell(0);
 	  var newCell2 = newRow.insertCell(1);
 	  var newCell3 = newRow.insertCell(2);
-	  var newCell4 = newRow.insertCell(3);
 	  var type = "M";
 	  
 	  // Cell에 텍스트 추가
-	  newCell1.innerText = '1';
+	  newCell1.innerText = adSize.length+1;
 	  newCell2.innerText = '메뉴판';
-	  newCell3.innerText = '메뉴판';
-	  newCell4.innerText = curTime;
+	  newCell3.innerText = curTime;
 	  
   	var data = {
     		id: storeId,
-    		menu: '메뉴판',
+    		menu: '메뉴판' + adSize.length,
     		type: type,
     		createDate: curTime,
 
@@ -971,10 +981,11 @@ function addRow() {
 			url: "${updateMenuUrl}",
 			data: JSON.stringify(data),
 			success: function (form) {
+				window.location.reload();
 			},
 			error: ajaxSaveError
 		});
-	  
+		
 }
 
 $(document).ready(function() {
@@ -994,7 +1005,13 @@ $(document).ready(function() {
 	});
 
 	 
-	$("#table_tb tr").click(function(){ 	
+	$("#table_tb tr").click(function(){ 
+		
+// 	      $(".clickableRow").on("click",function(){
+		       $(".highlight").removeClass("highlight");
+		      $(this).addClass("highlight");
+		      
+// 		      });
 
 		var str = ""
 			tdArr = new Array();
@@ -1024,17 +1041,13 @@ $(document).ready(function() {
 		str +=	" * 클릭된 Row의 td값 = No. : <font color='red'>" + no + "</font>" +
 				", 아이디 : <font color='red'>" + userid + "</font>" +
 				", 이름 : <font color='red'>" + name + "</font>" +
-				", 이메일 : <font color='red'>" + email + "</font>";		
+				", 이메일 : <font color='red'>" + email + "</font>";
 	});
 
 
 <c:if test="${not empty sessionScope['currentStoreId']}">
 	storeId = ${sessionScope['currentStoreId']};
 </c:if>
-
-	$("#kiosk-order select[name='kioskMenuMatrix']").selectpicker('render');
-
-	bootstrapSelectVal($("#kiosk-order select[name='kioskMenuMatrix']"), "3x3");
 	
 	$("#mobile-order select[name='mobileOrderType']").selectpicker('render');
 	bootstrapSelectVal($("#mobile-order select[name='mobileOrderType']"), "type2");
@@ -1051,7 +1064,6 @@ $(document).ready(function() {
     		kLogoUniqueName: kFilename,
     		vLogoUniqueName: $.trim(vFilename),
 			kLogoText: $.trim($("#kiosk-order input[name='txtLogo']").val()),
-   			kMatrix: $("#kiosk-order select[name='kioskMenuMatrix']").val(),
     		mLogoType: mLogoType,
     		mLogoImage: $.trim($("#mobile-order input[name='imgFilename']").val()),
     		mLogoUniqueName: mFilename,
@@ -1070,6 +1082,7 @@ $(document).ready(function() {
 
 //                     });
 				showSaveSuccessMsg();
+				window.location.reload();
 				kPreviewFile = "/titles/${storeRoot}/" + kFilename;
 				vPreviewFile = "/ad/${storeRoot}/" + vFilename;
 				mPreviewFile = "/m/titles/${storeRoot}/" + mFilename;
@@ -1113,7 +1126,6 @@ $(document).ready(function() {
 				selectRadioBtn('M', data.mobileLogoType);
 			}
 			
-			bootstrapSelectVal($("select[name='kioskMenuMatrix']"), data.menuMatrix);
 			bootstrapSelectVal($("select[name='mobileOrderType']"), data.orderType);
 		},
 		error: ajaxReadError
@@ -1121,7 +1133,7 @@ $(document).ready(function() {
 	
 	$("#delete-btn").click(function(e) {
 		e.preventDefault();
-			var num = tdArr[0];
+			var fileName = tdArr[1];
 			showDelConfirmModal(function(result) {
 				if (result) {
 					$.ajax({
@@ -1129,15 +1141,15 @@ $(document).ready(function() {
 						contentType: "application/json",
 						dataType: "json",
 						url: "${destroyUrl}",
-						data: JSON.stringify({num}),
+						data: JSON.stringify({fileName}),
 						success: function (form) {
         					showDeleteSuccessMsg();
-							grid.dataSource.read();
+							window.location.reload();
 						},
 						error: ajaxDeleteError
 					});
 				}
-			}, true, num);
+			}, true);
 		
 	});
 	
@@ -1148,7 +1160,6 @@ $(document).ready(function() {
 </script>
 
 <!--  / Scripts -->
-
 
 <!-- / Page body -->
 

@@ -124,6 +124,11 @@ public class PayServiceImpl implements PayService {
 		return uploadFileDao.getAdByStoreId(id);
 	}
 	@Override
+	public Ad getLastAd(Integer id) {
+		
+		return uploadFileDao.getLastAdByStoreId(id);
+	}
+	@Override
 	public List<Ad> getAdList(int id) {
 		
 		return uploadFileDao.getAdList(id);

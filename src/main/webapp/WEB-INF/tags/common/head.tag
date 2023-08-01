@@ -53,4 +53,7 @@
 	<script src="<c:url value='/resources/js/cultures/kendo.culture.${kendoLangCountryCode}.min.js' />"></script>
 	<script src="<c:url value='/resources/js/messages/kendo.messages.${kendoLangCountryCode}.min.js' />"></script>
 	<script> kendo.culture("${kendoLangCountryCode}"); </script>
+	<link href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css" rel="stylesheet">
+
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
 </head>

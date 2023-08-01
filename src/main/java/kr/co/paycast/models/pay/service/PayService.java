@@ -48,6 +48,7 @@ public interface PayService {
 	public Ad getAdByIndex(int index);
 	public Ad getAdByFileName(String fileName);
 	public Ad getAdByStoreId(Integer id);
+	public Ad getLastAd(Integer id);
 	public List<Ad> getAdList(int id);
 	public List<UploadFile> getUploadFilebySize(int listSize);
 	public List<Ad> getAdbySize(int listSize,int storeId, String enabled);

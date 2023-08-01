@@ -105,7 +105,7 @@ public class Ad {
 
 
 	public void setIndex(int fileIndex) {
-		this.fileIndex = fileIndex;
+		this.fileIndex = fileIndex + 1;
 	}
 
 

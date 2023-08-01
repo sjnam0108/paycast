@@ -203,7 +203,7 @@ public class StoreSettingController {
     	String newFilename = "";
     	String [] list = uploadedFilename.split(",");
     	System.out.println(list);
-    	ArrayList name = new ArrayList<>();
+    	ArrayList<Object> name = new ArrayList<>();
     	for(int i=0; i<list.length; i++) {
     	
 		String typeRootDir = SolUtil.getPhysicalRoot("UpTemp");
@@ -267,7 +267,6 @@ public class StoreSettingController {
         	String kLogoUniqueName = Util.parseString((String)model.get("kLogoUniqueName"));
         	String vLogoUniqueName = Util.parseString((String)model.get("vLogoUniqueName"));
         	String kLogoText = Util.parseString((String)model.get("kLogoText"));
-        	String kMatrix = Util.parseString((String)model.get("kMatrix"));
         	String mLogoType = Util.parseString((String)model.get("mLogoType"));
         	String mLogoImage = Util.parseString((String)model.get("mLogoImage"));
         	String mLogoUniqueName = Util.parseString((String)model.get("mLogoUniqueName"));
@@ -289,10 +288,6 @@ public class StoreSettingController {
         	//    1) 키오스크 메뉴 매트릭스 값이 없음
         	//    2) 로고가 이미지 유형으로 설정되었는데, 파일 정보가 전달 안됨
         	//
-        	if (Util.isNotValid(kMatrix)) {
-        		throw new ServerOperationForbiddenException(
-        				msgMgr.message("common.server.msg.wrongParamError", locale));
-        	}
         	
         	if ((kLogoType.equals("I") && Util.isNotValid(kLogoUniqueName)) || 
         			(mLogoType.equals("I") && Util.isNotValid(mLogoUniqueName))) {
@@ -305,24 +300,15 @@ public class StoreSettingController {
         	String [] indexList = debugStr.split(",");
         	List<Ad> adList = payService.getAdList(storeId);
         	
-        	System.out.println(indexList.length);
-        	if(indexList.length >0 && Util.isValid(debugStr)) {
-            	for(int i = 0; i < adList.size(); i++) {
-            		Ad ad = payService.getAdByFileName(indexList[i]);
-                	System.out.println(indexList[i]);
-            		ad.setIndex(i);
-            		payService.saveOrUpdate(ad);
-            	}
-        	}
-
-        	
+        	// 인덱스 처리
+        	Index(indexList,adList,target, session);
         	
         	StoreOpt opt = target.getStoreOpt();
         	if (opt == null) {
         		opt = new StoreOpt(target, session);
         	}
         	
-        	boolean refreshRequired = checkRefreshRequired(opt, kMatrix, kLogoType, kLogoUniqueName, kLogoText);
+        	boolean refreshRequired = checkRefreshRequired(opt, kLogoType, kLogoUniqueName, kLogoText);
         	
     		String tempRootDir = SolUtil.getPhysicalRoot("UpTemp");
     		String dstKioskDir = SolUtil.getPhysicalRoot("KioskTitle", target.getId());
@@ -382,7 +368,6 @@ public class StoreSettingController {
         	opt.setKioskLogoText(kLogoText);
         	opt.setMobileLogoType(mLogoType);
         	opt.setMobileLogoText(mLogoText);
-        	opt.setMenuMatrix(kMatrix);
         	opt.setOrderType(mType);
 
         	if (kLogoImageFile != null) {
@@ -402,7 +387,7 @@ public class StoreSettingController {
         	storeService.saveOrUpdate(opt);
         	
         	if (refreshRequired) {
-//        		selfService.setMonTask("M", String.valueOf(target.getId()), session);
+        		selfService.setMonTask("M", String.valueOf(target.getId()), session);
         	}
     	}
 		
@@ -428,19 +413,21 @@ public class StoreSettingController {
     			opt = new StoreOpt(target, session);
     		}
 
-    		Ad adFile = null;
+    		Ad adFile = payService.getLastAd(storeId);
+    		Ad ad = null;
+    		System.out.println(adFile.getType());
     		int adSize = payService.getAdList(storeId).size();
     		try {
-    				if(Util.isValid(menu)) {
+    				if(!adFile.getType().equals("M")) {
 
-    					adFile = new Ad(target, menu, menu,0, adSize,type,"Y", "Menu",session);
+    					ad = new Ad(target, Util.uniqueMenu(menu), menu,0, adSize,type,"Y", "Menu",session);
     					
-    					if (adFile != null) {
-    						payService.saveOrUpdate(adFile);
+    					if (ad != null) {
+    						payService.saveOrUpdate(ad);
     						selfService.setMonTask("A", String.valueOf(target.getId()), session);
     					}
     					
-    				} 
+    				}
     			
 
     		} catch (Exception e) {
@@ -493,10 +480,10 @@ public class StoreSettingController {
     /**
      * 상점 기기의 새로고침 필요 여부를 판단함
      */
-    private boolean checkRefreshRequired(StoreOpt opt, String kMatrix, String kLogoType,
+    private boolean checkRefreshRequired(StoreOpt opt, String kLogoType,
     		String kLogoUniqueName, String kLogoText) {
     	
-    	if (!kMatrix.equals(opt.getMenuMatrix()) || !kLogoType.equals(opt.getKioskLogoType())) {
+    	if (!kLogoType.equals(opt.getKioskLogoType())) {
     		return true;
     	}
     	
@@ -524,20 +511,43 @@ public class StoreSettingController {
     	return false;
     }
     
+    /**
+     * 상점 기기의 새로고침 필요 여부를 판단함
+     */
+    private boolean Index(String[] indexList,List<Ad> adList,Store target, HttpSession session ) {
+    	
+    	if(indexList.length >0) {
+        	for(int i = 0; i < adList.size(); i++) {
+        		Ad ad = payService.getAdByFileName(indexList[i]);
+            	System.out.println(indexList[i]);
+        		ad.setIndex(i);
+        		payService.saveOrUpdate(ad);
+        	}
+        	selfService.setMonTask("A", String.valueOf(target.getId()), session);
+        	return true;
+    	}
+    	
+    	return false;
+    }
+    
 	/**
 	 * 삭제 액션
 	 */
     @RequestMapping(value = "/destroy", method = RequestMethod.POST)
-    public @ResponseBody String destroy(@RequestBody Map<String, Object> model) {
+    public @ResponseBody String destroy(@RequestBody Map<String, Object> model, HttpSession session) {
 
-    	String indexNumStr = Util.parseString((String)model.get("num"));
+    	String UUID = Util.parseString((String)model.get("fileName"));
     	
-    	int indexNum = Integer.parseInt(indexNumStr);
-    	
-    	Ad ad = payService.getAdByIndex(indexNum);
+    	Ad ad = payService.getAdByFileName(UUID);
+    	int storeId = SolUtil.getSessionStoreId(session);
+    	Store store = storeService.getStore(storeId);
+    	List<Ad> adList = payService.getAdList(storeId);
+
     	
     	try {
         	payService.deleteAd(ad);
+			selfService.setMonTask("A", String.valueOf(storeId), session);
+
     	} catch (Exception e) {
     		logger.error("destroy", e);
     		throw new ServerOperationForbiddenException("DeleteError");

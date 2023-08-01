@@ -14,6 +14,7 @@ public interface UploadFileDao {
 	public Ad getAdByIndex(Integer index);
 	public Ad getAdByFileName(String fileName);
 	public Ad getAdByStoreId(Integer id);
+	public Ad getLastAdByStoreId(Integer id);
 	public List<Ad> getAdList(int id);
 	public List<UploadFile> getList(int listSize);
 	public List<Ad> getList(int listSize, int storeId, String enabled);

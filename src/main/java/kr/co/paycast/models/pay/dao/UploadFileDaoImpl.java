@@ -102,6 +102,25 @@ public class UploadFileDaoImpl implements UploadFileDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	@Override
+	public Ad getLastAdByStoreId(Integer id) {
+		
+		if (id == null) {
+			return null;
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Ad> list = session.createCriteria(Ad.class)
+		.setFirstResult(0)
+		.setMaxResults(1)
+		.addOrder(Order.desc("fileIndex"))
+		.createAlias("store", "store")
+		.add(Restrictions.eq("store.id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

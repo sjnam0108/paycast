@@ -2414,6 +2414,14 @@ public class Util {
 	}
 	
 	/**
+	 * 이미지 고유 파일명을 획득
+	 */
+	public static String uniqueMenu(String filename) {
+		
+		return uniqueFilename("M", filename);
+	}
+	
+	/**
 	 * 동영상 고유 파일명을 획득
 	 */
 	public static String uniqueVFilename() {
