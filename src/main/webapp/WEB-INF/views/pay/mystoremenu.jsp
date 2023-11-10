@@ -483,6 +483,16 @@
 								</div>
 							</div>
 							<div class="form-row">
+								<div class="col-sm-12">
+									<div class="form-group col">
+										<label class="form-label">
+											상품코드
+										</label>
+										<input name="code" type="text" maxlength="20" class="form-control required">
+									</div>
+								</div>
+							</div>
+							<div class="form-row">
 								<div class="col-sm-6">
 									<div class="form-group col">
 										<label class="form-label">
@@ -493,6 +503,7 @@
 											<option value="N" data-icon="fa-asterisk fa-fw mr-2">${item_new}</option>
 											<option value="R" data-icon="fa-award fa-fw mr-2">${item_rec}</option>
 											<option value="I" data-icon="fa-infinity mr-2">${item_refill}</option>
+											<option value="D" data-icon="fa-percent fa-fw mr-2"> 할인 메뉴</option>
 										</select>
 									</div>
 								</div>
@@ -518,6 +529,7 @@
 									</div>
 								</div>
 							</div>
+
 						</div>
 						<div class="tab-pane p-2 fade" id="menu-man-ctnt">
 							<div class="form-row mt-0 pt-1 pb-2 px-3">
@@ -1145,6 +1157,7 @@ function editMenu(e) {		// 2 / 3
 				
 				$("#form-4 input[name='name']").val(data.menu.name);
 				$("#form-4 input[name='price']").val(data.menu.price);
+				$("#form-4 input[name='code']").val(data.menu.code);
 
 				bootstrapSelectVal($("#form-4 select[name='badgeType']"), data.menu.flagType);
 				bootstrapSelectVal($("#form-4 select[name='visibleType']"), data.menu.published);
@@ -1936,6 +1949,7 @@ function saveMenu() {
        		id: Number($("#form-4").attr("rowid")),
        		name: $.trim($("#form-4 input[name='name']").val()),
        		price: $("#form-4 input[name='price']").val().replace(/,/g, ""),
+       		code: $.trim($("#form-4 input[name='code']").val()),
        		soldOut: $("#form-4 input[name='sold-out']").is(':checked') ? "Y" : "N",
        		
 			menuImage: $.trim($("#form-4 input[name='imgFilename']").val()),

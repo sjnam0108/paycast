@@ -35,6 +35,7 @@ import kr.co.paycast.models.store.service.StoreBasketService;
 import kr.co.paycast.models.store.service.StoreCookService;
 import kr.co.paycast.models.store.service.StoreOrderService;
 import kr.co.paycast.models.store.service.StorePayService;
+import kr.co.paycast.utils.PayUtil;
 import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
 
@@ -646,6 +647,15 @@ public class EasypayController {
 					"", storeOrderOne.getTelNumber(), senderKey, tmplCd, subject, msg, smsmsg);
 			
 			alimTalkService.save(alimTalk);
+
+				try {
+					PayUtil.testServiceApi(alimTalk);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+
 		}else{
 			logger.info("["+type+"]알림톡 전송안됨  >>> store.getBizName() [{}], store.isAlimTalkAllowed() [{}]", store.getBizName(), store.isAlimTalkAllowed());
 			logger.info("["+type+"]알림톡 전송안됨  >>> store.getBizName() [{}], store.getShortName() [{}]", store.getBizName(), store.getShortName());

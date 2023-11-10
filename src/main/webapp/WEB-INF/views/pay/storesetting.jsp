@@ -420,6 +420,7 @@ $(document).ready(function() {
 					<span class="small text-muted pl-3">${desc_mobileOrder}</span>
 				</div>
 				<select name="mobileOrderType" class="selectpicker col-sm-3 px-0" data-style="btn-default" data-none-selected-text="">
+					<option value="type4">매장</option>
 					<option value="type1">${type1_mobileOrder}</option>
 					<option value="type2">${type2_mobileOrder}</option>
 					<option value="type3">${type3_mobileOrder}</option>

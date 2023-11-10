@@ -105,6 +105,12 @@
 			배달
 		</a>
 	</li>
+ 	<li class="nav-item">
+		<a class="nav-link" data-toggle="tab" href="#discount-order">
+			<i class="mr-1 fas fa-percent"></i>
+			할인
+		</a>
+	</li>
 </ul>
 
 <div class="tab-content">
@@ -507,6 +513,23 @@
 			</div>
 		</div>
 	</div>
+	<div class="tab-pane" id="discount-order">
+		<div class="card">
+			<div class="card-body">
+				<div class="pb-2 mb-2">
+					할인 정책
+				</div>
+				<div class="form-row pb-2">
+					<div class="form-group col-sm-auto mb-auto mt-auto">제품 금액의</div>
+					<div class="form-group col-sm-1 mb-auto mt-auto">
+						<input type="hidden" name="discountId" value="">
+						<input type="text" class="form-control numberClass" name="percentageNumber" maxlength="3"/>
+					</div>
+					<div class="form-group col-sm-auto mb-auto mt-auto">%를 할인한다.</div>
+				</div>
+			</div>
+		</div>
+	</div>	
 </div>
 
 

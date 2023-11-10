@@ -521,6 +521,7 @@ public class MyStoreMenuController {
     	if (target != null) {
     		String name = Util.parseString((String)model.get("name"));
     		float price = Util.parseFloat((String)model.get("price"));
+    		String code = Util.parseString((String)model.get("code"));
     		String badgeType = Util.parseString((String)model.get("badgeType"));
     		String visibleType = Util.parseString((String)model.get("visibleType"));
         	String intro = Util.parseString((String)model.get("intro"));
@@ -561,6 +562,7 @@ public class MyStoreMenuController {
     		
     		target.setName(name);
     		target.setPrice(price);
+    		target.setCode(code);
     		target.setFlagType(badgeType);
     		target.setPublished(visibleType);
     		target.setIntro(intro);

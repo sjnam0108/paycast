@@ -1,5 +1,10 @@
 package kr.co.paycast.utils;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -8,8 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.fnd.service.SiteService;
+import kr.co.paycast.models.store.StoreAlimTalk;
 import kr.co.paycast.models.store.service.StoreSiteService;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
@@ -146,5 +154,42 @@ public class PayUtil {
 		return menuArray[menuLen-1].replace(")", "");
 	}
 	
+	public static void testServiceApi(StoreAlimTalk alimTalk) throws Exception {
+
+
+		try {
+			JSONObject reqParams = new JSONObject();
+			reqParams.put("ShortName", alimTalk.getShortName()); // body에 들어갈 내용을 담는다.
+			reqParams.put("Name", alimTalk.getName()); // body에 들어갈 내용을 담는다.
+			reqParams.put("Phone", alimTalk.getPhone()); // body에 들어갈 내용을 담는다.
+			reqParams.put("OrderSeq", alimTalk.getOrderSeq()); // body에 들어갈 내용을 담는다.
+			reqParams.put("allMenu", alimTalk.getAllMenu()); // body에 들어갈 내용을 담는다.
+			reqParams.put("finMenu", alimTalk.getFinMenu()); // body에 들어갈 내용을 담는다.
+			reqParams.put("telNumber", alimTalk.getTelNumber()); // body에 들어갈 내용을 담는다.
+			reqParams.put("senderKey", alimTalk.getSenderKey()); // body에 들어갈 내용을 담는다.
+			reqParams.put("tmplCd", alimTalk.getTmplCd()); // body에 들어갈 내용을 담는다.
+			reqParams.put("subject", alimTalk.getSubject()); // body에 들어갈 내용을 담는다.
+			reqParams.put("msg", alimTalk.getMsg()); // body에 들어갈 내용을 담는다.
+			reqParams.put("smsMsg", alimTalk.getSmsmsg()); // body에 들어갈 내용을 담는다.
+
+			URL url = new URL("https://www.test.com/test/open/order/possible-check"); // 호출할 외부 API 를 입력한다.
+
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection(); // header에 데이터 통신 방법을 지정한다.
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Content-Type", "application/json; utf-8");
+
+			// Post인 경우 데이터를 OutputStream으로 넘겨 주겠다는 설정
+			conn.setDoOutput(true);
+
+			// Request body message에 전송
+			OutputStreamWriter os = new OutputStreamWriter(conn.getOutputStream());
+			os.write(reqParams.toString());
+			os.flush();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 	
 }

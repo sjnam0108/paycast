@@ -64,11 +64,21 @@
                             </c:if>                     
                             <c:choose>
                                 <c:when test="${mOrderType eq 'type1'}">
-                                    <%-- [type1 : 매장 / 포장 만 되며 배달은 매장 문의 문구 추가]--%>
+                                    <%-- [type1 : 매장 / 포장 만 되며 배달은 숨김 처리]--%>
                                     <div class="btn-group btn-group-lg" style="width: 100%;">
-                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_S" name="orderType" value="S" style="width: 33.333%;"><b>매장</b></button>
-                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_P" name="orderType" value="P" style="width: 33.333%;"><b>포장</b></button>
-                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_D" name="orderType" value="D" style="width: 33.333%;"><b>배달</b></button>
+                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_S" name="orderType" value="S" style="width: 50%;"><b>매장</b></button>
+                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_P" name="orderType" value="P" style="width: 50%;"><b>포장</b></button>
+                                        <button type="button" class="btn btn-lg btn-outline-dark" style="display: none;" id="orderType_D" name="orderType" value="D" style="width: 33.333%;"><b>배달</b></button>
+                                    </div>
+                                    <input type="hidden" name="packing" value="0"/>
+                                    <input type="hidden" name="orderTypeClick" value="S"/>
+                                </c:when>
+                                <c:when test="${mOrderType eq 'type4'}">
+                                    <%-- [type4: 매장만 나머지는 숨김처리]--%>
+                                    <div class="btn-group btn-group-lg" style="width: 100%;">
+                                        <button type="button" class="btn btn-lg btn-outline-dark" id="orderType_S" name="orderType" value="S" style="width: 100%;"><b>매장</b></button>
+                                        <button type="button" class="btn btn-lg btn-outline-dark" style="display: none;" id="orderType_P" name="orderType" value="P" style="width: 33.333%;"><b>포장</b></button>
+                                        <button type="button" class="btn btn-lg btn-outline-dark" style="display: none;" id="orderType_D" name="orderType" value="D" style="width: 33.333%;"><b>배달</b></button>
                                     </div>
                                     <input type="hidden" name="packing" value="0"/>
                                     <input type="hidden" name="orderTypeClick" value="S"/>

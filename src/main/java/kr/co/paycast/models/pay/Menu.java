@@ -40,7 +40,10 @@ public class Menu {
 	private Store store;
 	
 	@Column(name = "MENU_NAME", nullable = false, length = 100)
-	private String name;				// 메뉴 명
+	private String name;	
+	// 메뉴 명
+	@Column(name = "MENU_CODE", nullable = false, length = 100)
+	private String code;				// 메뉴 명
 	
 	@Column(name = "SIBLING_SEQ", nullable = false)
 	private int siblingSeq;				// 메뉴 순서
@@ -259,6 +262,14 @@ public class Menu {
 
 	public void setPublished(String published) {
 		this.published = published;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	@JsonIgnore
