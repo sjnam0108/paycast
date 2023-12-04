@@ -20,10 +20,14 @@
 
 
 <c:url value="/pay/mystoresetting/couponRead" var="couponReadUrl" />
+<c:url value="/pay/mystoresetting/eventRead" var="eventReadUrl" />
 <c:url value="/pay/mystoresetting/couponList" var="couponListUrl" />
 <c:url value="/pay/mystoresetting/couponSave" var="couponSaveUrl" />
+<c:url value="/pay/mystoresetting/eventSave" var="eventSaveUrl" />
 <c:url value="/pay/mystoresetting/couponUpdate" var="couponUpdateUrl" />
+<c:url value="/pay/mystoresetting/eventUpdate" var="eventUpdateUrl" />
 <c:url value="/pay/mystoresetting/couponDestroy" var="destroyUrl" />
+<c:url value="/pay/mystoresetting/eventDestroy" var="eventdestroyUrl" />
 
 <c:url value="/pay/mystoresetting/deliveryPayRead" var="deliveryPayReadUrl" />
 <c:url value="/pay/mystoresetting/deliveryPayList" var="deliveryPayListUrl" />
@@ -523,10 +527,78 @@
 					<div class="form-group col-sm-auto mb-auto mt-auto">제품 금액의</div>
 					<div class="form-group col-sm-1 mb-auto mt-auto">
 						<input type="hidden" name="discountId" value="">
-						<input type="text" class="form-control numberClass" name="percentageNumber" maxlength="3"/>
+						<input type="text" class="form-control numberClass" name="dispercentageNumber" maxlength="3"/>
 					</div>
 					<div class="form-group col-sm-auto mb-auto mt-auto">%를 할인한다.</div>
 				</div>
+			</div>
+		</div>
+		<div class="card">
+			<div class="card-body">
+				<div class="pb-2 mb-2">
+					행사 상품
+				</div>
+
+			
+			<div class="mb-4">
+				<%
+					String editEventTemplate = 
+					"<button type='button' onclick='eventEdit(#= id #)' class='btn icon-btn btn-sm btn-outline-success borderless'>" + 
+					"<span class='fas fa-pencil-alt'></span></button>";
+				%>
+
+				<kendo:grid name="event-grid" pageable="true" filterable="false" sortable="false" scrollable="false" reorderable="false" resizable="true" selectable="single" >
+					<kendo:grid-pageable refresh="false" previousNext="false" numeric="false" pageSize="10000" info="false" />
+					<kendo:grid-toolbarTemplate>
+				    	<div class="clearfix">
+				    		<div class="float-left">
+				    			<button id="event-add-btn" type="button" class="btn btn-outline-success">${cmd_add}</button>
+				    		</div>
+				    		<div class="float-right">
+				    			<button id="event-delete-btn" type="button" class="btn btn-danger">${cmd_delete}</button>
+				    		</div>
+				    	</div>
+					</kendo:grid-toolbarTemplate>
+					<kendo:grid-columns>
+						<kendo:grid-column title="${cmd_edit}" width="50" filterable="false" sortable="false" template="<%= editEventTemplate %>" />
+						<kendo:grid-column title="이벤트 명" field="eventName" filterable="false" />
+						<kendo:grid-column title="유효기간" field="effectiveStartDate" format="{0:yyyy-MM-dd}" minScreenWidth="700"/>
+						<kendo:grid-column title="만료기간" field="effectiveEndDate" format="{0:yyyy-MM-dd}" minScreenWidth="700"/>
+					</kendo:grid-columns>
+					<kendo:grid-filterable>
+						<kendo:grid-filterable-messages selectedItemsFormat="${filter_selectedItems}"/>
+					</kendo:grid-filterable>
+					<kendo:dataSource serverPaging="true" serverSorting="true" serverFiltering="true" serverGrouping="true" error="kendoReadError">
+						<kendo:dataSource-sort>
+							<kendo:dataSource-sortItem field="whoLastUpdateDate" dir="asc"/>
+						</kendo:dataSource-sort>
+						<kendo:dataSource-filter>
+							<kendo:dataSource-filterItem field="store.site.id" operator="eq" logic="and" value="${sessionScope['currentSiteId']}">
+								<kendo:dataSource-filterItem field="store.id" operator="eq" logic="and" value="${sessionScope['currentStoreId']}">
+								</kendo:dataSource-filterItem>
+							</kendo:dataSource-filterItem>
+						</kendo:dataSource-filter>
+						<kendo:dataSource-transport>
+							<kendo:dataSource-transport-read url="${eventReadUrl}" dataType="json" type="POST" contentType="application/json" />
+							<kendo:dataSource-transport-parameterMap>
+								<script>
+									function parameterMap(options,type) {
+										return JSON.stringify(options);	
+									}
+								</script>
+							</kendo:dataSource-transport-parameterMap>
+						</kendo:dataSource-transport>
+						<kendo:dataSource-schema data="data" total="total" groups="data">
+							<kendo:dataSource-schema-model id="id">
+								<kendo:dataSource-schema-model-fields>
+									<kendo:dataSource-schema-model-field name="effectiveStartDate" type="date" />
+									<kendo:dataSource-schema-model-field name="effectiveEndDate" type="date" />
+								</kendo:dataSource-schema-model-fields>
+							</kendo:dataSource-schema-model>
+						</kendo:dataSource-schema>
+					</kendo:dataSource>
+				</kendo:grid>
+			</div>
 			</div>
 		</div>
 	</div>	
@@ -704,6 +776,69 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" onclick="couponUpdate();">${confirm_ok}</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="modal fade" data-backdrop="static" id="eventAdd">
+	<div class="modal-dialog">
+		<form class="modal-content" id="eventForm" method="post" enctype="application/json">
+			<div class="modal-header move-cursor">
+				<h5 class="modal-title">이벤트</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">이벤트 명<span class="text-danger">*</span></label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control required" name="name" maxlength="50">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">유효기간<span class="text-danger">*</span></label>
+					<div class="col-sm-8">
+						<input name="effectiveStartDate" type="text" class="form-control required">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onclick="eventSave();">${confirm_ok}</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="modal fade" data-backdrop="static" id="eventUpdate">
+	<div class="modal-dialog">
+		<form class="modal-content" id="eventUp" method="post" enctype="application/json">
+			<input type="hidden" name="eventId" />
+			<div class="modal-header move-cursor">
+				<h5 class="modal-title">이벤트</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">이벤트 명</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" name="eventName" maxlength="50">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">유효기간</label>
+					<div class="col-sm-8">
+						<input name="effectiveStartDate" type="text" class="form-control required">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">만료기간</label>
+					<div class="col-sm-8">
+						<input name="effectiveEndDate" type="text" class="form-control">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" onclick="eventUpdate();">${confirm_ok}</button>
 			</div>
 		</form>
 	</div>
@@ -1188,6 +1323,9 @@ $(document).ready(function() {
 			percentageNumber: $.trim($("#point-order input[name='percentageNumber']").val()),
 			pointAmt: $.trim($("#point-order input[name='pointAmt']").val()),
 			
+// 			discountId: $.trim($("#discount-order input[name='discountId']").val()),
+			dispercentageNumber: $.trim($("#discount-order input[name='dispercentageNumber']").val()),
+			
 			//배달료 관련 정보
   			deliveryId: $.trim($("#delivery-order input[name='deliveryId']").val()),
   			minOrderPrice: $.trim($("#delivery-order input[name='minOrderPrice']").val()),
@@ -1217,6 +1355,8 @@ $(document).ready(function() {
 		success: function (data, status) {
 
 			$("#kiosk-order input[name='txtLogo']").val(data.kioskLogoText);
+			$("#discount-order input[name='dispercentageNumber']").val(data.discount);
+			
 			if (data.kioskLogoImage) {
 				$("#kiosk-order input[name='imgFilename']").val(data.kioskLogoImage.orgFilename);
 				
@@ -1286,6 +1426,33 @@ $(document).ready(function() {
 		});
 	});
 	
+	$(document).on("click","#event-add-btn",function(){
+		
+		$("#eventAdd").modal('show');
+		$("#eventAdd").draggable({handle: ".modal-header"});
+		
+		$("#eventForm input[name='effectiveStartDate']").kendoDatePicker({
+			format: "yyyy-MM-dd",
+			parseFormats: [
+				"yyyy-MM-dd",
+			],
+			value: new Date(),
+		});
+		
+		$("#eventForm input[name='name']").val("");
+		
+		$("#evnetForm").validate({
+			rules: {
+				name: {
+					required: true, maxlength: 20
+				},
+				effectiveStartDate: { date: true },
+			}
+		});
+		
+
+	});
+	
 	$(document).on("click","#delivery-add-btn",function(){
 		$("#deliveryAdd").modal('show');
 		$("#deliveryAdd").draggable({handle: ".modal-header"});
@@ -1342,6 +1509,39 @@ $(document).ready(function() {
         					showDeleteSuccessMsg();
 							grid.dataSource.read();
 							couponSelect();
+						},
+						error: ajaxDeleteError
+					});
+				}
+			}, true, delRows.length);
+		}
+	});
+	// Delete
+	$("#event-delete-btn").click(function(e) {
+		e.preventDefault();
+			
+		var grid = $("#event-grid").data("kendoGrid");
+		var rows = grid.select();
+	
+		var delRows = [];
+		rows.each(function(index, row) {
+			var selectedItem = grid.dataItem(row);
+			delRows.push(selectedItem.id);
+		});
+			
+		if (delRows.length > 0) { 
+			showDelConfirmModal(function(result) {
+				if (result) {
+					$.ajax({
+						type: "POST",
+						contentType: "application/json",
+						dataType: "json",
+						url: "${eventdestroyUrl}",
+						data: JSON.stringify({ items: delRows }),
+						success: function (form) {
+        					showDeleteSuccessMsg();
+							grid.dataSource.read();
+							couponSelect();x
 						},
 						error: ajaxDeleteError
 					});
@@ -1415,6 +1615,32 @@ function couponSave(){
 	};
 }
 
+function eventSave(){
+	validateKendoDateValue($("#eventForm input[name='effectiveStartDate']"));
+	
+	if ($("#eventForm").valid()) {
+    	var data = {
+   			storeId : storeId, 
+   			name: $("#eventForm input[name='name']").val(),
+   			effectiveStartDate: $("#eventForm input[name='effectiveStartDate']").data("kendoDatePicker").value(),
+       	};
+		
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: "${eventSaveUrl}",
+			data: JSON.stringify(data),
+			success: function (data) {
+				showSaveSuccessMsg();
+				$("#eventAdd").modal("hide");
+				$("#event-grid").data("kendoGrid").dataSource.read();
+			},
+			error: ajaxSaveError
+		});
+	};
+}
+
 
 function edit(id) {
 	var dataItem = $("#grid").data("kendoGrid").dataSource.get(id);
@@ -1440,6 +1666,43 @@ function edit(id) {
 	
 	$("#couponUpdate").draggable({handle: ".modal-header"});
 	$("#couponUpdate").modal('show');
+}
+function eventEdit(id) {
+	
+	$("#eventUp input[name='effectiveStartDate']").kendoDatePicker({
+		format: "yyyy-MM-dd",
+		parseFormats: [
+			"yyyy-MM-dd",
+		],
+		value: new Date(),
+	});
+	$("#eventUp input[name='effectiveEndDate']").kendoDatePicker({
+		format: "yyyy-MM-dd",
+		parseFormats: [
+			"yyyy-MM-dd",
+		],
+		value: new Date(),
+	});
+	
+	var dataItem = $("#event-grid").data("kendoGrid").dataSource.get(id);
+	
+	$("#eventUp input[name='eventId']").val(dataItem.id);
+	$("#eventUp input[name='eventName']").val(dataItem.eventName);
+	$("#eventUp input[name='effectiveStartDate']").data("kendoDatePicker").value(dataItem.effectiveStartDate);
+	$("#eventUp input[name='effectiveEndDate']").data("kendoDatePicker").value(dataItem.effectiveEndDate);
+	
+	$("#eventUp").validate({
+		rules: {
+			eventName: {
+				required: true, maxlength: 20
+			},
+			effectiveStartDate: { date: true },
+			effectiveEndDate: { date: true },
+		}
+	});
+	
+	$("#eventUpdate").draggable({handle: ".modal-header"});
+	$("#eventUpdate").modal('show');
 }
 
 
@@ -1470,6 +1733,36 @@ function couponUpdate(){
 	};
 }
 
+function eventUpdate(){
+	validateKendoDateValue($("#eventUp input[name='effectiveStartDate']"));
+	validateKendoDateValue($("#eventUp input[name='effectiveEndDate']"));
+	
+	if ($("#eventUp").valid()) {
+    	var data = {
+    			id : $("#eventUp input[name='eventId']").val(), 
+    			eventName: $("#eventUp input[name='eventName']").val(),
+       			effectiveStartDate: $("#eventUp input[name='effectiveStartDate']").data("kendoDatePicker").value(),
+       			effectiveEndDate: $("#eventUp input[name='effectiveEndDate']").data("kendoDatePicker").value(),
+       	};
+		
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			dataType: "json",
+			url: "${eventUpdateUrl}",
+			data: JSON.stringify(data),
+			success: function (data) {
+				showOperationSuccessMsg();
+				$("#eventUp input[name='eventId']").val("");
+				$("#eventUpdate").modal("hide");
+				$("#event-grid").data("kendoGrid").dataSource.read();
+				
+			},
+			error: ajaxSaveError
+		});
+	};
+}
+
 function couponSelect(){
 	var data = {
 		storeId : storeId
@@ -1488,6 +1781,7 @@ function couponSelect(){
 					data: data
 				},
 				parameterMap: function (data) {
+					console.log(data)
                 	return JSON.stringify(data);
 				},
 			},
@@ -1659,13 +1953,14 @@ function policyRead(readType){
 							
 						deliveryDiv.html("");
 						deliveryDiv.append(deliveryHtmlSetting(data[i]));
-							
+// 						$("#discount-order input[name='dispercentageNumber']").val(data[i].dispercentageNumber);
 					}
 				}else if("P" == readType){
 					for(var i=0; i < data.length; i++){
 						$("#point-order input[name='pointId']").val(data[i].pointId);
 						$("#point-order input[name='percentageNumber']").val(data[i].percentageNumber);
 						$("#point-order input[name='pointAmt']").val(data[i].pointAmt);
+// 						$("#discount-order input[name='dispercentageNumber']").val(data[i].dispercentageNumber);
 						
  						minOrderDiv.html("");										
 						minOrderDiv.append(minOrdrHtmlSetting(data[i]));
@@ -1697,6 +1992,7 @@ function policyRead(readType){
 function couponPolicySelect(){
 	$("#couponDiv input[name=couponPolicyId]").each(function(index){
 		var cpDivId = $(this).val();
+		console.log(cpDivId);
 		for(var i=0; i < couponData.length; i++){
 			if("C" == couponData[i].type){
 				if(cpDivId == couponData[i].couponPolicyId){

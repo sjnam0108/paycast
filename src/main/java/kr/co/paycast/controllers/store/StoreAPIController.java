@@ -544,6 +544,7 @@ public class StoreAPIController {
 				MenuObject MenuItem = new MenuObject();	
 				
 				MenuItem.setProductId(String.valueOf(menu.getId()));
+				MenuItem.setProductCode(String.valueOf(menu.getCode()));
 				MenuItem.setSeq(String.valueOf(menu.getSiblingSeq()));
 				MenuItem.setName(menu.getName());
 				float priceFl = menu.getPrice();
@@ -555,9 +556,15 @@ public class StoreAPIController {
 				if(menu.getFlagType() == "R") {
 					MenuItem.setPopular("true");
 					MenuItem.setNewMenu("false");
-				} else {
+					MenuItem.setDisMenu("false");
+				} else if(menu.getFlagType() == "N"){
 					MenuItem.setPopular("false");
 					MenuItem.setNewMenu("ture");
+					MenuItem.setDisMenu("false");
+				} else if(menu.getFlagType() == "D") {
+					MenuItem.setPopular("false");
+					MenuItem.setNewMenu("false");
+					MenuItem.setDisMenu("ture");
 				}
 				
 				MenuItem.setSoldOut(menu.isSoldOut());
@@ -682,7 +689,7 @@ public class StoreAPIController {
 		String deviceId = (String) request.getParameter("deviceId");
 		String storeId = (String) request.getParameter("storeId");
 
-//		logger.info("/printmenu deviceId >>> [{}] / storeId >>> [{}]", deviceId, storeId);
+		logger.info("/printmenu deviceId >>> [{}] / storeId >>> [{}]", deviceId, storeId);
 
 		List<MenuJsonPrintItem> list = storeOrderService.makeMenuListPrint(storeId, deviceId);
 		try {
@@ -721,6 +728,7 @@ public class StoreAPIController {
 							JSONObject menuListObject = new JSONObject();// 배열 내에 들어갈 json
 
 							menuListObject.put("id", itemmenu.getProductID());
+							menuListObject.put("code", itemmenu.getProductCode());
 							menuListObject.put("name", itemmenu.getProductName());
 							menuListObject.put("cnt", itemmenu.getOrderCount());
 							menuListObject.put("price", itemmenu.getOrderPrice());
@@ -781,7 +789,7 @@ public class StoreAPIController {
 						}
 					}
 					menuObject.put("orderMenu", jMenuListArray);
-
+					
 					// Array�� �Է�
 					jArray.add(menuObject);
 				}
@@ -792,7 +800,7 @@ public class StoreAPIController {
 			}
 
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
-
+			
 			response.setHeader("Cache-Control", "no-store"); // HTTP 1.1
 			response.setHeader("Pragma", "no-cache, must-revalidate"); // HTTP 1.0
 			response.setContentType("application/json;charset=UTF-8");
@@ -951,6 +959,7 @@ public class StoreAPIController {
 								MenuListJsonPrintItem menuList = new MenuListJsonPrintItem();
 								JSONObject orderMenu = (JSONObject) orderMenuList.get(i);
 								String productID = (String) orderMenu.get("id");
+								String productCode = (String) orderMenu.get("code");
 								String productName = (String) orderMenu.get("name");
 								String orderCount = (String) orderMenu.get("count");
 								String orderPrice = (String) orderMenu.get("price");
@@ -963,6 +972,7 @@ public class StoreAPIController {
 								String add = (String) orderMenu.get("add");
 
 								menuList.setProductID(productID);
+								menuList.setProductCode(productCode);
 								menuList.setProductName(productName);
 								menuList.setOrderCount(orderCount);
 								menuList.setOrderPrice(orderPrice);
@@ -1419,7 +1429,7 @@ public class StoreAPIController {
 					Element catagoryElement = root.addElement("Catagory");
 					catagoryElement.addElement("storeName").addText(store.getBizName()); // 결제 매장명
 					if (store.getPhone() != null) { // 결제 매장 번호
-						catagoryElement.addElement("storeTel").addText(store.getPhone());
+						catagoryElement.addElement("storeTel").addText(store.getPhone());	
 					} else {
 						catagoryElement.addElement("storeTe").addText("");
 					}

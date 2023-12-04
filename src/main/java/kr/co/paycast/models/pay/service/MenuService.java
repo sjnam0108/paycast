@@ -29,6 +29,7 @@ public interface MenuService {
 	// Common
 	public Menu getMenu(int id);
 	public void saveOrUpdate(Menu menu);
+	public void saveOrUpdateCode(Menu menu);
 	public void deleteMenu(Menu menu);
 	public void deleteMenus(List<Menu> menus);
 

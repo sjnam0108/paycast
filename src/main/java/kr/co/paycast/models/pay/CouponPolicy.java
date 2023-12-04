@@ -124,4 +124,5 @@ public class CouponPolicy {
 	public void setWhoLastUpdateLogin(int whoLastUpdateLogin) {
 		this.whoLastUpdateLogin = whoLastUpdateLogin;
 	}
+	
 }

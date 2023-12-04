@@ -2,6 +2,7 @@ package kr.co.paycast.controllers.pay;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +23,7 @@ import kr.co.paycast.models.pay.PayUploadTransModel;
 import kr.co.paycast.models.pay.Store;
 import kr.co.paycast.models.pay.StoreCoupon;
 import kr.co.paycast.models.pay.StoreDeliveryPolicy;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.StoreOpt;
 import kr.co.paycast.models.pay.StorePolicy;
 import kr.co.paycast.models.pay.StoreDeliveryPay;
@@ -283,6 +285,7 @@ public class MyStoreSettingController {
         	String mLogoImage = Util.parseString((String)model.get("mLogoImage"));
         	String mLogoUniqueName = Util.parseString((String)model.get("mLogoUniqueName"));
         	String mLogoText = Util.parseString((String)model.get("mLogoText"));
+        	int dispercentageNumber = Util.parseInt((String)model.get("dispercentageNumber"), 0);
 //        	logger.info("ad"+kAd);
         	// 즉시취소 ON/OFF
         	boolean immediateTF = (boolean)model.get("immediateTF");
@@ -356,6 +359,7 @@ public class MyStoreSettingController {
         	opt.setMobileLogoText(mLogoText);
         	opt.setMenuMatrix(kMatrix);
         	opt.setImmediate(immediateTF);
+        	opt.setDiscount((double)dispercentageNumber/100);
 
         	if (kLogoImageFile != null) {
         		payService.saveOrUpdate(kLogoImageFile);
@@ -398,20 +402,20 @@ public class MyStoreSettingController {
         		int pointId = Util.parseInt((String)model.get("pointId"), 0);
         		int percentageNumber = Util.parseInt((String)model.get("percentageNumber"), 0);
         		int pointAmt = Util.parseInt((String)model.get("pointAmt"), 0);
-        		
         		boolean couponTf = pointPolicyUpdate(target, pointId, percentageNumber, pointAmt, session);
         		if(couponTf){
                 	logger.error("update - pointPolicyUpdate");
                 	throw new ServerOperationForbiddenException("OperationError");
         		}
         	}
-        	
+
         	//배달 요금 정보저장
         	if(target.getStoreEtc() != null){
 	    		int deliveryId = Util.parseInt((String)model.get("deliveryId"), 0);
 	    		int minOrderPrice = Util.parseInt((String)model.get("minOrderPrice"), 0);
 	    		int deliveryPay = Util.parseInt((String)model.get("deliveryPay"), 0);
 	    		boolean deliveryTf = deliveryUpdate(target,deliveryId, minOrderPrice,deliveryPay, session);
+
 	    		if(deliveryTf){
                 	logger.error("update - pointPolicyUpdate");
                 	throw new ServerOperationForbiddenException("OperationError");
@@ -507,7 +511,6 @@ public class MyStoreSettingController {
         		stampPolicy.setOrderAmt(orderAmt);
         		stampPolicy.setStamp(reserveAmt);
         		stampPolicy.touchWho(session);
-        		
         		couponService.saveOrUpdate(stampPolicy);
         	}else{
             	// 기존 정책이 없을 경우
@@ -627,6 +630,20 @@ public class MyStoreSettingController {
     		throw new ServerOperationForbiddenException("readError");
     	}
     }
+	/**
+	 * 행사상품 읽기 액션
+	 */
+	@RequestMapping(value = "/eventRead", method = RequestMethod.POST)
+	public @ResponseBody DataSourceResult eventRead(@RequestBody DataSourceRequest request, 
+			HttpSession session, HttpServletRequest req, HttpServletResponse res) {
+		
+		try {
+			return couponService.getEventRead(request);
+		} catch (Exception e) {
+			logger.error("read", e);
+			throw new ServerOperationForbiddenException("readError");
+		}
+	}
 	
 	/**
 	 * 저장된 쿠폰 select로 조회
@@ -672,6 +689,32 @@ public class MyStoreSettingController {
 		
 		return "OK";
 	}
+	
+	/**
+	 * 이벤트 저장
+	 */
+	@RequestMapping(value = "/eventSave", method = RequestMethod.POST)
+	public @ResponseBody String eventSave(@RequestBody Map<String, Object> model, Locale locale, 
+			HttpSession session) {
+		
+		Store target = storeService.getStore((int)model.get("storeId"));
+		if (target != null) {
+			String name = Util.parseString((String)model.get("name"));
+			Date effectiveStartDate = Util.removeTimeOfDate(Util.parseZuluTime((String)model.get("effectiveStartDate")));
+			
+			try {
+				StoreEvent event = new StoreEvent(name, effectiveStartDate, null, target, session);
+				
+				couponService.saveOrUpdate(event);
+			} catch (Exception e) {
+				logger.error("couponSave SaveError", e);
+				throw new ServerOperationForbiddenException("SaveError");
+			}
+			
+		}
+		
+		return "OK";
+	}
  
 	/**
 	 * 쿠폰 변경 액션
@@ -695,6 +738,35 @@ public class MyStoreSettingController {
 				throw new ServerOperationForbiddenException("SaveError");
 			}
 		
+		}
+		
+		return "OK";
+	}
+	
+	/**
+	 * 이벤트 변경 액션
+	 */
+	@RequestMapping(value = "/eventUpdate", method = RequestMethod.POST)
+	public @ResponseBody String eventUpdate(@RequestBody Map<String, Object> model, Locale locale, 
+			HttpSession session) {
+		
+		StoreEvent event = couponService.getId(Util.parseInt((String)model.get("id")));
+
+		if (event != null) {
+			String name = Util.parseString((String)model.get("eventName"));
+			String validDate = Util.parseString((String)model.get("eventValidDate"));
+			
+			try {
+				event.setEventName(name);
+				event.setEffectiveStartDate(Util.removeTimeOfDate(Util.parseZuluTime((String)model.get("effectiveStartDate"))));
+				event.setEffectiveEndDate(Util.setMaxTimeOfDate(Util.parseZuluTime((String)model.get("effectiveEndDate"))));
+				
+				couponService.saveOrUpdate(event);
+			} catch (Exception e) { 
+				logger.error("couponSave SaveError", e);
+				throw new ServerOperationForbiddenException("SaveError");
+			}
+			
 		}
 		
 		return "OK";
@@ -725,6 +797,32 @@ public class MyStoreSettingController {
     	}
 
         return "OK";
+    }
+    /**
+     * 삭제 액션
+     */
+    @RequestMapping(value = "/eventDestroy", method = RequestMethod.POST)
+    public @ResponseBody String eventDestroy(@RequestBody Map<String, Object> model, HttpSession session) {
+    	
+    	@SuppressWarnings("unchecked")
+    	ArrayList<Object> objs = (ArrayList<Object>) model.get("items");
+    	
+    	for (Object id : objs) {
+    		StoreEvent event  = couponService.getId((int)id);
+    		if (event != null) {
+    			try {
+    				couponService.deleteEvent(event);
+    				
+//    				couponService.saveOrUpdate(event);
+    				
+    			} catch (Exception e) {
+    				logger.error("destroy", e);
+    				throw new ServerOperationForbiddenException("DeleteError");
+    			}
+    		}
+    	}
+    	
+    	return "OK";
     }
     
     //배달료 관련 
@@ -864,7 +962,8 @@ public class MyStoreSettingController {
     @RequestMapping(value = "/policyRead", method = RequestMethod.POST)
     public @ResponseBody List<PolicyDispItem> policyRead(@RequestBody Map<String, Object> model, HttpSession session) {
     	List<PolicyDispItem> policyDispItemList = new ArrayList<PolicyDispItem>();
-    	
+    	Store target = storeService.getStore((int)model.get("storeId"));
+    	StoreOpt opt = target.getStoreOpt();
     	try {
     		int storeId = (int)model.get("storeId");
     		String readType = Util.parseString((String)model.get("readType"), "");

@@ -23,7 +23,10 @@ import kr.co.paycast.models.pay.OptionalMenu;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.PayUploadTransModel;
 import kr.co.paycast.models.pay.Store;
+import kr.co.paycast.models.pay.StoreCoupon;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.UploadFile;
+import kr.co.paycast.models.pay.service.CouponPointService;
 import kr.co.paycast.models.pay.service.MenuService;
 import kr.co.paycast.models.pay.service.PayService;
 import kr.co.paycast.models.pay.service.StoreService;
@@ -75,6 +78,9 @@ public class MyStoreMenuController {
 
     @Autowired
     private SelfService selfService;
+    
+    @Autowired
+    private CouponPointService couponService;
     
 	
 	/**
@@ -198,7 +204,6 @@ public class MyStoreMenuController {
             		
             		List<Menu> list = menuService.getMenuListByStoreIdGroupId(mg.getStore().getId(), mg.getId());
             		Collections.sort(list, Menu.SiblingSeqComparator);
-            		
             		List<MenuItem> menus = new ArrayList<MenuItem>();
             		for (Menu menu : list) {
             			menus.add(new MenuItem(menu));
@@ -515,8 +520,8 @@ public class MyStoreMenuController {
 	@RequestMapping(value = "/updateMenu", method = RequestMethod.POST)
     public @ResponseBody MenuItem updateMenu(@RequestBody Map<String, Object> model, Locale locale, 
     		HttpSession session) {
-
     	Menu target = menuService.getMenu((int)model.get("id"));
+    	
     	MenuItem menuItem = null;
     	if (target != null) {
     		String name = Util.parseString((String)model.get("name"));
@@ -527,13 +532,14 @@ public class MyStoreMenuController {
         	String intro = Util.parseString((String)model.get("intro"));
         	String menuImage = Util.parseString((String)model.get("menuImage"));
         	String menuUniqueName = Util.parseString((String)model.get("menuUniqueName"));
-        	
         	boolean soldOut = Util.parseBoolean((String)model.get("soldOut"));
-    		
+        	String eventSelect = Util.parseString((String)model.get("eventSelect"));
     		if (Util.isNotValid(name) || price < 0) {
             	throw new ServerOperationForbiddenException(msgMgr.message(
             			"common.server.msg.wrongParamError", locale));
     		}
+    		
+    		
     		
     		UploadFile menuImageFile = null;
     		String tempRootDir = SolUtil.getPhysicalRoot("UpTemp");
@@ -559,20 +565,29 @@ public class MyStoreMenuController {
             	logger.error("update - move file", e);
             	throw new ServerOperationForbiddenException("OperationError");
         	}
-    		
+        	
     		target.setName(name);
     		target.setPrice(price);
-    		target.setCode(code);
     		target.setFlagType(badgeType);
     		target.setPublished(visibleType);
     		target.setIntro(intro);
     		target.setSoldOut(soldOut);
-    		
+    		target.setEvent(eventSelect);  			
     		if (menuImageFile != null) {
     			payService.saveOrUpdate(menuImageFile);
     			target.setMenuImageId(menuImageFile.getId());
     		}
-    		
+    		if(code != null) {
+    			target.setCode(code);
+    			try {
+            		menuService.saveOrUpdateCode(target);
+            		
+            		menuItem = new MenuItem(target);
+            	} catch (Exception e) {
+            		logger.error("updateMenu - save menu", e);
+            		throw new ServerOperationForbiddenException("코드 중복");
+            	}
+    		}
     		target.touchWho(session);
     		
         	try {
@@ -583,8 +598,6 @@ public class MyStoreMenuController {
         		logger.error("updateMenu - save menu", e);
         		throw new ServerOperationForbiddenException("SaveError");
         	}
-
-        	
         	// 기존 저장된 선택 메뉴 저장
         	ArrayList<String> menuIds = new ArrayList<String>();
         	
@@ -909,4 +922,22 @@ public class MyStoreMenuController {
     	
     	return dstFile.length();
     }
+    
+	/**
+	 * 저장된 쿠폰 select로 조회
+	 */
+	@RequestMapping(value = "/eventList", method = RequestMethod.POST)
+    public @ResponseBody List<StoreEvent> eventReadList(@RequestBody Map<String, Object> model, Locale locale, 
+    		HttpSession session) {
+		
+		int storeId = (int)model.get("storeId");
+		
+    	try {
+    		return couponService.getEventList(storeId);
+    	} catch (Exception e) {
+    		logger.error("read", e);
+    		throw new ServerOperationForbiddenException("readError");
+    	}
+    }
+    
 }

@@ -18,6 +18,7 @@ public class PolicyDispItem {
 	private String type;				// S: 스탬프 적립 정책, C: 쿠폰 발급 정책
 	private int minOrderPrice = 0;		// 주문 최소금액
 	private int deliveryPrice = 0;
+	private int dispercentageNumber = 0;
 	
 	public PolicyDispItem() {}
 	
@@ -162,6 +163,16 @@ public class PolicyDispItem {
 
 	public void setDeliveryPrice(int deliveryPrice) {
 		this.deliveryPrice = deliveryPrice;
+	}
+	
+	
+
+	public int getDispercentageNumber() {
+		return dispercentageNumber;
+	}
+
+	public void setDispercentageNumber(int dispercentageNumber) {
+		this.dispercentageNumber = dispercentageNumber;
 	}
 
 	@Override

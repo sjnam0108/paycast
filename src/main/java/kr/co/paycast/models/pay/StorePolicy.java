@@ -212,5 +212,5 @@ public class StorePolicy {
 	public void setCouponPolicys(Set<CouponPolicy> couponPolicys) {
 		this.couponPolicys = couponPolicys;
 	}
-	
+
 }

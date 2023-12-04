@@ -14,6 +14,7 @@
 
 <c:url value="/pay/mystoremenu/read" var="readUrl" />
 <c:url value="/pay/mystoremenu/readMenu" var="readMenuUrl" />
+<c:url value="/pay/mystoremenu/eventList" var="eventListUrl" />
 
 <c:url value="/pay/mystoremenu/createGroups" var="createGroupUrl" />
 
@@ -483,12 +484,23 @@
 								</div>
 							</div>
 							<div class="form-row">
-								<div class="col-sm-12">
+								<div class="col-sm-6">
 									<div class="form-group col">
 										<label class="form-label">
 											상품코드
 										</label>
 										<input name="code" type="text" maxlength="20" class="form-control required">
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<div class="form-group col">
+										<label class="form-label">
+											행사상품
+										</label>
+											<input type="hidden" name="eventId" value="">
+											<select name="eventSelect" style="width: 100%;" class="form-control">
+
+											</select>
 									</div>
 								</div>
 							</div>
@@ -870,7 +882,7 @@ div.k-dropzone.k-dropzone-hovered em, div.k-dropzone em { color: #2e2e2e; }
 <!--  Scripts -->
 
 <script>
-
+var couponData = null;
 var initNestableRequired = true;
 
 var previewFile = "/m/menus/${storeRoot}/";
@@ -1109,7 +1121,7 @@ function changeMenuVisible(e) {		// 1 / 3
 
 //등록된 메뉴 정보 가져져기
 function editMenu(e) {		// 2 / 3
-
+	
 	e.preventDefault();
 	
 	var id = Number($(this).closest("li").attr("data-id"));
@@ -1130,6 +1142,7 @@ function editMenu(e) {		// 2 / 3
 				
 				$("#form-4 select[name='badgeType']").selectpicker('render');
 				$("#form-4 select[name='visibleType']").selectpicker('render');
+
 				
 				bootstrapSelectVal($("#form-4 select[name='badgeType']"), "");
 				bootstrapSelectVal($("#form-4 select[name='visibleType']"), "Y");
@@ -1158,10 +1171,13 @@ function editMenu(e) {		// 2 / 3
 				$("#form-4 input[name='name']").val(data.menu.name);
 				$("#form-4 input[name='price']").val(data.menu.price);
 				$("#form-4 input[name='code']").val(data.menu.code);
-
+				
 				bootstrapSelectVal($("#form-4 select[name='badgeType']"), data.menu.flagType);
 				bootstrapSelectVal($("#form-4 select[name='visibleType']"), data.menu.published);
-				
+// 				bootstrapSelectVal($("#form-4 select[name='eventSelect']"), data.menu.event);
+				$("#form-4 select[name='eventSelect']").val( data.menu.event);
+// 				$("#form-4 select[name='eventId']").val( data.menu.event.id);
+
 				$("#form-4 textarea[name='intro']").val(data.menu.intro);
 				
 				$("#form-4 input[name='sold-out']").prop("checked", data.menu.soldOut);
@@ -1209,6 +1225,9 @@ function editMenu(e) {		// 2 / 3
 				
 				$('#form-modal-4 .modal-dialog').draggable({ handle: '.modal-header' });
 				$("#form-modal-4").modal();
+				couponData = data.menu.event;
+				console.log(couponData);
+				eventSelect(data.menu.store.id);
 			},
 			error: ajaxReadError
 		});
@@ -1900,7 +1919,6 @@ function saveMenus() {
 					$("#form-modal-3").modal("hide");
 
 					var menuItemTemplate = kendo.template($("#template-menu-item").html());
-					
 					if(data.length > 0){
 						if (!$("#group-root-" + groupId).length) {
 							$("#li-group-root-" + groupId).prepend("<button data-action='expand' type='button' style='display: none;'>Expand</button>");
@@ -1916,6 +1934,7 @@ function saveMenus() {
 							$("#li-menu-root-" + data[i].id + " button[name='del-menu-btn']").click(deleteMenu);
 						}
 					}
+					
 				},
 				error: ajaxSaveError
 			});
@@ -1954,6 +1973,7 @@ function saveMenu() {
        		
 			menuImage: $.trim($("#form-4 input[name='imgFilename']").val()),
 			menuUniqueName: imgFilename,
+			eventSelect: $.trim($("#form-4 select[name='eventSelect']").val()),
        		badgeType: $("#form-4 select[name='badgeType']").val(),
        		visibleType: $("#form-4 select[name='visibleType']").val(),
        		
@@ -2124,6 +2144,50 @@ function refreshContent() {
 		}
 	});
 }
+
+function eventSelect(id){
+	var data = {
+		storeId : id
+   	};
+	$("#form-4 select[name='eventSelect']").kendoDropDownList({
+		dataTextField: "eventName",
+		dataValueField: "eventName",
+        dataSource: {
+			transport: {
+				read: {
+					type: "POST",
+					contentType: "application/json",
+					dataType: "json",
+					url: "${eventListUrl}",
+					data: data
+				},
+				parameterMap: function (data) {
+
+                	return JSON.stringify(data);
+				},
+			},
+			error: function(e) {
+      			showReadErrorMsg();
+			}
+        },
+        optionLabel: {
+        	eventName: "선택하세요.", value: "",
+		},
+        delay: 500,
+    });
+	couponPolicySelect()
+}
+
+function couponPolicySelect(){
+	$("#form-4 input[name=eventId]").each(function(index){
+		console.log(couponData);
+					$(this).parent().parent().find("select[name='eventSelect']").data("kendoDropDownList").value(couponData);
+
+			
+
+	});
+}
+
 
 </script>
 

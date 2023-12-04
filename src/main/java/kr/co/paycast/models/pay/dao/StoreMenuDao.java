@@ -11,6 +11,7 @@ public interface StoreMenuDao {
 	// Common
 	public Menu get(int id);
 	public void saveOrUpdate(Menu menu);
+	public void saveOrUpdateCode(Menu menu);
 	public void delete(Menu menu);
 	public void delete(List<Menu> menus);
 

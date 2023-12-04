@@ -6,6 +6,7 @@ import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
 import kr.co.paycast.models.pay.CouponPolicy;
 import kr.co.paycast.models.pay.StoreCoupon;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.StorePolicy;
 import kr.co.paycast.models.pay.dao.CouponDao;
 import kr.co.paycast.models.pay.dao.CouponPolicyDao;
@@ -63,6 +64,12 @@ public class CouponPointServiceImpl implements CouponPointService {
 		
 		return couponDao.get(id);
 	}
+	
+	@Override
+	public StoreEvent getId(int id) {
+		
+		return couponDao.getId(id);
+	}
 
 	@Override
 	public List<StoreCoupon> getCouponList(int storeId, int deleteState) {
@@ -71,15 +78,37 @@ public class CouponPointServiceImpl implements CouponPointService {
 	}
 	
 	@Override
+	public List<StoreEvent> getEventList(int storeId) {
+		
+		return couponDao.getEventList(storeId);
+	}
+	
+	@Override
 	public void saveOrUpdate(StoreCoupon coupon) {
 		
 		couponDao.saveOrUpdate(coupon);
+	}
+	@Override
+	public void saveOrUpdate(StoreEvent event) {
+		
+		couponDao.saveOrUpdate(event);
+	}
+	
+	@Override
+	public void deleteEvent(StoreEvent event) {
+		
+		couponDao.delete(event);
 	}
 	
 	@Override
 	public DataSourceResult getCouponRead(DataSourceRequest request) {
 		
 		return couponDao.getRead(request);
+	}
+	@Override
+	public DataSourceResult getEventRead(DataSourceRequest request) {
+		
+		return couponDao.getEventRead(request);
 	}
 
 	@Override

@@ -39,11 +39,16 @@ public class Menu {
 	@JoinColumn(name = "STORE_ID", nullable = false)
 	private Store store;
 	
+
+	
 	@Column(name = "MENU_NAME", nullable = false, length = 100)
 	private String name;	
 	// 메뉴 명
 	@Column(name = "MENU_CODE", nullable = false, length = 100)
 	private String code;				// 메뉴 명
+	
+	@Column(name = "EVENT_NAME")
+	private String event;
 	
 	@Column(name = "SIBLING_SEQ", nullable = false)
 	private int siblingSeq;				// 메뉴 순서
@@ -143,6 +148,13 @@ public class Menu {
 	public void setStore(Store store) {
 		this.store = store;
 	}
+	public String getEvent() {
+		return event;
+	}
+	
+	public void setEvent(String event) {
+		this.event = event;
+	}
 
 	public Date getWhoCreationDate() {
 		return whoCreationDate;
@@ -205,6 +217,7 @@ public class Menu {
 	}
 
 	public void setPrice(Float price) {
+		
 		this.price = price;
 	}
 
@@ -287,4 +300,6 @@ public class Menu {
     		return Integer.compare(item1.getSiblingSeq(), item2.getSiblingSeq());
     	}
 	};
+	
+	
 }

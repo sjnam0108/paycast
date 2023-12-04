@@ -4,8 +4,10 @@ import java.util.List;
 
 import kr.co.paycast.models.DataSourceRequest;
 import kr.co.paycast.models.DataSourceResult;
+import kr.co.paycast.models.pay.Ad;
 import kr.co.paycast.models.pay.CouponPolicy;
 import kr.co.paycast.models.pay.StoreCoupon;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.StorePolicy;
 import kr.co.paycast.models.store.StoreOrderCoupon;
 import kr.co.paycast.models.store.StoreOrderPoint;
@@ -22,11 +24,15 @@ public interface CouponPointService {
 	// for coupon Service
 	//
 	public StoreCoupon get(int id);
+	public StoreEvent getId(int id);
 	public List<StoreCoupon> getCouponList(int storeId, int deleteState);
+	public List<StoreEvent> getEventList(int storeId);
 	public void saveOrUpdate(StoreCoupon coupon);
-	
+	public void saveOrUpdate(StoreEvent event);
+	public void deleteEvent(StoreEvent event);
 	// for Kendo Grid Remote Read
 	public DataSourceResult getCouponRead(DataSourceRequest request);
+	public DataSourceResult getEventRead(DataSourceRequest request);
 
 	
 	//

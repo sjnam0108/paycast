@@ -47,7 +47,7 @@
 					<div class="logo"><img src="${storeDownLocation}/${mLogoImageFilename}" alt=""></div>	
 				</c:when>
 				<c:otherwise>
-					<div class="logo">${mobileLogoText}</div>
+					<div class="logo" style="font-size: 20px; margin-top: 7px;"><b>${mobileLogoText}</b></div>
 				</c:otherwise>
 			</c:choose>
 		</div>
@@ -86,6 +86,7 @@
 												<span class="img_wrap"><img src="${menuItem.imgPathFilename}" alt="" style="width: auto; height: auto; max-width: 100%; max-height: 100%;" /></span>
 												<span class="info_wrap taC">
 													<input type="hidden" name="productId" value="${menuItem.id}" />
+													<input type="hidden" name="productCode" value="${menuItem.code}" />
 													<input type="hidden" name="intro" value="${menuItem.intro}" />
 													<input type="hidden" name="price" value="<fmt:formatNumber value='${menuItem.price}' pattern='####' />" />
 													<input type="hidden" name="flagType" value="${menuItem.flagType}" />
@@ -228,6 +229,7 @@
 				<input type="hidden" name="befCompSe"/>
 				<input type="hidden" name="price" />
 				<input type="hidden" name="id" />
+				<input type="hidden" name="code" />
 				<input type="hidden" name="basketLiId" />
 				<input type="hidden" name="count" />
 				<input type="hidden" name="name" />
@@ -272,8 +274,8 @@
 				<h5 class="card-header">${pay_order} ${pay_cancel}</h5>
 				<div class="card-body" id="cardCancelVerifiCode">
 					<input type="hidden" name="cancelStoreId"  value="${storeId}" />
-					<input type="hidden" name="cancelTable" value="${table}" />
-					<input type="hidden" name="cancelPaygubun" value="${paygubun}" />
+					<input type="hidden"  name="cancelTable" value="${table}" />
+					<input  type="hidden" name="cancelPaygubun" value="${paygubun}" />
 					<div class="form-group" id="verifiCodeDiv" >
 						<input type="text" class="form-control underIn" style="width: 100%; text-align:center; font-size: 100px;" maxlength="${approvalDigit}" name="verifiCode" placeholder="" />
 					</div>
@@ -281,16 +283,16 @@
 						※ ${pay_apprCancel} ${approvalDigit}${msg_numEnter}
 					</div>
               	</div>
-				<div class="card-body" id="cardCancelGo" style="display: none;">
+				<div class="card-body" id="cardCancelGo">
            		</div>
 				<div id="cardCancelVerifiCodeBtn" class="button medium yell full circle" onclick="menuCancelCheck();">${pay_order} ${pay_cancel}</div>
-				<ul class="btn_area" id="cardCancelGoBtn" style="display: none;">
+				<ul class="btn_area" id="cardCancelGoBtn">
 					<li class="half">
 						<div class="button medium red full circle" onclick="popupCancelClose();">${pay_nope}</div>
 					</li>
 					<li class="half">
 						<div id="yesDiv" class="button medium yell full circle" onclick="menuCancel();">${pay_yes}</div>
-						<div id="yesHideDiv" class="button medium full circle" style="display: none;">${pay_yes}</div>
+						<div id="yesHideDiv" class="button medium full circle" style="display: none;" >${pay_yes}</div>
 					</li>
 				</ul>
             </form>
@@ -399,8 +401,8 @@
 		</div>
 		
 	</div>
-	<form id="orderSmilepay" name="orderSmilepay" method="post" Content-Type="application/json" action="/smilepay/order"></form>
-	<form id="orderRefill" name="orderRefill" method="post" Content-Type="application/json" action="/smilepay/rfOrder"></form>
+	<form id="orderSmilepay" name="orderSmilepay" method="post" Content-Type="application/json" action="/smartropay/order"></form>
+	<form id="orderRefill" name="orderRefill" method="post" Content-Type="application/json" action="/smartropay/rfOrder"></form>
 	
 </body>
 <style type="text/css">
@@ -467,7 +469,7 @@ function reloadPage(){
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/basketReload",
+		url: "/smartropay/basketReload",
 		data: JSON.stringify(data),
 		success: function (resData) {
 			var $selMenu = $(".sel_menu"); 
@@ -553,7 +555,7 @@ function onFn() {
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/onFn",
+		url: "/smartropay/onFn",
 		data: JSON.stringify({ menuInTime: "${time}" }),
 		success: function (data, status) {
 			if (data == "N") {
@@ -658,8 +660,8 @@ function popupCancelOpen(){
 	$('#cancelForm').find("input[name=verifiCode]").val("");
 	$("#cardCancelVerifiCode").show();
 	$("#cardCancelVerifiCodeBtn").show();
-	$("#cardCancelGo").hide();
-	$("#cardCancelGoBtn").hide();
+	$("#cardCancelGo").show();
+	$("#cardCancelGoBtn").show();
 	
 	$("#cancelForm").validate({
 		errorPlacement: function errorPlacement(error, element) {
@@ -687,14 +689,15 @@ function menuCancelCheck(){
 		var data = {
 			cancelStoreId: $('#cancelForm').find("input[name=cancelStoreId]").val(),
 			cancelTable: $('#cancelForm').find("input[name=cancelTable]").val(),
-			verifiCode: $('#cancelForm').find("input[name=verifiCode]").val()
+			verifiCode: $('#cancelForm').find("input[name=verifiCode]").val(),
+			cancelPaygubun: $('#cancelForm').find("input[name=cancelPaygubun]").val()
 		};
 		$("#cardCancelVerifiCodeBtn").hide();
 		$.ajax({
 			type: "POST",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/smilepay/menuCancelVerifi",
+			url: "/smartropay/menuCancelVerifi",
 			data: JSON.stringify(data),
 			success: function (form) {
 				if(form.payAuthYN != "Y"){
@@ -731,13 +734,14 @@ function menuCancel(){
 			cancelStoreId: $('#cancelForm').find("input[name=cancelStoreId]").val(),
 			cancelTable: $('#cancelForm').find("input[name=cancelTable]").val(),
 			verifiCode: $('#cancelForm').find("input[name=verifiCode]").val(),
-			storeOrderId : $('#cancelForm').find("input[name=storeOrderId]").val()
+			storeOrderId : $('#cancelForm').find("input[name=storeOrderId]").val(),
+			cancelPaygubun: $('#cancelForm').find("input[name=cancelPaygubun]").val(),
 		};
 		$.ajax({
 			type: "POST",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/smilepay/menuCancel",
+			url: "/smartropay/menuCancel",
 			data: JSON.stringify(data),
 			success: function (form) {
 				popupCancelClose();
@@ -949,7 +953,7 @@ function rfCheck(){
 			type: "POST",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/smilepay/rfChk",
+			url: "/smartropay/rfChk",
 			data: JSON.stringify(data),
 			success: function (form) {
 				if(viewTel != "" && viewTel != null){
@@ -1266,6 +1270,7 @@ $(document).ready(function () {
 			var flagType = $(this).find('input[name=flagType]').val();
 			var prod_price = $(this).find('input[name=price]').val();
 			var prod_Id = $(this).find('input[name=productId]').val();
+			var prod_Code = $(this).find('input[name=productCode]').val();
 			var intro = $(this).find('input[name=intro]').val();
 			var $opList = $(this).find(".optionList");
 			
@@ -1445,6 +1450,7 @@ function order(){
 	
 	var befCompSe = $popup.find('input[name="befCompSe"]').val();
 	var id = $popup.find('input[name="id"]').val();
+	var code = $popup.find('input[name="code"]').val();
 	var basketLiId = $popup.find('input[name="basketLiId"]').val();
 	var name = $popup.find('input[name="name"]').val();
 	var price = $popup.find('input[name="price"]').val();
@@ -1490,6 +1496,7 @@ function order(){
 	var data = {
 			choose: befCompSe,
 			id: id,
+			code: code,
 			basketLiId: basketLiId,
 			name: name,
 			price: price,
@@ -1513,7 +1520,7 @@ function order(){
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/basket",
+		url: "/smartropay/basket",
 		data: JSON.stringify(data),
 		success: function (resData) {
 			var $selMenu = $(".sel_menu"); 
@@ -1601,6 +1608,7 @@ function changePop(compSelect, menuId, basketLiId, toCount, price, toPrice, pack
 	var priceView = $home.find('.price').text();
 	var prod_price = $home.find('input[name=price]').val();
 	var prod_Id = $home.find('input[name=productId]').val();
+	var prod_Code = $home.find('input[name=productCode]').val();
 	var intro = $home.find('input[name=intro]').val();
 	var $opList = $home.find(".optionList");
 	
@@ -1639,7 +1647,7 @@ function menuDelete(basketLiId, compSelect){
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/basketDel",
+		url: "/smartropay/basketDel",
 		data: JSON.stringify(data),
 		success: function (resData) {
 			var $selMenu = $(".sel_menu"); 
@@ -1687,7 +1695,7 @@ function compltePage(){
 
 	$orderSmilepay.append(menOrderSelList);
 	smilepay();
-}p
+}
 
 function smilepay(){
 	var orderSmilepay = document.orderSmilepay;

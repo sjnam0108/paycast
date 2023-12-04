@@ -102,6 +102,7 @@
     	<mapping class="kr.co.paycast.models.pay.CouponPolicy"/>
     	<mapping class="kr.co.paycast.models.pay.StoreCoupon"/>
     	<mapping class="kr.co.paycast.models.pay.StorePolicy"/>
+    	<mapping class="kr.co.paycast.models.pay.StoreEvent"/>
     	<!-- Solution ext                                                  end -->
     	<!-- 배달료 관련  class -->
     	<mapping class="kr.co.paycast.models.pay.StoreDeliveryPay"/>

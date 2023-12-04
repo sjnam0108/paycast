@@ -1,6 +1,7 @@
 package kr.co.paycast.utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -154,10 +155,22 @@ public class PayUtil {
 		return menuArray[menuLen-1].replace(")", "");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void testServiceApi(StoreAlimTalk alimTalk) throws Exception {
 
 
 		try {
+
+
+			URL url = new URL("https://211.234.117.175/alim/PayCast"); // 호출할 외부 API 를 입력한다.
+
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection(); // header에 데이터 통신 방법을 지정한다.
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Content-Type", "application/json; utf-8");
+
+			// Post인 경우 데이터를 OutputStream으로 넘겨 주겠다는 설정
+			conn.setDoOutput(true);
+
 			JSONObject reqParams = new JSONObject();
 			reqParams.put("ShortName", alimTalk.getShortName()); // body에 들어갈 내용을 담는다.
 			reqParams.put("Name", alimTalk.getName()); // body에 들어갈 내용을 담는다.
@@ -171,20 +184,11 @@ public class PayUtil {
 			reqParams.put("subject", alimTalk.getSubject()); // body에 들어갈 내용을 담는다.
 			reqParams.put("msg", alimTalk.getMsg()); // body에 들어갈 내용을 담는다.
 			reqParams.put("smsMsg", alimTalk.getSmsmsg()); // body에 들어갈 내용을 담는다.
-
-			URL url = new URL("https://www.test.com/test/open/order/possible-check"); // 호출할 외부 API 를 입력한다.
-
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection(); // header에 데이터 통신 방법을 지정한다.
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Content-Type", "application/json; utf-8");
-
-			// Post인 경우 데이터를 OutputStream으로 넘겨 주겠다는 설정
-			conn.setDoOutput(true);
-
-			// Request body message에 전송
-			OutputStreamWriter os = new OutputStreamWriter(conn.getOutputStream());
-			os.write(reqParams.toString());
-			os.flush();
+			
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+			bw.write(reqParams.toString()); // 버퍼에 담기
+			bw.flush(); // 버퍼에 담긴 데이터 전달
+			bw.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();

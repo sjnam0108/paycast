@@ -119,6 +119,7 @@
 				<beans:value>kr.co.paycast.models.pay.SiteRegion</beans:value>
 				<beans:value>kr.co.paycast.models.pay.Store</beans:value>
 				<beans:value>kr.co.paycast.models.pay.StoreEtc</beans:value>
+				<beans:value>kr.co.paycast.models.pay.StoreEvent</beans:value>
 				<beans:value>kr.co.paycast.models.pay.StoreOpt</beans:value>
 				<beans:value>kr.co.paycast.models.pay.StoreUser</beans:value>
 				<beans:value>kr.co.paycast.models.pay.TokenActivity</beans:value>

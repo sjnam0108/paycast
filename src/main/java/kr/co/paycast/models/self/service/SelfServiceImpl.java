@@ -31,6 +31,7 @@ import kr.co.paycast.models.pay.MenuGroup;
 import kr.co.paycast.models.pay.OptionalMenu;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.Store;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.service.ContentService;
 import kr.co.paycast.models.pay.service.DeviceService;
@@ -51,6 +52,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jdk.internal.math.FloatingDecimal;
 
 @Transactional
 @Service("selfService")
@@ -304,7 +307,6 @@ public class SelfServiceImpl implements SelfService {
 						Element groupElement = storeElement.addElement("Catagory");
 						groupElement.addAttribute("seq", String.valueOf(mg.getSiblingSeq())); //그룹 순서
 						groupElement.addAttribute("name", mg.getName()); //그룹 명
-						
 						List<Menu> list = menuService.getMenuListByStoreIdGroupId(mg.getStore().getId(), mg.getId());
 						Collections.sort(list, Menu.SiblingSeqComparator);
 						
@@ -316,6 +318,10 @@ public class SelfServiceImpl implements SelfService {
 								
 									Element menuElement = groupElement.addElement("Menu");
 									menuElement.addAttribute("id", String.valueOf(menu.getId())); //메뉴 ID
+									menuElement.addAttribute("code", String.valueOf(menu.getCode())); //메뉴 ID
+									if(menu.getEvent() != null) {										
+										menuElement.addAttribute("groupName", menu.getEvent()); 
+									}
 									menuElement.addAttribute("seq", String.valueOf(menu.getSiblingSeq())); //메뉴 순서
 									menuElement.addAttribute("name", menu.getName()); //메뉴명
 									
@@ -351,6 +357,7 @@ public class SelfServiceImpl implements SelfService {
 									// 리필 : infinity(무제한) / limit(제한) / none(아님)
 									// 2019.11.12 개발할 경우 제한에 대한 내요이 없으므로 무제한 아니면 none으로 처리
 									String refillGunbun = "none";
+									String discount = "1";
 									switch (flagType) {
 										case "N":
 											newGunbun = "true";
@@ -361,6 +368,10 @@ public class SelfServiceImpl implements SelfService {
 										case "I":
 											refillGunbun = "infinity";
 											break;
+										case "D":
+											discount =  Double.toString(menu.getStore().getStoreOpt().getDiscount()/100);
+										
+											break;
 										default:
 											break;
 									}
@@ -368,6 +379,7 @@ public class SelfServiceImpl implements SelfService {
 									menuElement.addAttribute("newmenu", newGunbun); //신메뉴 여부
 									menuElement.addAttribute("popular", popularGunbun); //인기 여부
 									menuElement.addAttribute("refill ", refillGunbun); //리필 가능 여부
+									menuElement.addAttribute("discount ", discount); //리필 가능 여부
 									
 									//soldout
 									if(menu.isSoldOut()){

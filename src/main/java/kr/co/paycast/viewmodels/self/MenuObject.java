@@ -5,6 +5,7 @@ import java.util.List;
 public class MenuObject {
 
 	private String productId;
+	private String productCode;
 	private String seq;
 	private String name;
 	private String price;
@@ -12,9 +13,18 @@ public class MenuObject {
 	private String description;
 	private String popular;
 	private String newMenu;
+	private String disMenu;
 	private boolean soldOut;
 	private List<MenuOptionData> optMenusList;
 	
+	
+	
+	public String getDisMenu() {
+		return disMenu;
+	}
+	public void setDisMenu(String disMenu) {
+		this.disMenu = disMenu;
+	}
 	public String getProductId() {
 		return productId;
 	}
@@ -74,6 +84,12 @@ public class MenuObject {
 	}
 	public void setPrice(String price) {
 		this.price = price;
+	}
+	public String getProductCode() {
+		return productCode;
+	}
+	public void setProductCode(String productCode) {
+		this.productCode = productCode;
 	}
 
 	

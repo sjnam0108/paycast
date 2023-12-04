@@ -3,14 +3,20 @@ package kr.co.paycast.viewmodels.pay;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import kr.co.paycast.info.PayGlobalInfo;
 import kr.co.paycast.models.pay.Menu;
+import kr.co.paycast.models.pay.StorePolicy;
+import kr.co.paycast.models.pay.service.CouponPointService;
 import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
+
 
 public class MenuDispItem {
 
 	private int id;
+	private String code;
 	private int siblingSeq;
 	private float price;
 	
@@ -33,6 +39,7 @@ public class MenuDispItem {
 		
 		if (menu != null) {
 			this.id = menu.getId();
+			this.code = menu.getCode();
 			this.siblingSeq = menu.getSiblingSeq();
 			this.name = menu.getName();
 			this.published = Util.isValid(menu.getPublished()) && menu.getPublished().equals("Y");
@@ -147,4 +154,14 @@ public class MenuDispItem {
 	public void setOptMenus(List<OptionalMenuItem> optMenus) {
 		this.optMenus = optMenus;
 	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+	
+	
 }

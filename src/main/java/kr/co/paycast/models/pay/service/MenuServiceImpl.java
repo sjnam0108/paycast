@@ -71,6 +71,12 @@ public class MenuServiceImpl implements MenuService {
 		
 		menuDao.saveOrUpdate(menu);
 	}
+	
+	@Override
+	public void saveOrUpdateCode(Menu menu) {
+		
+		menuDao.saveOrUpdateCode(menu);
+	}
 
 	@Override
 	public void deleteMenu(Menu menu) {

@@ -5,6 +5,7 @@ import java.util.Date;
 public class MenuListJsonPrintItem  {
 	
 	private String productID; //상품 ID
+	private String productCode; //상품 ID
 	private String productName; //상품명
 	private String orderCount; //해당 상품의 주문 수량
 	private String orderPrice; //해당 상품의 금액
@@ -16,7 +17,7 @@ public class MenuListJsonPrintItem  {
 
 	}
 	
-	public MenuListJsonPrintItem(String productID, String productName,String orderCount,String orderPrice, String orderMenuPacking) {
+	public MenuListJsonPrintItem(String productID,String productCode, String productName,String orderCount,String orderPrice, String orderMenuPacking) {
         this.productID = productID;
         this.productName = productName;
         this.orderCount = orderCount;
@@ -24,6 +25,14 @@ public class MenuListJsonPrintItem  {
         this.orderMenuPacking = orderMenuPacking;
     }
 	
+	public String getProductCode() {
+		return productCode;
+	}
+
+	public void setProductCode(String productCode) {
+		this.productCode = productCode;
+	}
+
 	public String getProductID() {
 		return productID;
 	}

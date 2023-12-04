@@ -53,6 +53,9 @@ public class StoreOpt {
 
 	@Column(name = "M_LOGO_IMG_ID")
 	private Integer mobileLogoImageId;
+	
+	@Column(name = "DISCOUNT", nullable = false)
+	private double discount = 0; 			// 포인트 적립 퍼센트
 
 	
 	@Transient
@@ -336,6 +339,14 @@ public class StoreOpt {
 
 	public void setStore(Store store) {
 		this.store = store;
+	}
+
+	public double getDiscount() {
+		return discount * 100;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
 	}
 	
 }

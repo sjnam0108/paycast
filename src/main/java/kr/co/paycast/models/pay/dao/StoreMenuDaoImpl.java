@@ -2,10 +2,13 @@ package kr.co.paycast.models.pay.dao;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -14,6 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.paycast.models.pay.Menu;
+import kr.co.paycast.models.pay.StorePolicy;
+//import kr.co.signcast.utils.Util;
+import kr.co.paycast.models.pay.service.CouponPointService;
 
 @Transactional
 @Component
@@ -21,6 +27,9 @@ public class StoreMenuDaoImpl implements StoreMenuDao {
 
     @Autowired
     private SessionFactory sessionFactory;
+    
+    @Autowired
+    private CouponPointService couponService;
 
 	@Override
 	public Menu get(int id) {
@@ -34,6 +43,37 @@ public class StoreMenuDaoImpl implements StoreMenuDao {
 		return (list.isEmpty() ? null : list.get(0));
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void saveOrUpdateCode(Menu menu) {
+		Session session = sessionFactory.getCurrentSession();
+		
+		List<Menu> children = session.createCriteria(Menu.class)
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", menu.getStore().getId()))
+				.add(Restrictions.eq("code", menu.getCode())).list();
+		if(children.isEmpty()) {
+			session.saveOrUpdate(menu);
+		} else {
+			for (Menu item : children) {
+				if(item.getCode().equals(menu.getCode()) && item.getId()==(menu.getId())) {
+					item.setCode(menu.getCode());
+					item.setPrice(menu.getPrice());
+					item.setName(menu.getName());
+					item.setFlagType(menu.getFlagType());
+					item.setPublished(menu.getPublished());
+					item.setIntro(menu.getIntro());
+					item.setSoldOut(menu.isSoldOut());
+					item.setEvent(menu.getEvent());  
+		    		
+					session.saveOrUpdate(item);
+				}else if(item.getCode().equals(menu.getCode())) {
+					session.close();
+				}
+			} 
+		}
+	}
+	
 	@Override
 	public void saveOrUpdate(Menu menu) {
 		
