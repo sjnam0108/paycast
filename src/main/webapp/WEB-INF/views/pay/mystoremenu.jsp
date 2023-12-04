@@ -489,7 +489,7 @@
 										<label class="form-label">
 											상품코드
 										</label>
-										<input name="code" type="text" maxlength="20" class="form-control required">
+										<input name="code" type="text" maxlength="20" class="form-control">
 									</div>
 								</div>
 								<div class="col-sm-6">
@@ -2171,7 +2171,7 @@ function eventSelect(id){
 			}
         },
         optionLabel: {
-        	eventName: "선택하세요.", value: "",
+        	eventName: "", value: "",
 		},
         delay: 500,
     });
@@ -2182,9 +2182,6 @@ function couponPolicySelect(){
 	$("#form-4 input[name=eventId]").each(function(index){
 		console.log(couponData);
 					$(this).parent().parent().find("select[name='eventSelect']").data("kendoDropDownList").value(couponData);
-
-			
-
 	});
 }
 
