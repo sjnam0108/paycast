@@ -35,6 +35,9 @@ public class StoreEvent {
 	@Column(name = "NAME", nullable = false, length = 100)
 	private String name = "";		// 쿠폰명
 	
+	@Column(name = "DISCOUNT", nullable = false)
+	private double discount = 0; 			// 포인트 적립 퍼센트
+	
 	@Column(name = "EFFECTIVE_START_DATE", nullable = false)
 	private Date effectiveStartDate;
 	
@@ -59,6 +62,15 @@ public class StoreEvent {
 	
 	public StoreEvent() {}
 	
+	public StoreEvent(String name,double discount, Date effectiveStartDate, Date effectiveEndDate, Store store, HttpSession session) {
+		this.name = name;
+		this.discount = discount;
+		this.store = store;
+		this.effectiveStartDate = Util.removeTimeOfDate(effectiveStartDate == null ? new Date() : effectiveStartDate);
+		this.effectiveEndDate = Util.setMaxTimeOfDate(effectiveEndDate);
+		
+		touchWhoC(session);
+	}
 	public StoreEvent(String name,Date effectiveStartDate, Date effectiveEndDate, Store store, HttpSession session) {
 		this.name = name;
 		this.store = store;
@@ -143,6 +155,16 @@ public class StoreEvent {
 
 	public void setEffectiveEndDate(Date effectiveEndDate) {
 		this.effectiveEndDate = effectiveEndDate;
+	}
+	
+	
+
+	public double getDiscount() {
+		return discount * 100;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
 	}
 
 	@JsonIgnore

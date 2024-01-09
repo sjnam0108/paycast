@@ -52,7 +52,7 @@ public class LoginCheckInterceptor extends HandlerInterceptorAdapter {
 		
 		// Agent 요청 접근일 때 "통과"
 		if (requestUri != null && !requestUri.isEmpty()) {
-			if (requestUri.startsWith("/pay/agent/") || requestUri.startsWith("/pay/common/")) {
+			if (requestUri.startsWith("/alim/alimtalk/alim") || requestUri.startsWith("/pay/common/")) {
 				return true;
 			}
 		}

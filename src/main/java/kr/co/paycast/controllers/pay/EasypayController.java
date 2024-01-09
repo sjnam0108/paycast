@@ -1,7 +1,13 @@
 package kr.co.paycast.controllers.pay;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -39,6 +45,8 @@ import kr.co.paycast.utils.PayUtil;
 import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -607,6 +615,7 @@ public class EasypayController {
 	}
 	
 	// 포인트, 스탬프, 쿠폰 알림톡 전송
+	@SuppressWarnings("unchecked")
 	private void alimTalkSend(Store store, StoreOrder storeOrderOne, String type, String text0, String text1, String text2, Locale locale){
 		
 		if(store.isAlimTalkAllowed()){
@@ -646,15 +655,8 @@ public class EasypayController {
 			StoreAlimTalk alimTalk = new StoreAlimTalk(store.getShortName(), store.getStoreName(), store.getPhone(), storeOrderOne.getOrderSeq(), "", 
 					"", storeOrderOne.getTelNumber(), senderKey, tmplCd, subject, msg, smsmsg);
 			
-			alimTalkService.save(alimTalk);
-
-				try {
-					PayUtil.testServiceApi(alimTalk);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+//			alimTalkService.save(alimTalk);
+			PayUtil.testServiceApi(alimTalk);
 
 		}else{
 			logger.info("["+type+"]알림톡 전송안됨  >>> store.getBizName() [{}], store.isAlimTalkAllowed() [{}]", store.getBizName(), store.isAlimTalkAllowed());

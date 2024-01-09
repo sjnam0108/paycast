@@ -5,8 +5,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -2720,13 +2722,8 @@ public class SmilepayController {
           logger.info("[" + type + "] >>> msg [{}], smsmsg [{}]", msg, smsmsg);
           StoreAlimTalk alimTalk = new StoreAlimTalk(store.getShortName(), store.getStoreName(), store.getPhone(), storeOrderOne.getOrderSeq(), "", 
               "", storeOrderOne.getTelNumber(), senderKey, tmplCd, subject, msg, smsmsg);
-          this.alimTalkService.save(alimTalk);
-			try {
-				PayUtil.testServiceApi(alimTalk);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//          this.alimTalkService.save(alimTalk);
+			PayUtil.testServiceApi(alimTalk);
         } else {
           logger.info("[" + type + "] >>> store.getBizName() [{}], store.isAlimTalkAllowed() [{}]", store.getBizName(), Boolean.valueOf(store.isAlimTalkAllowed()));
           logger.info("[" + type + "] >>> store.getBizName() [{}], store.getShortName() [{}]", store.getBizName(), store.getShortName());
@@ -3187,5 +3184,44 @@ public class SmilepayController {
           }  
         return pointOne;
       }
+      
+  	public String getHttpPostResponse(String url, String params) {
+	    try {
+	        URL serverUrl = new URL(url);
+	        HttpURLConnection http = (HttpURLConnection) serverUrl.openConnection();
+
+	        http.setDefaultUseCaches(false);
+	        http.setDoInput(true);           // 서버에서 읽기 모드 지정
+	        http.setDoOutput(true);          // 서버로 쓰기 모드 지정
+	        http.setRequestMethod("POST");   // HTTP POST 메소드 설정
+
+	        // Header
+	        http.setRequestProperty("content-type", "application/x-www-form-urlencoded");
+
+	        OutputStreamWriter outStream = new OutputStreamWriter(http.getOutputStream(), "UTF-8");
+	        PrintWriter writer = new PrintWriter(outStream);
+	        writer.write(params);
+	        writer.flush();
+
+	        int responseCode = http.getResponseCode();
+
+	        InputStreamReader tmp = new InputStreamReader(http.getInputStream(), "UTF-8");
+	        BufferedReader reader = new BufferedReader(tmp);
+	        StringBuilder builder = new StringBuilder();
+	        String str;
+	        while ((str = reader.readLine()) != null) {
+	        	builder.append(str);
+	        }
+
+	        if (responseCode == 200) {
+	        	logger.error(str);
+	            return builder.toString();
+	        }
+	    } catch (Exception e) {
+	        logger.error("S3Upload Async Working!!", e);
+	    }
+	    	
+	    return "";
+	}
 
 }

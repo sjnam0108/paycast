@@ -562,6 +562,7 @@
 					<kendo:grid-columns>
 						<kendo:grid-column title="${cmd_edit}" width="50" filterable="false" sortable="false" template="<%= editEventTemplate %>" />
 						<kendo:grid-column title="이벤트 명" field="eventName" filterable="false" />
+						<kendo:grid-column title="할인율" field="discount" filterable="false" />
 						<kendo:grid-column title="유효기간" field="effectiveStartDate" format="{0:yyyy-MM-dd}" minScreenWidth="700"/>
 						<kendo:grid-column title="만료기간" field="effectiveEndDate" format="{0:yyyy-MM-dd}" minScreenWidth="700"/>
 					</kendo:grid-columns>
@@ -796,6 +797,12 @@
 					</div>
 				</div>
 				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">할인율<span class="text-danger">*</span></label>
+					<div class="col-sm-8">
+						<input type="number" class="form-control required" name="discount" maxlength="3" min='0' max='100'>
+					</div>
+				</div>
+				<div class="form-group row">
 					<label class="col-form-label col-sm-2 text-sm-right">유효기간<span class="text-danger">*</span></label>
 					<div class="col-sm-8">
 						<input name="effectiveStartDate" type="text" class="form-control required">
@@ -822,6 +829,12 @@
 					<label class="col-form-label col-sm-2 text-sm-right">이벤트 명</label>
 					<div class="col-sm-8">
 						<input type="text" class="form-control" name="eventName" maxlength="50">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-form-label col-sm-2 text-sm-right">할인율</label>
+					<div class="col-sm-8">
+						<input type="number" class="form-control" name="discount" maxlength="3" min="0", max="100">
 					</div>
 				</div>
 				<div class="form-group row">
@@ -1440,6 +1453,7 @@ $(document).ready(function() {
 		});
 		
 		$("#eventForm input[name='name']").val("");
+		$("#eventForm input[name='discount']").val(0);
 		
 		$("#evnetForm").validate({
 			rules: {
@@ -1622,6 +1636,7 @@ function eventSave(){
     	var data = {
    			storeId : storeId, 
    			name: $("#eventForm input[name='name']").val(),
+   			discount: $("#eventForm input[name='discount']").val(),
    			effectiveStartDate: $("#eventForm input[name='effectiveStartDate']").data("kendoDatePicker").value(),
        	};
 		
@@ -1688,6 +1703,7 @@ function eventEdit(id) {
 	
 	$("#eventUp input[name='eventId']").val(dataItem.id);
 	$("#eventUp input[name='eventName']").val(dataItem.eventName);
+	$("#eventUp input[name='discount']").val(dataItem.discount);
 	$("#eventUp input[name='effectiveStartDate']").data("kendoDatePicker").value(dataItem.effectiveStartDate);
 	$("#eventUp input[name='effectiveEndDate']").data("kendoDatePicker").value(dataItem.effectiveEndDate);
 	
@@ -1741,6 +1757,7 @@ function eventUpdate(){
     	var data = {
     			id : $("#eventUp input[name='eventId']").val(), 
     			eventName: $("#eventUp input[name='eventName']").val(),
+    			discount: $("#eventUp input[name='discount']").val(),
        			effectiveStartDate: $("#eventUp input[name='effectiveStartDate']").data("kendoDatePicker").value(),
        			effectiveEndDate: $("#eventUp input[name='effectiveEndDate']").data("kendoDatePicker").value(),
        	};

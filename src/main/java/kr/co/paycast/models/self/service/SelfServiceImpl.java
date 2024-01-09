@@ -321,6 +321,11 @@ public class SelfServiceImpl implements SelfService {
 									menuElement.addAttribute("code", String.valueOf(menu.getCode())); //메뉴 ID
 									if(menu.getEvent() != null) {										
 										menuElement.addAttribute("groupName", menu.getEvent()); 
+										if(menu.getStore().getStoreEvnet().getDiscount()>0) {
+											String Groupdiscount = Double.toString(menu.getStore().getStoreEvnet().getDiscount()/100);
+											menuElement.addAttribute("Groupdiscount", Groupdiscount); 
+										}
+										
 									}
 									menuElement.addAttribute("seq", String.valueOf(menu.getSiblingSeq())); //메뉴 순서
 									menuElement.addAttribute("name", menu.getName()); //메뉴명

@@ -146,6 +146,9 @@ public class Store {
 	@OneToOne(mappedBy = "store", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	private StoreOpt storeOpt;
 	
+	@OneToOne(mappedBy = "store", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	private StoreEvent storeEvnet;
+	
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	private Set<Device> devices = new HashSet<Device>(0);
 	
@@ -578,5 +581,15 @@ public class Store {
 	public void setAd(Set<Ad> ads) {
 		this.ads = ads;
 	}
+
+	public StoreEvent getStoreEvnet() {
+		return storeEvnet;
+	}
+
+	public void setStoreEvnet(StoreEvent storeEvnet) {
+		this.storeEvnet = storeEvnet;
+	}
+	
+	
 	
 }

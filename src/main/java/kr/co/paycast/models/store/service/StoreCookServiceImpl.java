@@ -551,7 +551,8 @@ public class StoreCookServiceImpl implements StoreCookService {
 					StoreAlimTalk alimTalk = new StoreAlimTalk(store.getShortName(), store.getStoreName(), store.getPhone(), storeOrderOne.getOrderSeq(), allMenu, 
 							finMenu, storeOrderOne.getTelNumber(), senderKey, tmplCd, subject, msg, smsmsg);
 					
-					alimTalkService.save(alimTalk);
+//					alimTalkService.save(alimTalk);
+					PayUtil.testServiceApi(alimTalk);
 				}
 			}
 		}catch (Exception e) {

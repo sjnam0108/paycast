@@ -3,6 +3,7 @@ package kr.co.paycast.utils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -22,6 +23,8 @@ import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+
+import com.mysql.cj.xdevapi.JsonArray;
 
 @Component
 public class PayUtil {
@@ -156,19 +159,16 @@ public class PayUtil {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void testServiceApi(StoreAlimTalk alimTalk) throws Exception {
-
-
+	public static void testServiceApi(StoreAlimTalk alimTalk) {
+		URL url;
+		HttpURLConnection conn = null;
 		try {
+			url = new URL("http://alim.bbmc.co.kr/alimtalk/send/PayCast"); // 호출할 외부 API 를 입력한다.
 
-
-			URL url = new URL("https://211.234.117.175/alim/PayCast"); // 호출할 외부 API 를 입력한다.
-
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection(); // header에 데이터 통신 방법을 지정한다.
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Content-Type", "application/json; utf-8");
-
-			// Post인 경우 데이터를 OutputStream으로 넘겨 주겠다는 설정
+			conn = (HttpURLConnection) url.openConnection(); // header에 데이터 통신 방법을 지정한다.
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+			conn.setRequestProperty("Connection", "keep-alive");
 			conn.setDoOutput(true);
 
 			JSONObject reqParams = new JSONObject();
@@ -185,11 +185,22 @@ public class PayUtil {
 			reqParams.put("msg", alimTalk.getMsg()); // body에 들어갈 내용을 담는다.
 			reqParams.put("smsMsg", alimTalk.getSmsmsg()); // body에 들어갈 내용을 담는다.
 			
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+			System.out.println(reqParams.toString());
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(),"UTF-8"));
 			bw.write(reqParams.toString()); // 버퍼에 담기
 			bw.flush(); // 버퍼에 담긴 데이터 전달
 			bw.close();
-
+			
+			// 서버로부터 데이터 읽어오기
+			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			
+			while((line = br.readLine()) != null) { // 읽을 수 있을 때 까지 반복
+				sb.append(line);
+			}
+			
+			System.out.println(sb.toString());	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

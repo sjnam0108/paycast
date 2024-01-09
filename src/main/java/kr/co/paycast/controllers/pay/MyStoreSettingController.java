@@ -700,10 +700,12 @@ public class MyStoreSettingController {
 		Store target = storeService.getStore((int)model.get("storeId"));
 		if (target != null) {
 			String name = Util.parseString((String)model.get("name"));
+			int intDiscount = Util.parseInt((String)model.get("discount"));
+			double discount = ((double)intDiscount/100);
 			Date effectiveStartDate = Util.removeTimeOfDate(Util.parseZuluTime((String)model.get("effectiveStartDate")));
 			
 			try {
-				StoreEvent event = new StoreEvent(name, effectiveStartDate, null, target, session);
+				StoreEvent event = new StoreEvent(name,discount, effectiveStartDate, null, target, session);
 				
 				couponService.saveOrUpdate(event);
 			} catch (Exception e) {
@@ -754,10 +756,13 @@ public class MyStoreSettingController {
 
 		if (event != null) {
 			String name = Util.parseString((String)model.get("eventName"));
-			String validDate = Util.parseString((String)model.get("eventValidDate"));
+			int intDiscount = Util.parseInt((String)model.get("discount"));
+			double discount = ((double)intDiscount/100);
+//			String validDate = Util.parseString((String)model.get("eventValidDate"));
 			
 			try {
 				event.setEventName(name);
+				event.setDiscount(discount);
 				event.setEffectiveStartDate(Util.removeTimeOfDate(Util.parseZuluTime((String)model.get("effectiveStartDate"))));
 				event.setEffectiveEndDate(Util.setMaxTimeOfDate(Util.parseZuluTime((String)model.get("effectiveEndDate"))));
 				
