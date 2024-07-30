@@ -31,7 +31,6 @@ import kr.co.paycast.models.pay.MenuGroup;
 import kr.co.paycast.models.pay.OptionalMenu;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.Store;
-import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.service.ContentService;
 import kr.co.paycast.models.pay.service.DeviceService;
@@ -321,10 +320,10 @@ public class SelfServiceImpl implements SelfService {
 									menuElement.addAttribute("code", String.valueOf(menu.getCode())); //메뉴 ID
 									if(menu.getEvent() != null) {										
 										menuElement.addAttribute("groupName", menu.getEvent()); 
-										if(menu.getStore().getStoreEvnet().getDiscount()>0) {
-											String Groupdiscount = Double.toString(menu.getStore().getStoreEvnet().getDiscount()/100);
-											menuElement.addAttribute("Groupdiscount", Groupdiscount); 
-										}
+//										if(menu.getStore().getStoreEvnet().getDiscount()>0) {
+//											String Groupdiscount = Double.toString(menu.getStore().getStoreEvnet().getDiscount()/100);
+//											menuElement.addAttribute("Groupdiscount", Groupdiscount); 
+//										}
 										
 									}
 									menuElement.addAttribute("seq", String.valueOf(menu.getSiblingSeq())); //메뉴 순서

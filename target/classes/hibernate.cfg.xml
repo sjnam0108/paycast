@@ -5,9 +5,9 @@
 <hibernate-configuration>
     <session-factory>
     	<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-    	<property name="connection.url">jdbc:mysql://localhost:3306/paycast?createDatabaseIfNotExist=true</property>
-     	<property name="connection.username">root</property>
-     	<property name="connection.password">bbmc2757</property>
+    	<property name="connection.url">jdbc:mysql://121.253.167.84:3306/paycast_demotest_20210107?createDatabaseIfNotExist=true</property>
+     	<property name="connection.username">paycastuser</property>
+     	<property name="connection.password">paycastuser!@</property>
      	<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
 <!--     	<property name="connection.url">jdbc:mysql://121.254.176.35:3306/paycast?createDatabaseIfNotExist=true</property> -->
 <!--      	<property name="connection.username">signcast</property> -->

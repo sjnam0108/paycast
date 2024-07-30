@@ -1,38 +1,56 @@
 package kr.co.paycast.controllers.store;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;import java.util.stream.Collector;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import kr.co.paycast.exceptions.ServerOperationForbiddenException;
 import kr.co.paycast.models.MessageManager;
 import kr.co.paycast.models.calc.service.CalculateService;
+import kr.co.paycast.models.fnd.Site;
+import kr.co.paycast.models.fnd.service.SiteService;
 import kr.co.paycast.models.pay.Ad;
+import kr.co.paycast.models.pay.Content;
 import kr.co.paycast.models.pay.ContentFile;
 import kr.co.paycast.models.pay.Device;
 import kr.co.paycast.models.pay.Menu;
@@ -41,8 +59,10 @@ import kr.co.paycast.models.pay.OptionalMenu;
 import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.OptionalMenuListDelete;
 import kr.co.paycast.models.pay.Store;
+import kr.co.paycast.models.pay.StoreEvent;
 import kr.co.paycast.models.pay.UploadFile;
 import kr.co.paycast.models.pay.service.ContentService;
+import kr.co.paycast.models.pay.service.CouponPointService;
 import kr.co.paycast.models.pay.service.DeviceService;
 import kr.co.paycast.models.pay.service.MenuService;
 import kr.co.paycast.models.pay.service.PayService;
@@ -68,6 +88,7 @@ import kr.co.paycast.viewmodels.pay.BannerInfo;
 import kr.co.paycast.viewmodels.pay.DownloadFiles;
 import kr.co.paycast.viewmodels.pay.MenuDispItem;
 import kr.co.paycast.viewmodels.pay.MenuGroupItem;
+import kr.co.paycast.viewmodels.pay.MenuItem;
 import kr.co.paycast.viewmodels.pay.OptionalMenuItem;
 import kr.co.paycast.viewmodels.self.CategoryObject;
 import kr.co.paycast.viewmodels.self.MenuObject;
@@ -79,6 +100,8 @@ import kr.co.paycast.viewmodels.store.MenuListJsonPrintItem;
 import kr.co.paycast.viewmodels.store.RefillView;
 import net.sf.json.JSONException;
 
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.apache.commons.io.FileUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -89,10 +112,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.mysql.cj.xdevapi.JsonArray;
 
 /**
  * ���� �ֹ� ���� �ý��� ���� ���� API
@@ -146,6 +175,12 @@ public class StoreAPIController {
 	
 	@Autowired
 	private PayService payService;
+	
+    @Autowired 
+    private SiteService siteService;
+    
+    @Autowired 
+    CouponPointService couponService;
 
 	/**
 	 * 매장 및 메뉴 중 변경된 정보에 대한 변경 수행 명령 내려주는 곳
@@ -181,13 +216,14 @@ public class StoreAPIController {
 		boolean success = true;
 		String message = "OK";
 
-		String storeId = (String) request.getParameter("storeId");
+		String storeKey = (String) request.getParameter("storeKey");
 		String deviceId = (String) request.getParameter("deviceId");
 		Map<String, Object> info2 = new HashMap<String, Object>();
 		Map<String, Object> info3 = new HashMap<String, Object>();
 		info2.put("openType", null);
 		info2.put("kioskEnable", null);
-		Store store = storeService.getStore(Util.parseInt(storeId));
+		Store store = storeService.getStoreByStoreKey(storeKey);
+		boolean eatHere = false;
 		if (store == null) {
 			success = false;
 
@@ -219,17 +255,72 @@ public class StoreAPIController {
 
 			return info;
 		}
+//		 먹고가기 예외 처리 현재 사용 X
+		if (store.getStoreCode() == 41) {
+			eatHere = true;
+		}
 		info3.put("addressInfo", store.getAddr2());
 		info3.put("storeTelNumber", store.getPhone());
 		info3.put("storeName", store.getBizName());
 		info3.put("businessNumber", store.getBizNum());
+		info3.put("CatId", store.getCatId());
+		info3.put("eatHere", eatHere);
 		info3.put("ceoName", store.getBizRep());
 		
 		info2.put("openType", store.getOpenType());
-		info2.put("kioskEnable", String.valueOf(store.isKioskOrderEnabled()));
+		info2.put("kioskEnable",store.isKioskOrderEnabled());
 		info2.put("sellerInfo", info3);
 
 		
+		info.put("data", info2);
+		info.put("success", success);
+		info.put("message", message);
+
+		return info;
+	}
+	
+	/**
+	 * 매장 오픈 정보 및 키오스크 사용 가능 여부 정보 내려주는곳
+	 */
+	@RequestMapping(value = "/storeSoldOut", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> storeSoldout(HttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws ServletException, IOException {
+		Map<String, Object> info = new HashMap<String, Object>();
+		String storeKey = (String) request.getParameter("storeCode");
+		String menuCode = (String) request.getParameter("menuCode");
+		Store store = storeService.getStoreByCode(Integer.parseInt(storeKey));
+		List<Menu> menus = menuService.getMenuListbyStoreId(store.getId());
+		String soldoutYN = (String) request.getParameter("set");
+		for(Menu menu : menus) {
+			if(menu.getCode().equals(menuCode) && soldoutYN.equals("Y")) {
+				menu.setSoldOut(true);
+				menuService.saveOrUpdate(menu);
+			}else if (menu.getCode().equals(menuCode) && soldoutYN.equals("N")) {
+				menu.setSoldOut(false);
+				menuService.saveOrUpdate(menu);
+			}
+			List<OptionalMenu> optlists = menuService.getOptionalMenuListByMenuId(menu.getId());
+			for(OptionalMenu optlist : optlists) {
+				List<OptionalMenuList> optMenuLists = menuService.getOptionByIdAndMenuCode(optlist.getId(),menuCode);
+				for(OptionalMenuList optMenuList : optMenuLists) {
+					if(soldoutYN.equals("Y")) {
+						optMenuList.setSoldOut(true);
+					}else {
+						soldoutYN.equals("N");
+						optMenuList.setSoldOut(false);
+					}
+					
+					menuService.saveOrUpdate(optMenuList);
+				}
+			}
+		}
+
+		boolean success = true;
+		String message = "OK";
+
+		Map<String, Object> info2 = new HashMap<String, Object>();
+		info2.put("storeKey", storeKey);
+		info2.put("menuCode", menuCode);
 		info.put("data", info2);
 		info.put("success", success);
 		info.put("message", message);
@@ -494,30 +585,13 @@ public class StoreAPIController {
 		Map<String, Object> info = new HashMap<String, Object>();
 		Map<String, Object> ResMenuCategory  = new HashMap<String, Object>();
 		
-		String storeId = (String) request.getParameter("storeId");
-		Store store = storeService.getStore(Integer.parseInt(storeId));
-		
+		String storeKey = (String) request.getParameter("storeKey");
+		Store store = storeService.getStoreByStoreKey(storeKey);
+		System.out.println("store" + store);
 		List<MenuGroup> groupList = menuService.getMenuGroupListByStoreIdByPublished(store.getId(),"Y");
-		
-		int groupSize = groupList.size();
-		String kLogoImageFilename = "";
-		String contentImgUrl = "img/";
-		
-		info.put("message", "OK");
-		info.put("success", true);
-		
-		ResMenuCategory.put("storeId", store.getStoreOpt().getKioskLogoText());
-		ResMenuCategory.put("storeName", store.getStoreName());
-		
-		ResMenuCategory.put("storeImage", contentImgUrl + kLogoImageFilename); //매장 로고 이미지
-
-		ResMenuCategory.put("storeBackground", "");
-		ResMenuCategory.put("categoryNum", Integer.toString(groupSize));
-		ResMenuCategory.put("unit", "KRW");
-		
-		
-		
-		info.put("resMenuCategory", ResMenuCategory);
+		String lastUpdateDateTime = menuService.getTime(store.getId());
+		System.out.println("groupList" + groupList);
+		info.put("lastUpdateDateTime", lastUpdateDateTime);
 		
 		List<CategoryObject> categoryGroup = new ArrayList<CategoryObject>();
 		
@@ -525,90 +599,94 @@ public class StoreAPIController {
 		for(MenuGroup group : groupList) {
 			List<Menu> list = menuService.getMenuListByStoreIdGroupIdPublished(group.getStore().getId(), group.getId(),"Y");
 			CategoryObject categoryObject = new CategoryObject();
-				
-				int menuListSize = list.size();
-				
-				
-				categoryObject.setSeq(String.valueOf(group.getSiblingSeq()));
-				categoryObject.setName(group.getName());
-				categoryObject.setMenuNum(String.valueOf(menuListSize));
+
+				categoryObject.setSiblingSeq(String.valueOf(group.getSiblingSeq()));
+				categoryObject.setGroupName(group.getName());
+				categoryObject.setPublished(group.getPublished());
 				categoryGroup.add(categoryObject);
 		
 
 						
-			ArrayList<MenuObject> menuObjectList = new ArrayList<MenuObject>();
+			ArrayList<MenuObject> menus = new ArrayList<MenuObject>();
 			for(Menu menu : list) {				
 				
 				List<OptionalMenu> optList = menuService.getOptionalMenuListByMenuId(menu.getId());
-				
-				MenuObject MenuItem = new MenuObject();	
-				
-				MenuItem.setProductId(String.valueOf(menu.getId()));
-				MenuItem.setProductCode(String.valueOf(menu.getCode()));
-				MenuItem.setSeq(String.valueOf(menu.getSiblingSeq()));
-				MenuItem.setName(menu.getName());
+				MenuObject MenuItem = new MenuObject();
+				MenuItem.setSiblingSeq(String.valueOf(menu.getSiblingSeq()));
+				MenuItem.setMenuName(menu.getName());
 				float priceFl = menu.getPrice();
 				int priceint = (int)priceFl;
-				MenuItem.setPrice(String.valueOf(priceint));
-				MenuItem.setImageFile("");
-				MenuItem.setDescription(menu.getIntro());
-
-				if(menu.getFlagType() == "R") {
-					MenuItem.setPopular("true");
-					MenuItem.setNewMenu("false");
-					MenuItem.setDisMenu("false");
-				} else if(menu.getFlagType() == "N"){
-					MenuItem.setPopular("false");
-					MenuItem.setNewMenu("ture");
-					MenuItem.setDisMenu("false");
-				} else if(menu.getFlagType() == "D") {
-					MenuItem.setPopular("false");
-					MenuItem.setNewMenu("false");
-					MenuItem.setDisMenu("ture");
-				}
-				
+				MenuItem.setPrice(String.valueOf(priceint)); 
+				MenuItem.setImage(menu.getImage());
+				MenuItem.setIntro(menu.getIntro());
+				MenuItem.setFlagType(menu.getFlagType());
+				MenuItem.setUpdateYN(menu.getUpdateYN());
 				MenuItem.setSoldOut(menu.isSoldOut());
+				if(menu.getEvent() == null) {
+					MenuItem.setDiscountName("");
+				}else {
+					MenuItem.setDiscountName(menu.getEvent());
+				}
+				MenuItem.setMenuCode(menu.getCode());
+				MenuItem.setEventName(menu.getEventCode());
+				float disPriceFl = menu.getDiscountPrice();
+				int disPriceint = (int)disPriceFl;
+				MenuItem.setDiscountPrice(String.valueOf(priceint-disPriceint));
+				 
+				String discount = Double.toString(menu.getDiscount());
+				MenuItem.setDiscount(discount);
+				menus.add(MenuItem);
 				
-				menuObjectList.add(MenuItem);
-					
-				categoryObject.setMenuObjectList(menuObjectList);
+				categoryObject.setMenus(menus);
 
 				ArrayList<MenuOptionData> MenuOptionDataList = new ArrayList<MenuOptionData>();
-				
+        		List<OptionalMenuItem> optionalMenus = new ArrayList<OptionalMenuItem>();
+        		
 				for(OptionalMenu optMenu : optList) {
-					List<OptionalMenuList> manMenuList = menuService.getOptionalMenuListByOptionId(optMenu.getId());
-					
+					 String optListStr = optMenu.getMenuList();
+					 String[] optListt = optListStr.split(",");
+						
+						 List<OptionalMenuList> manMenuList = menuService.getOptionalMenuListByOptionId(optMenu.getId());
 					MenuOptionData optionItem = new MenuOptionData();
 					
-					optionItem.setMenuOptName(optMenu.getName());
-					optionItem.setMenuGubun(optMenu.getOptType());
+					optionItem.setMenuName(optMenu.getName());
+					optionItem.setOptType(optMenu.getOptType());
 					optionItem.setMenuOptSeq(String.valueOf(optMenu.getSiblingSeq()));
 					
 					MenuOptionDataList.add(optionItem);
-					
-					MenuItem.setOptMenusList(MenuOptionDataList);
+					MenuItem.setOptionalMenus(MenuOptionDataList);
 						
 						ArrayList<SubOption> SubOptionList = new ArrayList<SubOption>();
 						
 					for(OptionalMenuList manMeList : manMenuList){
 						
 						SubOption subItem = new SubOption(); 
-						
-						subItem.setOptionName(manMeList.getName());
+						 for(int i = 0;  i < optListt.length; i++) {
+//						System.out.println("lis" + optListt[i]);
+						if(manMeList.getId() == Integer.parseInt(optListt[i])) {
+						subItem.setMenuName(manMeList.getName());
 						subItem.setPrice(manMeList.getPrice().toString());
-					
+						subItem.setImage(manMeList.getImage());
+						subItem.setMenuCode(manMeList.getCode());
+						subItem.setSoldOut(manMeList.isSoldOut());
+						if(optList == null) {
+							MenuItem.setSoldOut(manMeList.isSoldOut());
+							menus.add(MenuItem);
+						}
 						SubOptionList.add(subItem);
 						
-						optionItem.setOptionList(SubOptionList);
-					}
-					
+						optionItem.setOptionalList(SubOptionList);
+						}
+						 }
+					 }
 				}
 				
 			}
 		}
-		List<CategoryObject> a = categoryGroup.stream().sorted(Comparator.comparing(CategoryObject::getSeq)).collect(Collectors.toList());
+		List<CategoryObject> a = categoryGroup.stream().sorted(Comparator.comparing(CategoryObject::getSiblingSeq)).collect(Collectors.toList());
 		System.out.println(a);
-		ResMenuCategory.put("categoryObjectList", a);
+		
+		info.put("menu", a);
 
 		
 		return info;
@@ -1429,7 +1507,7 @@ public class StoreAPIController {
 					Element catagoryElement = root.addElement("Catagory");
 					catagoryElement.addElement("storeName").addText(store.getBizName()); // 결제 매장명
 					if (store.getPhone() != null) { // 결제 매장 번호
-						catagoryElement.addElement("storeTel").addText(store.getPhone());	
+						catagoryElement.addElement("storeTel").addText(store.getPhone());
 					} else {
 						catagoryElement.addElement("storeTe").addText("");
 					}
@@ -1912,5 +1990,310 @@ public class StoreAPIController {
 	   }
 	    return null;
 	  }
-	
-}
+	  
+		/**
+		 * API 액션
+		 * @throws IOException 
+		 * 
+		 */
+		@ResponseBody
+	    @RequestMapping(value = "/menuUpdate", method = RequestMethod.POST)
+	    public Map<String, Object> test(HttpServletResponse response, HttpSession session,
+	    		@PathVariable Map<String, String> pathMap, HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException {
+	    	BufferedReader reader = null;
+			String line = null;
+			String contents = "";
+			Map<String, Object> info = new HashMap<String, Object>();
+			String message = "OK";
+			boolean success = true;
+			info.put("message", message);
+			info.put("success", success);
+	    	try {
+				reader = request.getReader();
+				logger.info("/med/custom/rcvStream ----------------------------");
+				while ((line = reader.readLine()) != null) {
+					logger.info(line);
+					contents += line.replace("\\", "");
+				}
+				logger.info("--------------------------------------- end");
+			} catch (Exception e) {
+				logger.error("mediacast-rpt", e);
+			} finally {
+				if (reader != null) {
+					try {
+						reader.close();
+					} catch (IOException ex) {
+		    			logger.error("mediacast-rpt", ex);
+					}
+				}
+			}
+	    	if (Util.isValid(contents)) {
+	    	JSONParser parser = new JSONParser();
+	    	Object obj;
+			try {
+				obj = parser.parse(contents);
+			 
+	    		JSONObject jsonObj = (JSONObject) obj;
+	    		List<Store> storeList = storeService.get();
+	    		String storeIdStr = (String)jsonObj.get("storeCode");
+	    		Store store = storeService.getStoreByStoreName(storeIdStr);	 
+	    		
+	    		if(store == null) {
+		    		 store = storeService.getStoreByCode(Integer.parseInt(storeIdStr));
+		
+	    		}
+	    		
+	    		
+	    		if(store == null) {
+	    			message = "유효하지 않은 상점입니다.";
+	    			success = false;
+	    			info.put("message", message);
+	    			info.put("success", success);
+	    			System.out.println(info);
+	    			return info;
+	    		}
+	    		
+		    	MenuItem menuItem = null;
+
+		    	storeService.saveOrUpdate(store);	
+		    	
+	        	if (store != null) {
+	        		List<MenuGroupItem> groups = new ArrayList<MenuGroupItem>();
+	        		MenuGroup target;
+	        		Menu menu;
+	        		OptionalMenu optionalMenu;
+	        		OptionalMenuList opMenuList;
+	        		Set<OptionalMenuList> opMenuListt = new HashSet<OptionalMenuList>();
+	        		try {
+	        		JSONArray groupMenuData = (JSONArray) jsonObj.get("menu");
+	        		if (groupMenuData.size() > 0){
+	        		    for(int i=0; i<groupMenuData.size(); i++) {
+	        		        JSONObject jsonObj1 = (JSONObject)groupMenuData.get(i);
+	        		        String name = (String)jsonObj1.get("groupName"); 
+	        		        target = menuService.getMenuGroupByGroupName(name, store.getStoreKey());
+	        		        if(name.equals("하프앤하프")) {
+	        		        	target = new MenuGroup(store, name,"C", session);
+	        	        		menuService.saveAndReorder(target, session);
+	        		        } else if(target == null) {
+	        		        	target = new MenuGroup(store, name, session);
+	        	        		menuService.saveAndReorder(target, session);
+	        	        		
+	        	        		groups.add(new MenuGroupItem(target));
+	        		        } 
+
+	                		JSONArray MenuData = (JSONArray) jsonObj1.get("menus");
+	                		
+	                		if (MenuData.size() > 0){
+	                			for(int j=0; j<MenuData.size(); j++){
+	                				JSONObject jsonObj2 = (JSONObject)MenuData.get(j);
+	                				
+	                				String menuname =(String) jsonObj2.get("menuName");
+	                				menu = menuService.getMenuByName(menuname , target.getId());
+	                				if(menu == null) {
+	                					menu = new Menu(store, (String)menuname, session);
+	                				}
+	                        		menu.setGroupId(target.getId()); 
+	                        		menu.setFlagType((String)jsonObj2.get("flagType"));
+	                        		menu.setIntro((String)jsonObj2.get("intro"));
+	                        		Long inprice = (Long) (jsonObj2.get("price"));
+	                        		float price = (inprice);
+	                        		menu.setPrice(price);
+	                        		String eventName = (String)jsonObj2.get("discountName");
+	                        		String eventCode = (String)jsonObj2.get("eventName");
+	                        		menu.setEventCode(eventCode);
+	                        		menu.setEvent(eventName);
+	                        		menu.setCode((String)jsonObj2.get("menuCode"));
+	                        		menu.setImage((String)jsonObj2.get("image"));
+	                        		String updateYn = ((String)jsonObj2.get("updateYN"));
+	                        		
+	                        		Long Seq = (Long) jsonObj2.get("siblingSeq");
+
+	                        		menuService.saveOrUpdate(menu);
+	                        		
+	                        		menuItem = new MenuItem(menu); 
+	                        		
+	                                URL url = null;
+	                                InputStream in = null;
+	                                OutputStream out = null;
+	                                try {
+	                                    // 컴퓨터 또는 서버의 저장할 경로(절대패스로 지정해 주세요.)
+	                                	String imageName = (String)jsonObj2.get("image");
+	                                    String menuImage = Util.uniqueIFilename(imageName);
+	                                    url = new URL(imageName);
+	                                    in = url.openStream();
+	                                    System.out.println(menuImage);
+	                                    UploadFile  menuImageFile = new UploadFile(store, menuImage, imageName, 1, session);
+	                                    payService.saveOrUpdate(menuImageFile);
+	                                    out = new FileOutputStream(SolUtil.getPhysicalRoot("Menu",store.getId())+"/"+menuImage);
+	                                    menu.setMenuImageId(menuImageFile.getId());
+	                                    while (true) {
+	                                        // 루프를 돌면서 이미지데이터를 읽어들이게 됩니다.
+	                                        int data = in.read();
+
+	                                        // 데이터값이 -1이면 루프를 종료하고 나오게 됩니다.
+	                                        if (data == -1) {
+	                                            break;
+	                                        }
+
+	                                        // 읽어들인 이미지 데이터값을 컴퓨터 또는 서버공간에 저장하게 됩니다.
+	                                        out.write(data);
+	                                    }
+
+	                                    // 저장이 끝난후 사용한 객체는 클로즈를 해줍니다.
+	                                    in.close();
+	                                    out.close();
+
+	                                } catch (Exception e) {
+	                                	  // 예외처리
+	                                    e.printStackTrace();
+	                                } finally {
+	                                    // 만일 에러가 발생해서 클로즈가 안됐을 가능성이 있기에
+	                                    // NULL값을 체크후 클로즈 처리를 합니다.
+	                                    if (in != null) {
+	                                        in.close();
+	                                    }
+	                                    if (out != null) {
+	                                        out.close();
+	                                    }
+	                                }
+	                            
+	                        		try {
+	                        		Long inDisPrice = (Long) (jsonObj2.get("discountPrice"));
+	                        		if(inDisPrice == null) {
+	                        			continue;
+	                        		}else {
+		                        		float discountPrice = (inDisPrice);
+		                        		menu.setDiscountPrice(discountPrice);
+		                        		menuService.saveOrUpdate(menu);
+	                        		}
+	                        		}catch (Exception e) {
+										// TODO: handle exception
+	                        			menu.setDiscountPrice((float) 0);
+	                        			menuService.saveOrUpdate(menu);
+									}
+	                        		String discount1 = (String) jsonObj2.get("discount");
+	                        		if (discount1 == null) {
+	                        			continue;
+	                        		} else if(discount1.equals("")){
+		                        		menu.setDiscount(1);
+		                        		menuService.saveOrUpdate(menu);
+	                        		} else {
+		                        		double discount = Double.parseDouble(discount1);
+		                        		menu.setSiblingSeq(Seq.intValue());
+		                        		menu.setDiscount(discount);
+		                        		menuService.saveOrUpdate(menu);
+	                        		}
+	                        		
+	                        		if(updateYn == null) {
+	                        			continue;
+	                        		} else {
+		                        		if(updateYn.equals("Y")) {
+		                        			menu.setUpdateYN(new Date());
+		                        			menuService.saveOrUpdate(menu);
+		                        		}
+	                        		}
+	                        		
+	                        		JSONArray optData = (JSONArray) jsonObj2.get("optionalMenus");
+	                        		if(optData == null) {
+	                        			continue;
+	                        		} else if(optData.size() > 0 && optData != null) {
+	                        			for(int h=0; h<optData.size(); h++){
+	                        				JSONObject jsonObj3 = (JSONObject)optData.get(h);	
+	                        				Long siblingSeq = (Long) jsonObj3.get("siblingSeq");
+	                        				
+	                        				optionalMenu = menuService.getOptionalMenuByName((String) jsonObj3.get("menuName") , menu.getId());
+	                        				if (optionalMenu == null) {
+	                        					optionalMenu = new OptionalMenu(menu,(String) jsonObj3.get("optType"),(String) jsonObj3.get("menuName"),siblingSeq.intValue(), session);
+	                        					menuService.saveOrUpdate(optionalMenu);
+	                        				}else {
+	                        					optionalMenu.setName((String) jsonObj3.get("menuName"));
+	                        					optionalMenu.setOptType((String) jsonObj3.get("optType"));
+	                        					optionalMenu.setSiblingSeq(siblingSeq.intValue());
+	                        					menuService.saveOrUpdate(optionalMenu);
+	                        					
+	                        				}
+	                              			String id = "";
+	                              			JSONArray optList = (JSONArray) jsonObj3.get("optionalList");
+	                              			if(optList.size()> 0) {
+	                              				for(int k=0; k<optList.size(); k++){
+	                              					JSONObject jsonObj4 = (JSONObject)optList.get(k);
+	                              					String optMenuName = (String) jsonObj4.get("menuName");
+	                              					Long longPrice = (Long) jsonObj4.get("price");
+	                              					String image = (String) jsonObj4.get("image");
+	                              					String menuCode = (String) jsonObj4.get("menuCode");
+	                              					if(h==0) {
+		                              					menu.setCode(menuCode.substring(4));
+		                              					menuService.saveOrUpdate(menu);
+	                              					}
+	                              					float price2 = longPrice;
+	                              					opMenuList = menuService.getOptionalMenuList(optMenuName, optionalMenu.getId());
+	                              					if(opMenuList == null) {
+	                              						opMenuList = new OptionalMenuList(optionalMenu, optMenuName, price2,image, menuCode, session);
+	                              						menuService.saveOrUpdate(opMenuList);
+	                              					if(k == optList.size()-1) {
+	                              						id += opMenuList.getId();
+	                              					}else {
+	                              						id += opMenuList.getId() + ",";
+	                              						
+	                              					}
+	                              					optionalMenu.setMenuList(id);
+	                              					menuService.saveOrUpdate(optionalMenu);
+	                              					} else {
+	                              						opMenuList.setName(optMenuName);
+	                              						opMenuList.setPrice(price2);
+	                              						opMenuList.setOptMenu(optionalMenu);
+	                              						opMenuList.setImage(image);
+	                              						opMenuList.setCode(menuCode);
+	                              						menuService.saveOrUpdate(opMenuList);
+		                              					if(k == optList.size()-1) {
+		                              						id += opMenuList.getId();
+		                              					}else {
+		                              						id += opMenuList.getId() + ",";
+		                              						
+		                              					}
+		                              					optionalMenu.setMenuList(id);
+		                              					menuService.saveOrUpdate(optionalMenu);
+	                              					}
+	                              				}
+	                              			}
+	                              			
+	                        			}
+	                        		}
+	                			}
+	                		}
+	        		    }
+	        		    
+	            	}
+		        	}catch (Exception e) {
+						// TODO: handle exception
+						e.printStackTrace();
+						message = "메뉴 등록 실패하였습니다.";
+						success = false;
+						info.put("message", message);
+						info.put("success", success);
+						System.out.println(info);
+						return info;
+					}
+	        	}
+
+			}catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					message = "매장 코드 및 파라미터를 확인해주세요.";
+					success = false;
+					info.put("message", message);
+					info.put("success", success);
+					System.out.println(info);
+					return info;
+				}
+			
+	    }
+			message = "OK";
+			success = true;
+			info.put("message", message);
+			info.put("success", success);
+			System.out.println(info);
+	    	return info;
+	    }
+} 
+

@@ -14,6 +14,10 @@ public interface StoreDao {
 	// Common
 	public List<Store> get();
 	public Store get(int id);
+	public Store getByName(String name);
+	public Store getByCode(int code);
+	public Store getAll();
+	public Store getStore(String storeKey);
 	public void saveOrUpdate(Store store);
 	public void delete(Store store);
 	public void delete(List<Store> stores);

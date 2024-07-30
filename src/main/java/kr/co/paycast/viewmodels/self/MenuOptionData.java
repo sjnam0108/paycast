@@ -4,35 +4,34 @@ import java.util.List;
 
 public class MenuOptionData {
 	
-	private String menuOptName;
-	private String menuGubun;
+	private String menuName;
+	private String optType;
 	private String menuOptSeq;
-	private List<SubOption> optionList;
+	private List<SubOption> optionalList;
 	
-	public String getMenuOptName() {
-		return menuOptName;
-	}
-	public void setMenuOptName(String menuOptName) {
-		this.menuOptName = menuOptName;
-	}
-	public String getMenuGubun() {
-		return menuGubun;
-	}
-	public void setMenuGubun(String menuGubun) {
-		this.menuGubun = menuGubun;
-	}
 	public String getMenuOptSeq() {
 		return menuOptSeq;
 	}
 	public void setMenuOptSeq(String menuOptSeq) {
 		this.menuOptSeq = menuOptSeq;
 	}
-	public List<SubOption> getOptionList() {
-		return optionList;
+	public String getMenuName() {
+		return menuName;
 	}
-	public void setOptionList(List<SubOption> optionList) {
-		this.optionList = optionList;
+	public void setMenuName(String menuName) {
+		this.menuName = menuName;
+	}
+	public String getOptType() {
+		return optType;
+	}
+	public void setOptType(String optType) {
+		this.optType = optType;
+	}
+	public List<SubOption> getOptionalList() {
+		return optionalList;
+	}
+	public void setOptionalList(List<SubOption> optionalList) {
+		this.optionalList = optionalList;
 	}
 
-	
 }

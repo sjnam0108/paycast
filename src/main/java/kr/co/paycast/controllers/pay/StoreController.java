@@ -128,7 +128,7 @@ public class StoreController {
     		
 //    		orderUrl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort() +
 //    				"/menu?store={0}";
-    		orderUrl = request.getScheme()+"s://"+request.getServerName()+":"+request.getServerPort() +
+    		orderUrl = request.getScheme()+"app://"+request.getServerName()+":"+request.getServerPort() +
     				"/menu?store={0}&table=";
     		
     		//
@@ -245,7 +245,6 @@ public class StoreController {
         	target.setSite(site);
         	target.setShortName(shortName);
         	target.setStoreName(storeName);
-        	
         	target.setEffectiveStartDate(effectiveStartDate);
             target.setEffectiveEndDate(Util.setMaxTimeOfDate(Util.parseZuluTime((String)model.get("effectiveEndDate"))));
         	target.setStoreKey(storeKey);
@@ -277,7 +276,7 @@ public class StoreController {
             
             etc.setEpStoreKey(Util.parseString((String)model.get("epStoreKey"), ""));
             etc.setStorePayGubun(Util.parseString((String)model.get("storePayGubun"), "ME"));
-            
+            etc.setPaymentType((String)model.get("paymentType"));
             etc.setSavingType(Util.parseString((String)model.get("savingType"), "NO"));
             
             saveOrUpdate(target, opt, etc, locale);

@@ -86,7 +86,11 @@ public class Store {
 	@Column(name = "KO_ENABLED", nullable = false)
 	private boolean kioskOrderEnabled = true;
 	
+	@Column(name = "CAT_ID", length = 100)
+	private String catId;
 	
+	@Column(name = "STORE_CODE", length = 100)
+	private Integer storeCode;
 	
 	@Column(name = "BIZ_NAME", length = 100)
 	private String bizName;
@@ -145,9 +149,6 @@ public class Store {
 	
 	@OneToOne(mappedBy = "store", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	private StoreOpt storeOpt;
-	
-	@OneToOne(mappedBy = "store", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-	private StoreEvent storeEvnet;
 	
 	@OneToMany(mappedBy = "store", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	private Set<Device> devices = new HashSet<Device>(0);
@@ -582,14 +583,22 @@ public class Store {
 		this.ads = ads;
 	}
 
-	public StoreEvent getStoreEvnet() {
-		return storeEvnet;
+	public String getCatId() {
+		return catId;
 	}
 
-	public void setStoreEvnet(StoreEvent storeEvnet) {
-		this.storeEvnet = storeEvnet;
+	public void setCatId(String catId) {
+		this.catId = catId;
 	}
-	
-	
+
+	public int getStoreCode() {
+		return storeCode;
+	}
+
+	public void setStoreCode(int storeCode) {
+		this.storeCode = storeCode;
+	}
+
+		
 	
 }

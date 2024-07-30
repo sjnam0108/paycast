@@ -1,5 +1,6 @@
 package kr.co.paycast.models.pay.dao;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -8,15 +9,20 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.paycast.models.pay.Menu;
+import kr.co.paycast.models.pay.OptionalMenuList;
 import kr.co.paycast.models.pay.StorePolicy;
 //import kr.co.signcast.utils.Util;
 import kr.co.paycast.models.pay.service.CouponPointService;
@@ -39,6 +45,96 @@ public class StoreMenuDaoImpl implements StoreMenuDao {
 		@SuppressWarnings("unchecked")
 		List<Menu> list = session.createCriteria(Menu.class)
 				.add(Restrictions.eq("id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public String getTime(int id) {
+		Session session = sessionFactory.getCurrentSession();
+		
+		ProjectionList projectionList = Projections.projectionList();
+		projectionList.add(Projections.property("updateYN").as("updateYN"));
+		Criteria crit = session.createCriteria(Menu.class);
+		crit.setProjection(projectionList);
+		crit.createAlias("store", "store");
+		crit.add(Restrictions.eq("store.id", id));
+		crit.addOrder(Order.desc("updateYN"));
+		crit.setMaxResults(1);
+		Date menu = (Date) crit.uniqueResult();
+		String menuString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(menu);
+		return menuString;
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Menu> getByMenuList(int id) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		
+		return session.createCriteria(Menu.class)
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", id)).list();
+		
+//		 (list.isEmpty() ? null : list.get(0));
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Menu> getByMenuCode(int id, String menuCode) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		
+		return session.createCriteria(Menu.class)
+				.createAlias("store", "store")
+				.add(Restrictions.eq("store.id", id))
+				.add(Restrictions.eq("code", menuCode)).list();
+		
+//		 (list.isEmpty() ? null : list.get(0));
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<OptionalMenuList> getByOptionCode(int id, String menuCode) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		
+		return session.createCriteria(OptionalMenuList.class)
+				.createAlias("optMenu", "optMenu")
+				.add(Restrictions.eq("optMenu.id", id))
+				.add(Restrictions.eq("code", menuCode)).list();
+		
+//		 (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Menu> getListByStoreIdGroupId(int storeId, Integer groupId) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		if (groupId == null) {
+			return session.createCriteria(Menu.class)
+					.createAlias("store", "store")
+					.add(Restrictions.eq("store.id", storeId))
+					.add(Restrictions.isNull("groupId")).list();
+		} else {
+			return session.createCriteria(Menu.class)
+					.add(Restrictions.eq("groupId", groupId)).list();
+		}
+	}
+	
+	@Override
+	public Menu getName(String name,  int groupId) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Menu> list = session.createCriteria(Menu.class)
+		.add(Restrictions.eq("name", name))
+		.add(Restrictions.eq("groupId", groupId)).list();
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
@@ -136,22 +232,7 @@ public class StoreMenuDaoImpl implements StoreMenuDao {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Menu> getListByStoreIdGroupId(int storeId, Integer groupId) {
-		
-		Session session = sessionFactory.getCurrentSession();
-		
-		if (groupId == null) {
-			return session.createCriteria(Menu.class)
-					.createAlias("store", "store")
-					.add(Restrictions.eq("store.id", storeId))
-					.add(Restrictions.isNull("groupId")).list();
-		} else {
-			return session.createCriteria(Menu.class)
-					.add(Restrictions.eq("groupId", groupId)).list();
-		}
-	}
+
 	
 	@SuppressWarnings("unchecked")
 	@Override

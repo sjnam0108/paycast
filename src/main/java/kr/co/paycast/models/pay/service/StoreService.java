@@ -32,6 +32,10 @@ public interface StoreService {
 	// Common
 	public List<Store> get();
 	public Store getStore(int id);
+	public Store getStoreByStoreName(String name);
+	public Store getStoreByCode(int code);
+	public Store getAllStore();
+	public Store getStoreKey(String storeKey);
 	public void saveOrUpdate(Store store);
 	public void deleteStore(Store store);
 	public void deleteStores(List<Store> stores);

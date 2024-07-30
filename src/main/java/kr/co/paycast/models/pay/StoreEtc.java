@@ -54,6 +54,9 @@ public class StoreEtc {
 	
 	@Column(name = "SAVING_TYPE", nullable = false, length = 4)
 	private String savingType = "NO"; 				// 상점 적립 사용 여부 : NO= 사용안함, CP= 쿠폰, PO= 포인트 
+	
+	@Column(name = "PAYMENT_TYPE", nullable = false, length = 4)
+	private String paymentType = "AD"; 				// trtype : AD : 선불, CA : 취소, RF : 리필, DE : 후불
 
 	@Column(name = "CREATION_DATE", nullable = false)
 	private Date whoCreationDate;
@@ -195,6 +198,14 @@ public class StoreEtc {
 
 	public void setSavingType(String savingType) {
 		this.savingType = savingType;
+	}
+	
+	public String getPaymentType() {
+		return paymentType;
+	}
+
+	public void setPaymentType(String paymentType) {
+		this.paymentType = paymentType;
 	}
 
 	public void setTime (){

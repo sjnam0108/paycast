@@ -714,6 +714,13 @@ public class SmilepayController {
 			}else{
 				model.addAttribute("savingType", "NO");
 			}
+			// 선불 후불 정의값
+			// AD= 선불, DE= 후불, PO= 포인트 
+			if(res.getStoreEtc() != null){
+				model.addAttribute("payment", res.getStoreEtc().getPaymentType());
+			}else{
+				model.addAttribute("payment", "AD");
+			}
 
 			// 모바일 상점 로그 가져오기
 			imgCommon(res, model);
@@ -2925,6 +2932,8 @@ public class SmilepayController {
 		logger.info("BuyerTel" + BuyerTel);
    		String payment = (String)request.getParameter("payment");
    		logger.info(payment);
+//   		String paySelect = (String)request.getParameter("paySelect");
+//   		logger.info(paySelect);
 		String EncryptData = encodeSHA256Base64(EdiDate + Mid + payment + res.getStoreEtc().getSpAuthKey());
 		SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
 		String toDate = yyyyMMddHHmmss.format(new Date());		
@@ -2945,8 +2954,8 @@ public class SmilepayController {
 		logger.info("/easyPayCheck coupon [{}] couponAmt [{}]", coupon, couponSelect);
 		logger.info("/easyPayCheck pointTotal [{}] usePoint [{}]", pointTotal, usePoint);
 		logger.info("/easyPayCheck discount [{}] payment [{}]", discount, payment);
-   		
-   		if(paymentInt <= 0){
+   		String strorePaySelect = storeService.getStore(storeId).getStoreEtc().getPaymentType();
+   		if(paymentInt <= 0 || strorePaySelect.equals("DE")){
    			logger.info("페이가 0일 경우");
    	        try {
    	        	GoodsName = URLDecoder.decode(GoodsName, "UTF-8");

@@ -10,6 +10,7 @@ public interface MenuGroupDao {
 	
 	// Common
 	public MenuGroup get(int id);
+	public MenuGroup getName(String name,String storeKey);
 	public void saveOrUpdate(MenuGroup menuGroup);
 	public void delete(MenuGroup menuGroup);
 	public void delete(List<MenuGroup> menuGroups);

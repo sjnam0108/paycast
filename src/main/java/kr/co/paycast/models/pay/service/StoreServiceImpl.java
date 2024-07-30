@@ -85,6 +85,30 @@ public class StoreServiceImpl implements StoreService {
 		
 		return storeDao.get(id);
 	}
+	
+	@Override
+	public Store getStoreByCode(int code) {
+		
+		return storeDao.getByCode(code);
+	}
+	
+	@Override
+	public Store getStoreByStoreName(String name) {
+		
+		return storeDao.getByName(name);
+	}
+	
+	@Override
+	public Store getAllStore() {
+		
+		return storeDao.getAll();
+	}
+	
+	@Override
+	public Store getStoreKey(String storeKey) {
+		
+		return storeDao.getStore(storeKey);
+	}
 
 	@Override
 	public void saveOrUpdate(Store store) {

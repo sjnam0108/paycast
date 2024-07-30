@@ -434,9 +434,23 @@ $(document).ready(function() {
 							</div>
 						</div>
 						<div class="tab-pane p-2 fade" id="store-pay-ctnt">
-							<input name="mobilePayment" type="hidden" />
+							<input name="mobilePayment" type="hidden" />	
 							<div class="form-row mt-3 mb-2">
 								<div class="col-12">
+									<div class="form-group col mb-1">
+										<label class="form-label d-block">결제 방식</label>
+										<label class="switcher mb-2">
+											<input type="radio" class="switcher-input" name="paymentType" value="AD">
+											<span class="switcher-indicator"></span>
+											<span class="switcher-label">선불</span>
+										</label>
+										<span class="pl-2"></span>
+										<label class="switcher mb-2">
+											<input type="radio" class="switcher-input" name="paymentType" value="DE">
+											<span class="switcher-indicator"></span>
+											<span class="switcher-label">후불</span>
+										</label>
+									</div>
 									<div class="form-group col mb-1">
 										<span class="pr-1">
 											<img src="/resources/shared/images/cus/logo_smilepay.png" height="20" />
@@ -503,7 +517,7 @@ $(document).ready(function() {
 												<span class="ml-2">${tip_selected}</span>
 											</span>
 											<span name="meUnselected">${tip_select}</span>
-										</a>										
+										</a>									
 									</div>
 								</div>
 							</div>
@@ -756,6 +770,12 @@ function edit(id) {
 		}
 	})
 	
+	$("#form-2 input[name='paymentType']").each(function(){
+		if($(this).val() == dataItem.storeEtc.paymentType){
+			$(this).prop("checked", true);
+		}
+	})
+	
 	$('#form-modal-2 .modal-dialog').draggable({ handle: '.modal-header' });
 	$("#form-modal-2").modal();
 }
@@ -787,7 +807,8 @@ function saveForm2() {
 			spCancelCode: $.trim($("#form-2 input[name='smilepayCancelCode']").val()),
 			epStoreKey: $.trim($("#form-2 input[name='easypayStoreID']").val()),
 			storePayGubun: $.trim($("#form-2 input[name='mobilePayment']").val()),
-			savingType: $.trim($("#form-2 input[name='savingType']:checked").val())
+			savingType: $.trim($("#form-2 input[name='savingType']:checked").val()),
+			paymentType: $.trim($("#form-2 input[name='paymentType']:checked").val())
     	};
     	
 		$.ajax({

@@ -572,21 +572,11 @@ public class MyStoreMenuController {
     		target.setPublished(visibleType);
     		target.setIntro(intro);
     		target.setSoldOut(soldOut);
-    		target.setEvent(eventSelect);  			
+    		target.setEvent(eventSelect);  	
+    		target.setCode(code);
     		if (menuImageFile != null) {
     			payService.saveOrUpdate(menuImageFile);
     			target.setMenuImageId(menuImageFile.getId());
-    		}
-    		if(code != null) {
-    			target.setCode(code);
-    			try {
-            		menuService.saveOrUpdateCode(target);
-            		
-            		menuItem = new MenuItem(target);
-            	} catch (Exception e) {
-            		logger.error("updateMenu - save menu", e);
-            		throw new ServerOperationForbiddenException("코드 중복");
-            	}
     		}
     		target.touchWho(session);
     		

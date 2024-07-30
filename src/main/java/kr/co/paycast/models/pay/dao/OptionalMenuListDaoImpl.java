@@ -18,17 +18,19 @@ public class OptionalMenuListDaoImpl implements OptionalMenuListDao {
     @Autowired
     private SessionFactory sessionFactory;
 
-//	@Override
-//	public OptionalMenu get(int id) {
-//		
-//		Session session = sessionFactory.getCurrentSession();
-//		
-//		@SuppressWarnings("unchecked")
-//		List<OptionalMenu> list = session.createCriteria(OptionalMenu.class)
-//				.add(Restrictions.eq("id", id)).list();
-//		
-//		return (list.isEmpty() ? null : list.get(0));
-//	}
+	@Override
+	public OptionalMenuList get(String name, int id) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<OptionalMenuList> list = session.createCriteria(OptionalMenuList.class)
+				.add(Restrictions.eq("name", name))						
+				.createAlias("optMenu", "optMenu")
+				.add(Restrictions.eq("optMenu.id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
 
 	@Override
 	public void saveOrUpdate(OptionalMenuList optMenuList) {
@@ -47,6 +49,20 @@ public class OptionalMenuListDaoImpl implements OptionalMenuListDao {
 		return session.createCriteria(OptionalMenuList.class)
 				.createAlias("optMenu", "optMenu")
 				.add(Restrictions.eq("optMenu.id", id)).list();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<OptionalMenuList> getOptionalMenuListByOptionIdByMenusId(int id,String idStr) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		int menuId = Integer.parseInt(idStr);
+		
+		return session.createCriteria(OptionalMenuList.class)
+				.createAlias("optMenu", "optMenu")
+				.add(Restrictions.eq("optMenu.id", id))
+				.add(Restrictions.eq("id", menuId)).list();
 	}
 
 //	@Override

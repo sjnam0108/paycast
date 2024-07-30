@@ -249,6 +249,9 @@
                                             <label class="col-form-label col-sm-12 font-type5">※ 최소 주문 금액 : ${minOrderPriceCom} 원</label>
                                             <input type="hidden" name="minOrderPriceCom" value="${minOrderPriceCom}">
                                             <input type="hidden" name="minOrderPrice" value="${minOrderPrice}">
+                                            
+
+                                            
                                         </div>
                                     </div>
                      
@@ -1169,6 +1172,9 @@ function payCheck(payGuBun){
                     break;
                 case "OFF" :
                    document.location.href="/mobileOrder/storeOff?store=${storeKey}&table=${table}";
+                    break;
+                case "DE" :
+                    document.location.href="/smartropay/returnMobilePay?store=${storeKey}&basket=${basket}";
                     break;
                 default :
                    showAlertModal("warning", "${pay_msg_alertMsg3}");

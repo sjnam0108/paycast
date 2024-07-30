@@ -1,15 +1,22 @@
 package kr.co.paycast.models.pay.dao;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
 import kr.co.paycast.models.pay.Menu;
+import kr.co.paycast.models.pay.OptionalMenuList;
 
 public interface StoreMenuDao {
 	
 	// Common
 	public Menu get(int id);
+	public String getTime(int id);
+	public List<Menu> getByMenuList(int id);
+	public List<Menu> getByMenuCode(int id,String menuCode);
+	public List<OptionalMenuList> getByOptionCode(int id,String menuCode);
+	public Menu getName(String name, int groupId);
 	public void saveOrUpdate(Menu menu);
 	public void saveOrUpdateCode(Menu menu);
 	public void delete(Menu menu);

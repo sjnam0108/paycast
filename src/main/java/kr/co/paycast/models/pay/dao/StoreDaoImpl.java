@@ -55,6 +55,53 @@ public class StoreDaoImpl implements StoreDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	
+	@Override
+	public Store getByCode(int code) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Store> list = session.createCriteria(Store.class)
+		.add(Restrictions.eq("storeCode", code)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public Store getByName(String name) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Store> list = session.createCriteria(Store.class)
+		.add(Restrictions.eq("storeName", name)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public Store getAll() {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Store> list = session.createCriteria(Store.class).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
+	
+	@Override
+	public Store getStore(String storeKey) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<Store> list = session.createCriteria(Store.class)
+				.add(Restrictions.eq("storeKey", storeKey)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
 
 	@Override
 	public void saveOrUpdate(Store store) {

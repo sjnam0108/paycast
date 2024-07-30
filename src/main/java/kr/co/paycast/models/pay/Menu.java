@@ -50,11 +50,20 @@ public class Menu {
 	@Column(name = "EVENT_NAME")
 	private String event;
 	
+	@Column(name = "EVENT_CODE")
+	private String eventCode;
+	
+	@Column(name = "DISCOUNT", nullable = false)
+	private double discount = 0; 			// 포인트 적립 퍼센트
+	
 	@Column(name = "SIBLING_SEQ", nullable = false)
 	private int siblingSeq;				// 메뉴 순서
 	
 	@Column(name = "PRICE", nullable = false)
 	private Float price = 0f;				// 가격
+	
+	@Column(name = "DISCOUNT_PRICE", nullable = false)
+	private Float discountPrice = 0f;				// 할인 가격
 	
 	@Column(name = "GROUP_ID")
 	private Integer groupId;			// 그룹 시퀀스 번호
@@ -70,11 +79,17 @@ public class Menu {
 	@Column(name = "INTRO", length = 300)
 	private String intro; 				// 메뉴 설명
 	
+	@Column(name = "IMAGE", length = 300)
+	private String image; 				// 메뉴 설명
+	
 	@Column(name = "SOLD_OUT", nullable = false)
 	private boolean soldOut = false;	// 매진
 	
 	@Column(name = "PUBLISHED", nullable = false, length = 1)
 	private String published = "Y";
+	
+	@Column(name = "UPDATEYN", nullable = false, length = 1)
+	private Date updateYN = new Date();
 	// 2019.11.21 DB 에 저장하지는 않지만 POS에 내려줄때 삭제된 메뉴에 대해서 "D : 삭제"로 하여  셋팅(published)
 	
 	@Transient
@@ -300,6 +315,49 @@ public class Menu {
     		return Integer.compare(item1.getSiblingSeq(), item2.getSiblingSeq());
     	}
 	};
+
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public Date getUpdateYN() {
+		return updateYN;
+	}
+
+	public void setUpdateYN(Date updateYN) {
+		this.updateYN = updateYN;
+	}
+
+	public double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
+	}
+
+	public Float getDiscountPrice() {
+		return discountPrice;
+	}
+
+	public void setDiscountPrice(Float discountPrice) {
+		this.discountPrice = discountPrice;
+	}
+
+	public String getEventCode() {
+		return eventCode;
+	}
+
+	public void setEventCode(String eventCode) {
+		this.eventCode = eventCode;
+	}
+	
+	
 	
 	
 }

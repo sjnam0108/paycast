@@ -1,14 +1,22 @@
 package kr.co.paycast.controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.security.PrivateKey;
 import java.text.DateFormat;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,12 +42,15 @@ import kr.co.paycast.models.pay.service.StoreService;
 import kr.co.paycast.utils.SolUtil;
 import kr.co.paycast.utils.Util;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -1035,5 +1046,32 @@ public class HomeController {
 			HttpSession session) {
 		return "/jusoPopup";
 	}
+	
+	@RequestMapping(value="/m/menus/S{storeId:.+}/{file_name}", method= RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE) 
+	  public @ResponseBody String getContentMediaVideo(@PathVariable("storeId")int storeId,@PathVariable("file_name")String file_name,HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, IOException {
+
+		  String filePath = SolUtil.getPhysicalRoot("Menu",storeId);
+		  
+		  System.out.println(filePath);
+		  System.out.println(file_name);
+		  
+	    //progressbar 에서 특정 위치를 클릭하거나 해서 임의 위치의 내용을 요청할 수 있으므로
+	    //파일의 임의의 위치에서 읽어오기 위해 RandomAccessFile 클래스를 사용한다.
+	    //해당 파일이 없을 경우 예외 발생
+		  
+		  ServletOutputStream bout = response.getOutputStream();
+	    
+	    File file = new File(filePath+"/"+ file_name);
+	    if( ! file.exists() ) new FileNotFoundException();
+	    
+	    String res = filePath + "/" + file_name;
+	    FileInputStream in = new FileInputStream(res);
+	    int length;
+	    byte[] buffer = new byte[10];
+	    while((length=in.read(buffer)) != -1){
+	    	bout.write(buffer,0,length);
+	    }
+	    return null;
+	  }
 	
 }

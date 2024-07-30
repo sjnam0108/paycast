@@ -111,7 +111,7 @@
 	</div>
 	<c:choose>
 		<c:when test="${storePay eq 'MS'}">
-			<form id="orderForm" name="orderForm" method="post" Content-Type="application/json" action="/smilepay"></form>
+			<form id="orderForm" name="orderForm" method="post" Content-Type="application/json" action="/smartropay"></form>
 		</c:when>
 		<c:otherwise>
 			<form id="orderForm" name="orderForm" method="post" Content-Type="application/json" action="/mobileOrder"></form>
@@ -268,7 +268,7 @@ function onFn() {
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/onFn",
+		url: "/smartropay/onFn",
 		data: JSON.stringify({ menuInTime: "${time}" }),
 		success: function (data, status) {
 			if (data == "N") {
@@ -374,7 +374,7 @@ function menuDelete(basketLiId, compSelect){
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/basketDel",
+		url: "/smartropay/basketDel",
 		data: JSON.stringify(data),
 		success: function (resData) {
 			if(resData.length > 0){
@@ -426,7 +426,7 @@ function menuPacking(firstChk){
 			type: "POST",
 			contentType: "application/json",
 			dataType: "json",
-			url: "/smilepay/packingChg",
+			url: "/smartropay/packingChg",
 			data: JSON.stringify(data),
 			success: function (data) {
 				if(data != "OK"){
@@ -463,7 +463,7 @@ function countChg($home, num){
 		type: "POST",
 		contentType: "application/json",
 		dataType: "json",
-		url: "/smilepay/countChg",
+		url: "/smartropay/countChg",
 		data: JSON.stringify(data),
 		success: function (data) {
 			if(data != "OK"){

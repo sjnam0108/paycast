@@ -34,6 +34,12 @@ public class OptionalMenuList {
 	@Column(name = "MENU_NAME", nullable = false, length = 100)
 	private String name;				// 옵션 메뉴 명
 	
+	@Column(name = "MENU_CODE", nullable = false, length = 100)
+	private String code;				// 옵션 메뉴 명
+	
+	@Column(name = "IMAGE", nullable = false, length = 100)
+	private String image;				// 옵션 메뉴 명
+	
 	@Column(name = "PRICE", nullable = false)
 	private Float price = 0f;			// 옵션 가격
 	
@@ -52,6 +58,8 @@ public class OptionalMenuList {
 	@Column(name = "LAST_UPDATE_LOGIN", nullable = false)
 	private int whoLastUpdateLogin;
 	
+	@Column(name = "SOLD_OUT", nullable = false)
+	private boolean soldOut = false;	// 매진
 	
 	public OptionalMenuList() {}
 	
@@ -60,6 +68,17 @@ public class OptionalMenuList {
 		this.optMenu = optMenu;
 		this.name = name;
 		this.price = price;
+		
+		touchWhoC(session);
+	}
+	
+	public OptionalMenuList(OptionalMenu optMenu, String name, Float price,String image, String menuCode, HttpSession session) {
+		
+		this.optMenu = optMenu;
+		this.name = name;
+		this.price = price;
+		this.image = image;
+		this.code = menuCode;
 		
 		touchWhoC(session);
 	}
@@ -150,5 +169,31 @@ public class OptionalMenuList {
 	public void setOptMenu(OptionalMenu optMenu) {
 		this.optMenu = optMenu;
 	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	public boolean isSoldOut() {
+		return soldOut;
+	}
+
+	public void setSoldOut(boolean soldOut) {
+		this.soldOut = soldOut;
+	}
+	
+	
 	
 }

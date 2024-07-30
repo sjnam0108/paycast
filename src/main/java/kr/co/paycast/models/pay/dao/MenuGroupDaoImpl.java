@@ -32,6 +32,20 @@ public class MenuGroupDaoImpl implements MenuGroupDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	
+	@Override
+	public MenuGroup getName(String name, String storeKey) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<MenuGroup> list = session.createCriteria(MenuGroup.class)
+		.add(Restrictions.eq("name", name))
+		.createAlias("store", "store")
+		.add(Restrictions.eq("store.storeKey", storeKey)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
 
 	@Override
 	public void saveOrUpdate(MenuGroup menuGroup) {
@@ -107,8 +121,9 @@ public class MenuGroupDaoImpl implements MenuGroupDao {
 		
 		return session.createCriteria(MenuGroup.class)
 				.createAlias("store", "store")
-				.add(Restrictions.eq("store.id", storeId))
-				.add(Restrictions.eq("published", published)).list();
+				.add(Restrictions.eq("store.id", storeId)).list();
+//				.add(Restrictions.eq("published", published)
+						
 	}
 	
 	@SuppressWarnings("unchecked")

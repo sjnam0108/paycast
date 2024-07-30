@@ -50,7 +50,6 @@ public class OptionalMenu {
 	@Column(name = "MENU_LIST", length = 4000)
 	private String menuList;
 	
-	
 	@Column(name = "CREATION_DATE", nullable = false)
 	private Date whoCreationDate;
 	
@@ -201,4 +200,7 @@ public class OptionalMenu {
     		return Integer.compare(item1.getSiblingSeq(), item2.getSiblingSeq());
     	}
 	};
+
+	
+	
 }

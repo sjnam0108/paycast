@@ -29,6 +29,20 @@ public class OptionalMenuDaoImpl implements OptionalMenuDao {
 		
 		return (list.isEmpty() ? null : list.get(0));
 	}
+	
+	@Override
+	public OptionalMenu getName(String name, int id) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		
+		@SuppressWarnings("unchecked")
+		List<OptionalMenu> list = session.createCriteria(OptionalMenu.class)
+		.add(Restrictions.eq("name", name))
+		.createAlias("menu", "menu")
+		.add(Restrictions.eq("menu.id", id)).list();
+		
+		return (list.isEmpty() ? null : list.get(0));
+	}
 
 	@Override
 	public void saveOrUpdate(OptionalMenu optionalMenu) {

@@ -1,5 +1,6 @@
 package kr.co.paycast.models.pay.service;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -28,6 +29,11 @@ public interface MenuService {
 	//
 	// Common
 	public Menu getMenu(int id);
+	public String getTime(int id);
+	public List<Menu> getMenuListbyStoreId(int id);
+	public List<Menu> getMenuByIdAndMenuCode(int id,String menuCode);
+	public List<OptionalMenuList> getOptionByIdAndMenuCode(int id,String menuCode);
+	public Menu getMenuByName(String name, int groupId);
 	public void saveOrUpdate(Menu menu);
 	public void saveOrUpdateCode(Menu menu);
 	public void deleteMenu(Menu menu);
@@ -46,6 +52,7 @@ public interface MenuService {
 	//
 	// Common
 	public MenuGroup getMenuGroup(int id);
+	public MenuGroup getMenuGroupByGroupName(String name, String storeKey);
 	public void saveOrUpdate(MenuGroup menuGroup);
 	public void deleteMenuGroup(MenuGroup menuGroup);
 	public void deleteMenuGroups(List<MenuGroup> menuGroups);
@@ -62,6 +69,7 @@ public interface MenuService {
 	//
 	// Common
 	public OptionalMenu getOptionalMenu(int id);
+	public OptionalMenu getOptionalMenuByName(String name, int id);
 	public void saveOrUpdate(OptionalMenu optionalMenu);
 	public void deleteOptionalMenu(OptionalMenu optionalMenu);
 	public void deleteOptionalMenus(List<OptionalMenu> optionalMenus);
@@ -78,6 +86,8 @@ public interface MenuService {
 	// for OptionalMenuList specific
 	public void saveOrUpdate(OptionalMenuList opMenuList);
 	public List<OptionalMenuList> getOptionalMenuListByOptionId(int id);
+	public List<OptionalMenuList> getOptionalMenuListByOptionIdByMenusId(int id,String idStr);
+	public OptionalMenuList getOptionalMenuList(String name, int id);
 
 	//
 	// for MenuDelete Dao

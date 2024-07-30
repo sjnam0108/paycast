@@ -491,6 +491,7 @@ public class MobileOrderController {
    		String usePoint = (String)request.getParameter("usePoint");
    		int discount = Util.parseInt((String)request.getParameter("discount"), 0);
    		String payment = (String)request.getParameter("payment");
+//   		String paySelect = (String)request.getParameter("paySelect");
    		
    		//최종 결제가 될 금액이 0원 일 경우 easypay를 사용 하지 않는다. 2020-04-27
    		int paymentInt = Util.parseInt(payment, 0);	
@@ -499,8 +500,9 @@ public class MobileOrderController {
 		logger.info("/easyPayCheck coupon [{}] couponAmt [{}]", coupon, couponSelect);
 		logger.info("/easyPayCheck pointTotal [{}] usePoint [{}]", pointTotal, usePoint);
 		logger.info("/easyPayCheck discount [{}] payment [{}]", discount, payment);
-   		
-   		if(paymentInt <= 0){
+//		logger.info(paySelect);
+   		String strorePaySelect = storeService.getStore(storeId).getStoreEtc().getPaymentType();
+   		if(paymentInt <= 0 || strorePaySelect.equals("DE")){
    	        try {
    	        	sp_product_nm = URLDecoder.decode(sp_product_nm, "UTF-8");
    	        	storeName = URLDecoder.decode(storeName, "UTF-8");
@@ -527,6 +529,7 @@ public class MobileOrderController {
 				order.setDiscountAmt(discount);
 				order.setPaymentAmt(paymentInt);
 				order.setSavingType(savingType);
+				order.setPayment(strorePaySelect);
 				order.setUseCoupon(basketOne.getCouponId());
 				storeOrderService.saveOrUpdate(order);
 				
@@ -643,6 +646,8 @@ public class MobileOrderController {
 		String orderNumber = Util.parseString((String)model.get("Moid"));
 		logger.info("페이체크 시작*************" + orderNumber);
 		String orderType = Util.parseString((String)model.get("orderType"));
+		String paySelect = Util.parseString((String)model.get("paySelect"));
+		logger.info("페이체크 시작*************" + paySelect);
 		logger.info("페이체크 시작*************" + orderType);
 		String basket = Util.parseString((String)model.get("basket"));
 		logger.info("페이체크 시작*************" + basket);
@@ -797,7 +802,8 @@ public class MobileOrderController {
 				}
 				order.setTelNumber(tel);
 				order.setOrderType(orderType);
-				order.setPayment("AD"); // 선불 
+		   		String strorePaySelect = storeService.getStore(storeId).getStoreEtc().getPaymentType();
+				order.setPayment(strorePaySelect); // 선불 
 				order.touchWho(session);
 				storeOrderService.saveOrUpdate(order);
 				
@@ -834,10 +840,11 @@ public class MobileOrderController {
 					order.setTelNumber(deliTel);
 					order.setOrderType(orderType);
 					order.setDeliveryId(deli.getId());
-					order.setPayment("AD");  // 선불 
+			   		String strorePaySelect = storeService.getStore(storeId).getStoreEtc().getPaymentType();
+					order.setPayment(strorePaySelect);  // 선불 
 					order.touchWho(session);
 					storeOrderService.saveOrUpdate(order);
-					
+
 				}else{
 					// 동의하지 않았을 경우 전화번호가 있으면 동의하라고 다시 확인
 					if(!consent2){

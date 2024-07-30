@@ -8,6 +8,7 @@ public interface OptionalMenuDao {
 	
 	// Common
 	public OptionalMenu get(int id);
+	public OptionalMenu getName(String name, int id);
 	public void saveOrUpdate(OptionalMenu optionalMenu);
 	public void delete(OptionalMenu optionalMenu);
 	public void delete(List<OptionalMenu> optionalMenus);

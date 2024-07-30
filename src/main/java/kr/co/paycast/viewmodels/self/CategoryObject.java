@@ -4,49 +4,37 @@ import java.util.List;
 
 public class CategoryObject {
 
-	private String seq;
-	private String name;
-	private String image;
-	private String menuNum;
+	private String siblingSeq;
+	private String groupName;
+	private String published;
 	
-	private List<MenuObject> menuObjectList;
+	private List<MenuObject> menus;
 	
-	public String getSeq() {
-		return seq;
+	public List<MenuObject> getMenus() {
+		return menus;
 	}
-	public void setSeq(String seq) {
-		this.seq = seq;
+	public void setMenus(List<MenuObject> menus) {
+		this.menus = menus;
 	}
-	public String getName() {
-		return name;
+	public String getPublished() {
+		return published;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setPublished(String published) {
+		this.published = published;
 	}
-	public String getImage() {
-		return image;
+	public String getSiblingSeq() {
+		return siblingSeq;
 	}
-	public void setImage(String image) {
-		this.image = image;
+	public void setSiblingSeq(String siblingSeq) {
+		this.siblingSeq = siblingSeq;
 	}
-	public String getMenuNum() {
-		return menuNum;
+	public String getGroupName() {
+		return groupName;
 	}
-	public void setMenuNum(String menuNum) {
-		this.menuNum = menuNum;
-	}
-	public List<MenuObject> getMenuObjectList() {
-		return menuObjectList;
-	}
-	public void setMenuObjectList(List<MenuObject> menuObjectList) {
-		this.menuObjectList = menuObjectList;
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 	
-	@Override
-	public String toString() {
-		return "CategoryObject [seq=" + seq + ", name=" + name + ", image=" + image + ", menuNum=" + menuNum
-				+ ", menuObjectList=" + menuObjectList + "]";
-	}
 
 
 	

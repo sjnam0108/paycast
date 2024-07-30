@@ -2,6 +2,7 @@ package kr.co.paycast.models.pay.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -65,6 +66,35 @@ public class MenuServiceImpl implements MenuService {
 		
 		return menuDao.get(id);
 	}
+	
+	@Override
+	public String getTime(int id) {
+		// TODO Auto-generated method stub
+		return menuDao.getTime(id);
+	}
+	
+	@Override
+	public List<Menu> getMenuListbyStoreId(int id) {
+		
+		return menuDao.getByMenuList(id);
+	}
+	
+	@Override
+	public List<Menu> getMenuByIdAndMenuCode(int id,String menuCode) {
+		
+		return menuDao.getByMenuCode(id,menuCode);
+	}
+	@Override
+	public List<OptionalMenuList> getOptionByIdAndMenuCode(int id,String menuCode) {
+		
+		return menuDao.getByOptionCode(id,menuCode);
+	}
+	
+	@Override
+	public Menu getMenuByName(String name, int groupId) {
+		
+		return menuDao.getName(name, groupId);
+	}
 
 	@Override
 	public void saveOrUpdate(Menu menu) {
@@ -126,6 +156,12 @@ public class MenuServiceImpl implements MenuService {
 		
 		return menuGroupDao.get(id);
 	}
+	
+	@Override
+	public MenuGroup getMenuGroupByGroupName(String name, String storeKey) {
+		
+		return menuGroupDao.getName(name, storeKey);
+	}
 
 	@Override
 	public void saveOrUpdate(MenuGroup menuGroup) {
@@ -174,6 +210,18 @@ public class MenuServiceImpl implements MenuService {
 	public OptionalMenu getOptionalMenu(int id) {
 		
 		return optionalMenuDao.get(id);
+	}
+	
+	@Override
+	public OptionalMenu getOptionalMenuByName(String name, int id) {
+		
+		return optionalMenuDao.getName(name, id);
+	}
+	
+	@Override
+	public OptionalMenuList getOptionalMenuList(String name , int id) {
+		
+		return optionalMenuListDao.get(name, id);
 	}
 
 	@Override
@@ -272,6 +320,11 @@ public class MenuServiceImpl implements MenuService {
 	@Override
 	public List<OptionalMenuList> getOptionalMenuListByOptionId(int id) {
 		return optionalMenuListDao.getOptionalMenuListByOptionId(id);
+	}
+	
+	@Override
+	public List<OptionalMenuList> getOptionalMenuListByOptionIdByMenusId(int id,String idStr) {
+		return optionalMenuListDao.getOptionalMenuListByOptionIdByMenusId(id, idStr);
 	}
 	
 	
@@ -478,4 +531,7 @@ public class MenuServiceImpl implements MenuService {
 		
 		return menuDeleteDao.getOptionalMenuListDeleteByOptDeleteMenuId(optMenuDeleteId);
 	}
+
+
+
 }

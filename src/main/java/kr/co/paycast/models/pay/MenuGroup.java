@@ -75,6 +75,15 @@ public class MenuGroup {
 		touchWhoC(session);
 	}
 	
+	public MenuGroup(Store store, String name, String published, HttpSession session) {
+		
+		this.store = store;
+		this.name = name;
+		this.published = published;
+		
+		touchWhoC(session);
+	}
+	
 	private void touchWhoC(HttpSession session) {
 		
 		this.whoCreatedBy = Util.loginUserId(session);

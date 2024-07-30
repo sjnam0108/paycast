@@ -19,6 +19,7 @@ public class MenuListJsonPrintItem  {
 	
 	public MenuListJsonPrintItem(String productID,String productCode, String productName,String orderCount,String orderPrice, String orderMenuPacking) {
         this.productID = productID;
+        this.productCode = productCode;
         this.productName = productName;
         this.orderCount = orderCount;
         this.orderPrice = orderPrice;

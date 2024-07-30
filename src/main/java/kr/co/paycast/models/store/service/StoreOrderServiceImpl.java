@@ -806,7 +806,11 @@ public class StoreOrderServiceImpl implements StoreOrderService {
 							Calendar calendar = new GregorianCalendar(Locale.KOREA);
 							int nYear = calendar.get(Calendar.YEAR);
 							String nYearSt = String.valueOf(nYear);
-							menuitme.setOrderDate(nYearSt.substring(0, 2) + orderPay.getPayAuthDate());	//결제 승인 일자
+							if(order.getPayment().equals("DE")) {
+								menuitme.setOrderDate(orderPay.getPayAuthDate());	//결제 승인 일자
+							}else {
+								menuitme.setOrderDate(nYearSt.substring(0, 2) + orderPay.getPayAuthDate());	//결제 승인 일자
+							}
 						}else{
 							menuitme.setOrderDate(orderPay.getPayAuthDate());	//결제 승인 일자
 						}
