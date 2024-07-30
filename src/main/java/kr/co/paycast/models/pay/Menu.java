@@ -44,7 +44,7 @@ public class Menu {
 	@Column(name = "MENU_NAME", nullable = false, length = 100)
 	private String name;	
 	// 메뉴 명
-	@Column(name = "MENU_CODE", nullable = false, length = 100)
+	@Column(name = "MENU_CODE", length = 100)
 	private String code;				// 메뉴 명
 	
 	@Column(name = "EVENT_NAME")

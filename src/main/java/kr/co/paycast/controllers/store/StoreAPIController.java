@@ -256,7 +256,7 @@ public class StoreAPIController {
 			return info;
 		}
 //		 먹고가기 예외 처리 현재 사용 X
-		if (store.getStoreCode() == 41) {
+		if (store.getStoreCode() == "41") {
 			eatHere = true;
 		}
 		info3.put("addressInfo", store.getAddr2());

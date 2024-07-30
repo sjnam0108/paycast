@@ -34,7 +34,7 @@ public class OptionalMenuList {
 	@Column(name = "MENU_NAME", nullable = false, length = 100)
 	private String name;				// 옵션 메뉴 명
 	
-	@Column(name = "MENU_CODE", nullable = false, length = 100)
+	@Column(name = "MENU_CODE", length = 100)
 	private String code;				// 옵션 메뉴 명
 	
 	@Column(name = "IMAGE", nullable = false, length = 100)

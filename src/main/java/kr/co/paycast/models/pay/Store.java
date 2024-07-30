@@ -90,7 +90,7 @@ public class Store {
 	private String catId;
 	
 	@Column(name = "STORE_CODE", length = 100)
-	private Integer storeCode;
+	private String storeCode;
 	
 	@Column(name = "BIZ_NAME", length = 100)
 	private String bizName;
@@ -591,13 +591,15 @@ public class Store {
 		this.catId = catId;
 	}
 
-	public int getStoreCode() {
+	public String getStoreCode() {
 		return storeCode;
 	}
 
-	public void setStoreCode(int storeCode) {
+	public void setStoreCode(String storeCode) {
 		this.storeCode = storeCode;
 	}
+
+
 
 		
 	
